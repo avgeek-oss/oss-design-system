@@ -28,8 +28,10 @@ export function ApiKeysSettings<T extends ApiKey>({
   useEffect(() => {
     if (revoking || !opener.current) return;
     const target = opener.current;
-    // The native table can restore its row after the modal restores the button.
-    let frame = requestAnimationFrame(() => {
+    // A grid may restore its row after the modal returns focus to its action.
+    let frame = 0;
+    const restore = () => {
+      cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         if (!document.hasFocus() || !target.isConnected) return;
         const active = document.activeElement;
@@ -40,8 +42,31 @@ export function ApiKeysSettings<T extends ApiKey>({
         )
           target.focus({ preventScroll: true });
       });
-    });
-    return () => cancelAnimationFrame(frame);
+    };
+    const stop = () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("pointerdown", stop, true);
+      document.removeEventListener("keydown", stop, true);
+      window.removeEventListener("blur", stop);
+    };
+    const onFocus = (event: FocusEvent) => {
+      const active = event.target;
+      if (active === target) return;
+      if (
+        active === document.body ||
+        active === target.closest('[role="row"]') ||
+        active === target.closest('[role="gridcell"]')
+      )
+        restore();
+      else stop();
+    };
+    document.addEventListener("focusin", onFocus);
+    document.addEventListener("pointerdown", stop, true);
+    document.addEventListener("keydown", stop, true);
+    window.addEventListener("blur", stop);
+    restore();
+    return stop;
   }, [revoking]);
   return (
     <>

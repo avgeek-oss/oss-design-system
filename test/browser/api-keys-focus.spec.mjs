@@ -28,6 +28,8 @@ test("API-key confirmation restores its connected row action after Escape and Ca
     expect(await original.evaluate((element) => element.isConnected)).toBe(
       true,
     );
+    await opener.evaluate((element) => element.closest('[role="row"]').focus());
+    await expect(opener).toBeFocused();
   }
 });
 

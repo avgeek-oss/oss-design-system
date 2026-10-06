@@ -11,7 +11,7 @@ export type PasskeyVerificationProps = {
   brand: ReactNode;
   isPending?: boolean;
   onRetry: () => void;
-  onCancelRequest: () => void;
+  onCancelRequest?: () => void;
   onRecoverySignIn?: () => void;
   /** @deprecated Compatibility for existing consumers only. New integrations use passkeys and passkey recovery. */
   onAuthenticatorSignIn?: () => void;
@@ -37,13 +37,16 @@ export function PasskeyVerification({
         <HugeiconsIcon aria-hidden icon={FingerPrintIcon} size={16} />
         {isPending ? "Waiting for your passkey…" : "Try passkey again"}
       </Button>
-      {isPending && (
+      {isPending && onCancelRequest && (
         <Button variant="secondary" onPress={onCancelRequest}>
           Cancel passkey request
         </Button>
       )}
       <div className="flex items-center justify-between gap-4">
-        <BackToSignIn onClick={onBackToSignIn} />
+        <BackToSignIn
+          disabled={isPending && !onCancelRequest}
+          onClick={onBackToSignIn}
+        />
         <div className="grid justify-items-end gap-3">
           {onAuthenticatorSignIn && (
             <AuthAction disabled={isPending} onClick={onAuthenticatorSignIn}>

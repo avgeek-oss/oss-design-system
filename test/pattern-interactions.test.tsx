@@ -1302,3 +1302,36 @@ test("stacked resource tables keep one native row, every field and one action pe
     await view.unmount();
   }
 });
+
+test("passkey verification permits cancellation only while an abort callback is available", async () => {
+  const view = await mount(
+    <PasskeyVerification
+      brand="Example"
+      isPending
+      onRetry={() => {}}
+      onBackToSignIn={() => {}}
+    />,
+  );
+  try {
+    assert.equal(
+      [...document.querySelectorAll("button")].some(
+        (item) => item.textContent === "Cancel passkey request",
+      ),
+      false,
+    );
+    assert.equal(button("← Back to Sign In").disabled, true);
+    await view.render(
+      <PasskeyVerification
+        brand="Example"
+        isPending
+        onRetry={() => {}}
+        onBackToSignIn={() => {}}
+        onCancelRequest={() => {}}
+      />,
+    );
+    assert.equal(button("Cancel passkey request").disabled, false);
+    assert.equal(button("← Back to Sign In").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});

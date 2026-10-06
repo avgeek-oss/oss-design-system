@@ -19,6 +19,16 @@ export function AuthAction({
   );
 }
 
-export function BackToSignIn({ onClick }: { onClick: () => void }) {
-  return <AuthAction onClick={onClick}>← Back to Sign In</AuthAction>;
+export function BackToSignIn({
+  onClick,
+  disabled = false,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <AuthAction disabled={disabled} onClick={onClick}>
+      ← Back to Sign In
+    </AuthAction>
+  );
 }
