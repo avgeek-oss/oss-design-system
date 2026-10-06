@@ -94,3 +94,9 @@ Auth screens are exported from their own files, rather than implemented inside C
 `AuthForm.isPending` accepts owner-level pending state when a suspended native portal remounts while its request is still settling. It combines with the form’s own submit lock, disables fields and actions, and prevents a repeat callback. Keep that state above the portal; clear it when the app cancels or settles the request. A current rejected attempt still shows one danger toast. Shared actions and clipboard controls suppress late feedback from an attempt invalidated by `OverlaySuspensionScope` or owner unmount; suspension does not undo server mutations or a completed clipboard write.
 
 `ProfileSettings` and other uses of `NameSettingsForm` retain their name draft and pending lock through a suspended save. Feedback from that invalidated attempt is suppressed after resume or owner unmount; settlement releases only its own request lock. Current failed saves show one danger toast per attempt and remain retryable. Apps still own committed values, cancellation and keyed unmount on account change.
+
+## Display preferences
+
+Use `dateFormatOptions`, `timeFormatOptions` and `defaultDateTimePreferences` from `@avgeek-oss/design-system/utilities/date-time-preferences` in account settings and onboarding. The React-free catalog defines the same five date and four time format IDs for every app. Stored defaults are `day-short-month-year`, `24-hour` and `UTC`. `browserDateTimePreferences` can suggest a supported browser time zone during onboarding; it does not replace stored preferences.
+
+Apps validate and persist these IDs and convert legacy IDs without losing existing choices. Formatting follows the selected display preference. Domain DATE and UTC timestamp serialization remain app-owned wire contracts. Pass the catalog arrays to `DateTimePreferenceFields` along with supported IANA time zones.

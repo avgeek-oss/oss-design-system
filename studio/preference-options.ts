@@ -1,12 +1,11 @@
+import {
+  dateFormatOptions,
+  timeFormatOptions,
+} from "../src/utilities/date-time-preferences.js";
+
 export const preferenceOptions = {
-  dateFormats: [
-    { id: "day-short-month-year", label: "6 Oct 2026" },
-    { id: "year-month-day", label: "2026-10-06" },
-  ],
-  timeFormats: [
-    { id: "24-hour", label: "14:30" },
-    { id: "12-hour", label: "2:30 PM" },
-  ],
+  dateFormats: dateFormatOptions,
+  timeFormats: timeFormatOptions,
   timeZones: [
     "UTC",
     "Asia/Kolkata",

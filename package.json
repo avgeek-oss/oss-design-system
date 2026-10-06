@@ -680,6 +680,10 @@
     "./overlays/overlay-suspension": {
       "types": "./dist/overlays/overlay-suspension.d.ts",
       "import": "./dist/overlays/overlay-suspension.js"
+    },
+    "./utilities/date-time-preferences": {
+      "types": "./dist/utilities/date-time-preferences.d.ts",
+      "import": "./dist/utilities/date-time-preferences.js"
     }
   }
 }

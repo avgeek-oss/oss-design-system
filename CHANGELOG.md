@@ -2,6 +2,8 @@
 
 ## 1.2.4 — 2026-10-07
 
+- Export a React-free shared date/time preference catalog with five date formats, four time formats and stored defaults for consistent account settings and onboarding.
+
 - Suppress stale profile and team name-save feedback after session suspension or owner unmount, preserving the draft and request lock for a deliberate retry.
 
 ## 1.2.3 — 2026-10-07

@@ -144,3 +144,7 @@ Additional shared account, invitation and passkey surfaces:
 `TeamGeneralSettings` ([source](../src/patterns/team-settings/team-general-settings.tsx)) owns the Team details widget and Team name copy. The default mode saves a name; `mode="details"` saves name and description together for apps that support a team description.
 
 `OverlaySuspensionScope` and `useOverlaySuspension` are exported from the package root and `overlays/overlay-suspension`. Their source is [src/overlays/overlay-suspension.tsx](../src/overlays/overlay-suspension.tsx), with the retained modal and settings previews under `Primitives / Overlays / OverlaySuspensionScope`. Use the scope to release supported native overlay locks while preserving a mounted owner’s logical state. Use ordinary controlled `isOpen` for intentional dismissal. See [Suspending retained overlays](layouts.md#suspending-retained-overlays) for cancellation, drafts, supported portals and owner-change responsibilities.
+
+### Date/time preference catalog
+
+The React-free `utilities/date-time-preferences` public subpath and root export provide `dateFormatOptions`, `timeFormatOptions`, `defaultDateTimePreferences`, `DateFormatId`, `TimeFormatId` and `StandardDateTimePreferences`. Use this catalog for common preference controls instead of local option lists. See [forms](forms.md#display-preferences) for defaults, persistence and serialization boundaries.

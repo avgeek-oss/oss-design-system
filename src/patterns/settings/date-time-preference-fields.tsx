@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { defaultDateTimePreferences } from "../../utilities/date-time-preferences.js";
 export type DateTimePreferences = {
   dateFormat: string;
   timeFormat: string;
@@ -12,15 +13,15 @@ import { Autocomplete, SearchField } from "../../pickers/autocomplete.js";
 import { timeZoneOffset } from "../../lib/time-zone-offset.js";
 
 export type DateTimePreferenceOptions = {
-  dateFormats: Array<{
+  dateFormats: ReadonlyArray<{
     id: DateTimePreferences["dateFormat"];
     label: string;
   }>;
-  timeFormats: Array<{
+  timeFormats: ReadonlyArray<{
     id: DateTimePreferences["timeFormat"];
     label: string;
   }>;
-  timeZones: string[];
+  timeZones: readonly string[];
 };
 
 export function browserDateTimePreferences(
@@ -28,11 +29,13 @@ export function browserDateTimePreferences(
 ): DateTimePreferences {
   const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return {
-    dateFormat: options.dateFormats[0]?.id ?? "day-short-month-year",
-    timeFormat: options.timeFormats[0]?.id ?? "24-hour",
+    dateFormat:
+      options.dateFormats[0]?.id ?? defaultDateTimePreferences.dateFormat,
+    timeFormat:
+      options.timeFormats[0]?.id ?? defaultDateTimePreferences.timeFormat,
     timeZone: options.timeZones.includes(browserTimeZone)
       ? browserTimeZone
-      : "UTC",
+      : defaultDateTimePreferences.timeZone,
   };
 }
 
