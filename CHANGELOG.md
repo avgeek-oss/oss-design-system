@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Lock recovery-code copying during clipboard writes, with one toast outcome and retry after failure.
+
 ## 1.2.1 — 2026-10-07
 
 - Share profile-image settings, invitation password setup, passkey recovery verification, team details settings, and team removal/revocation confirmations with fixed copy.
