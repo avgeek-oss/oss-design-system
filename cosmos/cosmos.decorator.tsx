@@ -11,7 +11,7 @@ export default function Decorator({ children }: { children: ReactNode }) {
         <ThemeSwitcher />
       </div>
       {children}
-      <Toast.Provider placement="top end" />
+      <Toast.Provider placement="bottom" />
     </Providers>
   );
 }

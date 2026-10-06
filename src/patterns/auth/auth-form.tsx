@@ -1,11 +1,18 @@
 "use client";
 
-import { useId, useState, type ComponentProps, type ReactNode } from "react";
+import {
+  useId,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import { Button } from "../../buttons/button.js";
 import { Field, FieldDescription } from "../../forms/field.js";
 import { Input } from "../../forms/input.js";
 import { Label } from "../../forms/label.js";
 import { PasswordInput } from "../../forms/password-input.js";
+import { cn } from "../../lib/utils.js";
 import { toast } from "../../overlays/toast.js";
 
 export type AuthField = Omit<
@@ -27,6 +34,7 @@ export function AuthForm({
   children,
   onCancel,
   cancelLabel = "Cancel",
+  submitButtonClassName,
 }: {
   fields: AuthField[];
   onSubmit: (values: Record<string, string>) => Promise<void>;
@@ -36,9 +44,11 @@ export function AuthForm({
   children?: ReactNode;
   onCancel?: () => void;
   cancelLabel?: string;
+  submitButtonClassName?: string;
 }) {
   const id = useId();
   const [busy, setBusy] = useState(false);
+  const pending = useRef(false);
   const [invalid, setInvalid] = useState<string[]>([]);
   return (
     <form
@@ -47,7 +57,7 @@ export function AuthForm({
       aria-busy={busy}
       onSubmit={async (event) => {
         event.preventDefault();
-        if (busy) return;
+        if (pending.current) return;
         const form = event.currentTarget;
         const inputs = Array.from(form.elements).filter(
           (item): item is HTMLInputElement =>
@@ -65,6 +75,7 @@ export function AuthForm({
           return;
         }
         const data = new FormData(form);
+        pending.current = true;
         setBusy(true);
         try {
           await onSubmit(
@@ -84,6 +95,7 @@ export function AuthForm({
               : "Unable to continue. Try again.",
           );
         } finally {
+          pending.current = false;
           setBusy(false);
         }
       }}
@@ -150,7 +162,7 @@ export function AuthForm({
         ) : null}
         <Button
           type="submit"
-          className={onCancel ? undefined : "w-full"}
+          className={cn(onCancel ? undefined : "w-full", submitButtonClassName)}
           isDisabled={busy}
         >
           {busy ? busyLabel : submitLabel}

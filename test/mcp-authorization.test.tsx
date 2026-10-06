@@ -63,6 +63,6 @@ test("pending authorization disables both decisions and metadata does not imply 
   assert.match(html, /aria-busy="true"/);
   assert.match(html, /Published metadata does not verify this app/);
   assert.doesNotMatch(html, /Unverified app/);
-  assert.match(html, /Unable to connect. Try again/);
+  assert.doesNotMatch(html, /Unable to connect. Try again/);
   assert.match(html, /<button[^>]*disabled[^>]*>Deny<\/button>/);
 });

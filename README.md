@@ -1,6 +1,6 @@
 # Avgeek OSS Design System
 
-Shared React components, application layouts, and UI patterns for Avgeek OSS apps. Adapted from Towbar under Apache-2.0, with Mill as a compatibility reference.
+Shared React components, application layouts, and UI patterns for Avgeek OSS apps. Towbar is the baseline for common surfaces and presentation contracts. Adapted under Apache-2.0.
 
 ## Installation
 
@@ -44,7 +44,7 @@ The root exports common layouts and patterns. Primitives also have explicit subp
 
 Apps supply branding, routes, navigation groups, permissions, dates, and actions. API calls, authentication policy, credential ceremonies, and persistence stay in the app. Validation builders accept existing app limits; the package does not replace server authorization.
 
-Component usage and design rules are in [DESIGN.md](DESIGN.md).
+Component usage and design rules are in [DESIGN.md](DESIGN.md). The [shared pattern guide](docs/patterns.md) covers account and team management, history/filtering, notification settings, integrations, operation progress, and their application boundaries.
 
 ## Routing
 

@@ -89,32 +89,11 @@ export function SessionsTable({
     />
   );
 }
-export type ApiKey = { id: string; name: string; expiresAt: string | null };
-export function ApiKeysTable({
-  items,
-  actions,
-  formatDate,
-}: {
-  items: ApiKey[];
-  formatDate: (value: string) => ReactNode;
-} & Actions<ApiKey>) {
-  return (
-    <ResourceTable
-      ariaLabel="API keys"
-      items={items}
-      getRowKey={(item) => item.id}
-      emptyTitle="No API keys"
-      emptyDescription=""
-      columns={[
-        { key: "name", header: "Name", cell: (item) => item.name },
-        {
-          key: "expiry",
-          header: "Expires",
-          cell: (item) =>
-            item.expiresAt ? formatDate(item.expiresAt) : "Never",
-        },
-        actionColumn(actions),
-      ]}
-    />
-  );
-}
+export {
+  ApiKeysTable,
+  AuthorizedClientsTable,
+  type ApiKey,
+  type ApiKeysTableProps,
+  type AuthorizedClient,
+  type AuthorizedClientsTableProps,
+} from "../account-settings/api-keys-table.js";

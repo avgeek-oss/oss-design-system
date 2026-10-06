@@ -43,6 +43,7 @@ export { RecoveryCodes } from "./patterns/auth/recovery-codes.js";
 export {
   NotificationMenu,
   type NotificationItem,
+  type NotificationMenuProps,
 } from "./patterns/notifications.js";
 export { SidebarAccountMenu } from "./patterns/sidebar-account-menu.js";
 
@@ -112,4 +113,147 @@ export {
 export {
   MembersTable,
   type Member,
+  type MembersTableProps,
 } from "./patterns/team-settings/members-table.js";
+
+export {
+  EmailChangeSettings,
+  type EmailChangeSettingsProps,
+  type PendingEmailChange,
+} from "./patterns/account-settings/email-change-settings.js";
+
+export {
+  PasswordChangeSettings,
+  type PasswordChangeSettingsProps,
+  type PasswordChangeValues,
+} from "./patterns/account-settings/password-change-settings.js";
+
+export {
+  ApiKeysTable,
+  type ApiKeysTableProps,
+  type ApiKey,
+  AuthorizedClientsTable,
+  type AuthorizedClientsTableProps,
+  type AuthorizedClient,
+} from "./patterns/account-settings/api-keys-table.js";
+
+export {
+  CreateApiKeyDialog,
+  type CreateApiKeyDialogProps,
+  type CreateApiKeyValues,
+  type CreatedApiKey,
+} from "./patterns/account-settings/create-api-key-dialog.js";
+
+export {
+  InvitationsTable,
+  type InvitationsTableProps,
+  type Invitation,
+} from "./patterns/team-settings/invitations-table.js";
+
+export {
+  InviteMemberDialog,
+  type InviteMemberDialogProps,
+  type InviteMemberValues,
+} from "./patterns/team-settings/invite-member-dialog.js";
+
+export {
+  MemberEditDialog,
+  type MemberEditDialogProps,
+  type MemberEditValues,
+} from "./patterns/team-settings/member-edit-dialog.js";
+
+export {
+  AddMemberDialog,
+  type AddMemberDialogProps,
+  type AddMemberValues,
+} from "./patterns/team-settings/add-member-dialog.js";
+
+export {
+  HistoryTable,
+  type HistoryTableProps,
+  type HistoryPagination,
+} from "./patterns/history/history-table.js";
+
+export {
+  HistorySearch,
+  type HistorySearchProps,
+} from "./patterns/history/history-search.js";
+
+export {
+  HistoryFilter,
+  type HistoryFilterProps,
+} from "./patterns/history/history-filter.js";
+
+export {
+  EventDetailsDialog,
+  type EventDetailsDialogProps,
+  EventDetail,
+  type EventDetailProps,
+  type EventDetailField,
+} from "./patterns/history/event-details-dialog.js";
+
+export {
+  FilterDialog,
+  type FilterDialogProps,
+  type FilterField,
+  type FilterCondition,
+} from "./patterns/filters/filter-dialog.js";
+
+export {
+  NotificationDestinationsSettings,
+  type NotificationDestinationsSettingsProps,
+  type NotificationDestination,
+  type NotificationCategory,
+  type SubscriptionMode,
+} from "./patterns/notification-settings/notification-destinations-settings.js";
+
+export {
+  AddNotificationDestinationDialog,
+  type AddNotificationDestinationDialogProps,
+} from "./patterns/notification-settings/add-notification-destination-dialog.js";
+
+export {
+  ProgressChecklistItem,
+  type ProgressChecklistItemProps,
+} from "./patterns/operations/progress-checklist-item.js";
+
+export {
+  OperationProgress,
+  type OperationProgressProps,
+  type OperationStep,
+} from "./patterns/operations/operation-progress.js";
+
+export {
+  IntegrationConnectionCard,
+  type IntegrationConnectionCardProps,
+  type IntegrationConnection,
+} from "./patterns/integrations/integration-connection-card.js";
+
+export {
+  StatusIndicator,
+  type StatusIndicatorProps,
+  type StatusDescriptor,
+} from "./patterns/status-indicator.js";
+
+export {
+  ActionConfirmation,
+  type ActionConfirmationProps,
+} from "./patterns/actions/action-confirmation.js";
+
+export {
+  AsyncActionButton,
+  type AsyncActionButtonProps,
+} from "./patterns/actions/async-action-button.js";
+
+export {
+  QueryError,
+  type QueryErrorProps,
+  QueryLoading,
+  type QueryLoadingProps,
+} from "./patterns/feedback/query-state.js";
+
+export {
+  ChoiceField,
+  type ChoiceFieldProps,
+  type ChoiceOption,
+} from "./patterns/choice-field.js";

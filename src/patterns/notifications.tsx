@@ -12,26 +12,43 @@ export type NotificationItem = {
   id: string;
   title: string;
   message?: string;
+  source?: string;
   href: string;
   icon: ReactNode;
   time: string;
   dateTime?: string;
   unread?: boolean;
 };
+
+export interface NotificationMenuProps {
+  items: NotificationItem[];
+  unreadCount: number;
+  loading?: boolean;
+  isOpen?: boolean;
+  defaultIsOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
+  headerEnd?: ReactNode;
+  onMarkAllRead?: () => void;
+  markingRead?: boolean;
+}
+
 export function NotificationMenu({
   items,
   unreadCount,
   loading = false,
   onMarkAllRead,
   markingRead = false,
-}: {
-  items: NotificationItem[];
-  unreadCount: number;
-  loading?: boolean;
-  onMarkAllRead?: () => void;
-  markingRead?: boolean;
-}) {
-  const [open, setOpen] = useState(false);
+  isOpen,
+  defaultIsOpen = false,
+  onOpenChange,
+  headerEnd,
+}: NotificationMenuProps) {
+  const [internalOpen, setInternalOpen] = useState(defaultIsOpen);
+  const open = isOpen ?? internalOpen;
+  const setOpen = (nextOpen: boolean) => {
+    if (isOpen === undefined) setInternalOpen(nextOpen);
+    onOpenChange?.(nextOpen);
+  };
   return (
     <Popover isOpen={open} onOpenChange={setOpen}>
       <Button
@@ -65,14 +82,15 @@ export function NotificationMenu({
             <Widget.Header
               className="widget__header--notification"
               endContent={
-                onMarkAllRead ? (
+                headerEnd ??
+                (onMarkAllRead ? (
                   <Widget.Action
                     isDisabled={!unreadCount || markingRead}
                     onPress={onMarkAllRead}
                   >
                     {markingRead ? "Marking read…" : "Mark all read"}
                   </Widget.Action>
-                ) : null
+                ) : null)
               }
             >
               <Popover.Heading className="flex min-w-0">
@@ -98,7 +116,7 @@ export function NotificationMenu({
                       <li key={item.id}>
                         <RouteLink
                           href={item.href}
-                          onNavigate={() => setOpen(false)}
+                          onClick={() => setOpen(false)}
                           className="flex w-full min-w-0 gap-3 rounded-none px-4 py-3 outline-none transition-colors hover:bg-default/60 focus-visible:bg-default/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
                         >
                           <span
@@ -128,6 +146,11 @@ export function NotificationMenu({
                             {item.message ? (
                               <span className="text-sm text-muted">
                                 {item.message}
+                              </span>
+                            ) : null}
+                            {item.source ? (
+                              <span className="text-xs text-muted">
+                                {item.source}
                               </span>
                             ) : null}
                           </span>

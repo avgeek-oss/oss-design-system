@@ -80,13 +80,17 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",
+    "@types/css.escape": "^1.5.2",
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "css.escape": "^1.5.1",
     "eslint": "^10.12.0",
     "eslint-plugin-react-hooks": "^7.0.0",
     "globals": "^17.0.0",
+    "jsdom": "^30.1.2",
     "next": "^16.3.8",
     "prettier": "3.9.9",
     "react": "19.3.0",
@@ -546,6 +550,98 @@
     "./patterns/team-settings/members-table": {
       "types": "./dist/patterns/team-settings/members-table.d.ts",
       "import": "./dist/patterns/team-settings/members-table.js"
+    },
+    "./patterns/account-settings/email-change-settings": {
+      "types": "./dist/patterns/account-settings/email-change-settings.d.ts",
+      "import": "./dist/patterns/account-settings/email-change-settings.js"
+    },
+    "./patterns/account-settings/password-change-settings": {
+      "types": "./dist/patterns/account-settings/password-change-settings.d.ts",
+      "import": "./dist/patterns/account-settings/password-change-settings.js"
+    },
+    "./patterns/account-settings/api-keys-table": {
+      "types": "./dist/patterns/account-settings/api-keys-table.d.ts",
+      "import": "./dist/patterns/account-settings/api-keys-table.js"
+    },
+    "./patterns/account-settings/create-api-key-dialog": {
+      "types": "./dist/patterns/account-settings/create-api-key-dialog.d.ts",
+      "import": "./dist/patterns/account-settings/create-api-key-dialog.js"
+    },
+    "./patterns/team-settings/invitations-table": {
+      "types": "./dist/patterns/team-settings/invitations-table.d.ts",
+      "import": "./dist/patterns/team-settings/invitations-table.js"
+    },
+    "./patterns/team-settings/invite-member-dialog": {
+      "types": "./dist/patterns/team-settings/invite-member-dialog.d.ts",
+      "import": "./dist/patterns/team-settings/invite-member-dialog.js"
+    },
+    "./patterns/team-settings/member-edit-dialog": {
+      "types": "./dist/patterns/team-settings/member-edit-dialog.d.ts",
+      "import": "./dist/patterns/team-settings/member-edit-dialog.js"
+    },
+    "./patterns/team-settings/add-member-dialog": {
+      "types": "./dist/patterns/team-settings/add-member-dialog.d.ts",
+      "import": "./dist/patterns/team-settings/add-member-dialog.js"
+    },
+    "./patterns/history/history-table": {
+      "types": "./dist/patterns/history/history-table.d.ts",
+      "import": "./dist/patterns/history/history-table.js"
+    },
+    "./patterns/history/history-search": {
+      "types": "./dist/patterns/history/history-search.d.ts",
+      "import": "./dist/patterns/history/history-search.js"
+    },
+    "./patterns/history/history-filter": {
+      "types": "./dist/patterns/history/history-filter.d.ts",
+      "import": "./dist/patterns/history/history-filter.js"
+    },
+    "./patterns/history/event-details-dialog": {
+      "types": "./dist/patterns/history/event-details-dialog.d.ts",
+      "import": "./dist/patterns/history/event-details-dialog.js"
+    },
+    "./patterns/filters/filter-dialog": {
+      "types": "./dist/patterns/filters/filter-dialog.d.ts",
+      "import": "./dist/patterns/filters/filter-dialog.js"
+    },
+    "./patterns/notification-settings/notification-destinations-settings": {
+      "types": "./dist/patterns/notification-settings/notification-destinations-settings.d.ts",
+      "import": "./dist/patterns/notification-settings/notification-destinations-settings.js"
+    },
+    "./patterns/notification-settings/add-notification-destination-dialog": {
+      "types": "./dist/patterns/notification-settings/add-notification-destination-dialog.d.ts",
+      "import": "./dist/patterns/notification-settings/add-notification-destination-dialog.js"
+    },
+    "./patterns/operations/progress-checklist-item": {
+      "types": "./dist/patterns/operations/progress-checklist-item.d.ts",
+      "import": "./dist/patterns/operations/progress-checklist-item.js"
+    },
+    "./patterns/operations/operation-progress": {
+      "types": "./dist/patterns/operations/operation-progress.d.ts",
+      "import": "./dist/patterns/operations/operation-progress.js"
+    },
+    "./patterns/integrations/integration-connection-card": {
+      "types": "./dist/patterns/integrations/integration-connection-card.d.ts",
+      "import": "./dist/patterns/integrations/integration-connection-card.js"
+    },
+    "./patterns/status-indicator": {
+      "types": "./dist/patterns/status-indicator.d.ts",
+      "import": "./dist/patterns/status-indicator.js"
+    },
+    "./patterns/actions/action-confirmation": {
+      "types": "./dist/patterns/actions/action-confirmation.d.ts",
+      "import": "./dist/patterns/actions/action-confirmation.js"
+    },
+    "./patterns/actions/async-action-button": {
+      "types": "./dist/patterns/actions/async-action-button.d.ts",
+      "import": "./dist/patterns/actions/async-action-button.js"
+    },
+    "./patterns/feedback/query-state": {
+      "types": "./dist/patterns/feedback/query-state.d.ts",
+      "import": "./dist/patterns/feedback/query-state.js"
+    },
+    "./patterns/choice-field": {
+      "types": "./dist/patterns/choice-field.d.ts",
+      "import": "./dist/patterns/choice-field.js"
     }
   }
 }

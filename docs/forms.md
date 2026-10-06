@@ -49,13 +49,19 @@ Do not make Cancel another primary button. Use native HeroUI variants. Chips def
 
 `AuthForm` and `NameSettingsForm` show one validation toast and focus the invalid control. Server failures keep the draft and allow retry. Disable the submit action during its request; show a busy label. Never replace the whole page with an empty loading screen when existing data is available.
 
-`IdentityCredentialsForm` defaults to toast feedback. Inline feedback remains an explicit app option, rather than a second message shown alongside a toast. The Cosmos provider places toasts at the top so they do not cover mobile modal footers; toast styling and close-control behavior follow HeroUI defaults.
+Submission failures use one danger toast, including inside modals. Keep the draft and dialog open, release the pending state, and allow retry. Do not also render an inline error or alert for the same failed submission. Load failures and persistent access restrictions remain in their owning surface.
+
+`IdentityCredentialsForm` defaults to toast feedback. Its `errorPresentation` option controls field validation only; rejected submissions always use a toast. Field validation can mark/focus the invalid control without duplicating a submission failure.
+
+Mount one `Toast.Provider` for the application, including public auth routes. Use `placement="bottom"` for bottom-center toasts; this is the native HeroUI default and the explicit placement used by AppShell and Cosmos. Toast styling, announcements, and close controls follow HeroUI defaults.
 
 Role vocabulary belongs to the app. Use `createInvitationSchema(["admin", "editor", "viewer"])` for Rootset and the existing Admin/Member/Viewer schema for Towbar or Mill. Do not broaden server permissions because the shared table supports another role label.
 
 ## Notifications and charts
 
-`NotificationMenu` requires an icon on every row. Use a full-width hover area, a raised red unread badge, and the subtle Mark all read action. Apps supply unread counts, timestamps, destinations, and mutations.
+`NotificationMenu` requires an icon on every row. Use a full-width hover area, a raised red unread badge, and the subtle Mark all read action. Apps map their API data into the shared `NotificationItem` presentation contract: `id`, `title`, optional `message` and `source`, `href`, `icon`, formatted `time`, optional ISO `dateTime`, and `unread`. Backend event payloads remain app-owned. The menu supplies the theme-aware icon button, badge, popover, row layout, loading/empty states and navigation dismissal.
+
+Use `isOpen` and `onOpenChange` when the app needs to refresh or acknowledge notifications on opening; otherwise the menu owns its open state, with optional `defaultIsOpen`. A `headerEnd` slot can replace Mark all read with an app action such as Clear All. Apps own read timers, persistence, polling, counts and mutations. Supply a `Widget.Action` in that slot to retain the standard header action style.
 
 `LineChart` supplies consistent axes, line width, colors, and tooltips. Do not connect missing measurements as real data. Use dashed series for the previous period with `legendType="none"`. Keep each current metric and its previous-period row together in tooltips, with the change before the current value. Use `success-soft-foreground` and `danger-soft-foreground` for change text; fewer errors is an improvement. Format from the tooltip's datum, never by searching for a matching numeric value. Use Enable compare and Disable compare actions. Preserve measurements during refresh without adding refresh text. LineChart owns empty and initial loading states; its Legend, ReferenceLine and Selection parts are optional.
 

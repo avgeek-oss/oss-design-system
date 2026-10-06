@@ -2,7 +2,7 @@
 
 ## Purpose and boundaries
 
-This repository owns the shared React UI for Avgeek OSS apps: HeroUI primitives, application layouts, and reusable auth, account settings, team settings, and data patterns. It reduces copied UI and makes reviewed behavior consistent across Towbar, Mill, Rootset, and other consumers.
+This repository owns the shared React UI for Avgeek OSS apps: HeroUI primitives, application layouts, and reusable auth, account settings, team settings, and data patterns. Towbar is the baseline for common features, surfaces, and UI data contracts; other applications adopt that standard. It reduces copied UI and makes reviewed behavior consistent across consumers.
 
 Apps own routing destinations, permissions, API calls, persistence, date policy, branding, WebAuthn ceremonies, and recovery-code generation. Components accept typed data and callbacks. Never move application services or authorization policy into this package, or import app packages into `src`. Next.js belongs only in `src/adapters/next.tsx`; it is an optional peer.
 
@@ -22,6 +22,7 @@ Read [DESIGN.md](DESIGN.md) and the relevant file in [docs](docs) before changin
 2. Put reusable workflows in a named file under `src/patterns/<domain>`. Keep primitives, routing adapters, and layout responsibilities in their existing folders. Account Settings and Team Settings are separate domains.
 3. Define a named props type and export the component and consumer-facing types. Use callbacks for app actions, children/slots for variable content, and discriminated unions for mutually exclusive modes. Follow the underlying HeroUI prop names; do not invent synonym props.
 4. Keep controlled app data separate from editable drafts. Await mutations, prevent repeat submission, retain drafts on failure, and close dialogs only after success. Do not silently replace failed requests with mock data or an empty success state.
+   Report submission/mutation failures through one danger toast at bottom center. Do not also display the same failure inline in a form or modal. Field validation, load errors, and persistent access restrictions keep their own appropriate presentation. Apps mount one toast provider across authenticated and public routes.
 5. Add the root export when it is an intended root API and a typed ESM subpath in `package.json`. Do not expose internal helpers merely because they have a file. Never import the root barrel from within `src`.
 6. Add a Cosmos fixture that renders the actual export. Group it under Primitives, Patterns, or Layouts. Use separate files for separate published components; use variants/controls for states of one component. Sample data, simulated API calls, and navigation belong in `studio` or `cosmos` only.
 7. Update the catalog and applicable usage docs. Explain when to use the component versus its closest alternative. A new dependency needs an existing API gap and must be declared in the appropriate dependency/peer section.

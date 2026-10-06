@@ -1,1 +1,3 @@
-export { ApiKeysSettingsPreview as default } from "../../../studio/account-settings-previews";
+import { ApiKeysSettingsPreview } from "../../../studio/pattern-previews";
+
+export default ApiKeysSettingsPreview;

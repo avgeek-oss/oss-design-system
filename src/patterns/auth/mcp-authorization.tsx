@@ -1,9 +1,10 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { AuthScreen } from "./auth-screen.js";
 import { Button } from "../../buttons/button.js";
 import { Alert } from "../../feedback/alert.js";
+import { toast } from "../../overlays/toast.js";
 
 export type McpAuthorizationDetails = {
   clientName: string;
@@ -44,6 +45,11 @@ export function McpAuthorization({
   onDeny,
   children,
 }: McpAuthorizationProps) {
+  const reportedError = useRef<ReactNode>(undefined);
+  useEffect(() => {
+    if (error != null && error !== reportedError.current) toast.danger(error);
+    reportedError.current = error;
+  }, [error]);
   const approvalBlocked = approvalBlockedReason != null;
   return (
     <AuthScreen
@@ -59,14 +65,6 @@ export function McpAuthorization({
           if (!isPending && !approvalBlocked) onAllow();
         }}
       >
-        {error != null && (
-          <Alert status="danger">
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Description>{error}</Alert.Description>
-            </Alert.Content>
-          </Alert>
-        )}
         <div className="grid gap-2">
           <div className="flex min-w-0 items-center gap-2">
             {details.clientLogo}

@@ -1,9 +1,10 @@
 # Design rules
 
-This system follows the shared Towbar and Mill layouts. Base HeroUI primitives use the library’s default styling and native variant, color, and size APIs. App layouts and composed patterns carry their own structure. Apps own authorization, persistence, and data fetching.
+Towbar is the baseline for shared application layouts, features, and presentation contracts. Base HeroUI primitives use the library’s default styling and native variant, color, and size APIs. App layouts and composed patterns carry their own structure. Apps own authorization, persistence, and data fetching.
 
 - [Layouts](docs/layouts.md): page spacing, navigation, overlays, headings.
 - [Forms and feedback](docs/forms.md): surface variants, validation, pending states, notifications.
+- [Shared application patterns](docs/patterns.md): typed data, callbacks, and application boundaries.
 - [Component catalog](docs/components.md): primitive source files and Cosmos entries.
 - [Contributor rules](AGENTS.md): component ownership, APIs, lint, styles, and validation.
 
