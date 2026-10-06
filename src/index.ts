@@ -297,3 +297,8 @@ export {
   TeamGeneralSettings,
   type TeamGeneralSettingsProps,
 } from "./patterns/team-settings/team-general-settings.js";
+
+export {
+  EmailConfirmation,
+  type EmailConfirmationProps,
+} from "./patterns/auth/email-confirmation.js";

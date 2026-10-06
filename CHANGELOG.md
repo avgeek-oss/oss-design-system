@@ -7,6 +7,7 @@
 ## 1.2.2 — 2026-10-07
 
 - Keep auth form values out of URLs by using POST for native submissions before JavaScript handles the form.
+- Add controlled email-link confirmation with explicit awaited actions, and invitation-code resend with a shared pending lock and server cooldown.
 
 - Lock recovery-code copying during clipboard writes, with one toast outcome and retry after failure.
 
