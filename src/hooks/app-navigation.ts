@@ -1,21 +1,30 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 
 export const MobileNavigationContext = createContext<{
   host: HTMLElement | null;
   isMobile: boolean;
+  isRestoringFocus?: boolean;
   close: () => void;
   registerSecondaryNavigation: () => () => void;
 }>({
   host: null,
   isMobile: false,
+  isRestoringFocus: false,
   close: () => {},
   registerSecondaryNavigation: () => () => {},
 });
 
 export function useMobileNavigation() {
-  return useContext(MobileNavigationContext);
+  const navigation = useContext(MobileNavigationContext);
+  return useMemo(
+    () => ({
+      ...navigation,
+      isRestoringFocus: navigation.isRestoringFocus ?? false,
+    }),
+    [navigation],
+  );
 }
 
 export const NavigationContext = createContext<

@@ -64,6 +64,7 @@ export function AppLayout({
   const hasSidebar = Boolean(sidebar);
   const [drawerMounted, setDrawerMounted] = useState(false);
   const wasDrawerMounted = useRef(false);
+  const [restoringFocus, setRestoringFocus] = useState(false);
   const previousSidebarOpen = useRef(sidebarOpen);
   const [presented, setPresented] = useState({
     pathname,
@@ -91,6 +92,7 @@ export function AppLayout({
     : { pathname, sidebar, navbar, children };
   const trackDrawer = useCallback((element: HTMLDivElement | null) => {
     setDrawerMounted(Boolean(element));
+    setRestoringFocus(!element && wasDrawerMounted.current);
   }, []);
   useLayoutEffect(() => {
     const reopened = sidebarOpen && !previousSidebarOpen.current;
@@ -121,13 +123,21 @@ export function AppLayout({
   useLayoutEffect(() => {
     const exited = wasDrawerMounted.current && !drawerMounted;
     wasDrawerMounted.current = drawerMounted;
-    if (!exited || isDesktop || sidebarOpen) return;
+    if (isDesktop || (sidebarOpen && drawerMounted)) {
+      setRestoringFocus(false);
+      return;
+    }
+    if (!exited) return;
 
     // The outgoing navbar can disappear before React Aria restores its opener.
     const frame = requestAnimationFrame(() => {
       const element = root.current;
       const document = element?.ownerDocument;
-      if (document?.hasFocus() && document.activeElement === document.body) {
+      if (
+        !sidebarOpen &&
+        document?.hasFocus() &&
+        document.activeElement === document.body
+      ) {
         const toggle =
           element?.querySelector<HTMLButtonElement>(".navigation-toggle");
         if (
@@ -138,6 +148,7 @@ export function AppLayout({
           toggle.focus({ preventScroll: true });
         }
       }
+      setRestoringFocus(false);
     });
     return () => cancelAnimationFrame(frame);
   }, [drawerMounted, isDesktop, sidebarOpen]);
@@ -193,6 +204,8 @@ export function AppLayout({
           value={{
             host: mobileHost,
             isMobile: !isDesktop,
+            isRestoringFocus:
+              !isDesktop && (restoringFocus || (drawerMounted && !sidebarOpen)),
             registerSecondaryNavigation,
             close: () => {
               if (!isDesktop) onSidebarOpenChange?.(false);
