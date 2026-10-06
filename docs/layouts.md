@@ -30,7 +30,7 @@ The account menu uses labeled Account, product, and Session sections with divide
 
 ### Breadcrumbs
 
-Use `BreadcrumbTrail` for links and current-page labels. Place `BreadcrumbDropdown.Root` or `BreadcrumbSelect.Root` in an item's `content` for navigation menus or searchable entity selectors. Both retain HeroUI's compound parts and keyboard behavior; their compact triggers inherit the current item's emphasis and show a chevron. Menus render in a portal outside the breadcrumb's truncation area.
+Use `BreadcrumbTrail` for links and current-page labels. Place `BreadcrumbDropdown.Root` or `BreadcrumbSelect.Root` in an item's `content` for navigation menus or searchable entity selectors. Both retain HeroUI's compound parts and keyboard behavior; their compact triggers inherit the current item's emphasis and show a chevron. Menus render in a portal outside the breadcrumb's truncation area. Breadcrumb popovers use an opacity-only 120ms opening fade and 80ms closing fade, keeping their geometry and pressed rows steady. Reduced motion disables the fade. Their native compound parts, refs, controlled state, keyboard navigation, and focus return remain available; reopening a retained closing popover restores focus inside its active scope without remounting it. Ordinary `Dropdown` and `Select` keep native motion.
 
 ```tsx
 <BreadcrumbTrail

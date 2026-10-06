@@ -49,6 +49,34 @@ body {
 }
 
 @layer components {
+  :is(.dropdown__popover, .select__popover).breadcrumb-popover {
+    animation: none;
+    transform: none;
+    opacity: 1;
+    transition: opacity 120ms ease-out;
+
+    &[data-entering="true"],
+    &[data-exiting="true"] {
+      animation: none;
+      transform: none;
+      opacity: 0;
+      will-change: opacity;
+    }
+
+    &[data-exiting="true"] {
+      transition-duration: 80ms;
+    }
+
+    :is(.menu-item, .list-box-item) {
+      transform: none;
+      transition-property: background-color, color, box-shadow;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
   .toast__close-button {
     width: 32px;
     height: 32px;

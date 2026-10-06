@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Keep breadcrumb popover geometry steady through an opacity-only fade and restore native focus on interrupted-exit reopening without remounting the menu.
+
 ## 1.2.0 — 2026-10-06
 
 - Support real secondary navigation links alongside action buttons, preserving native menu density, router integration, modified clicks, and mobile dismissal.
