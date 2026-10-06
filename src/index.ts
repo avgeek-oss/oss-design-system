@@ -19,7 +19,12 @@ export {
   TypographyParagraph,
   TypographyText,
 } from "./typography/typography.js";
-export { ResourceTable, ResourceName } from "./patterns/resource-table.js";
+export {
+  ResourceTable,
+  ResourceName,
+  type ResourceTableProps,
+  type ResourceTableColumn,
+} from "./patterns/resource-table.js";
 export {
   IdentityAuthFrame,
   IdentityAuthHeading,

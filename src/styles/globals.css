@@ -324,3 +324,53 @@ pre {
 .theme-changing *::after {
   transition: none !important;
 }
+
+@layer components {
+  .resource-table-mobile-label {
+    display: none;
+  }
+
+  @media (width < 40rem) {
+    .resource-table--stacked {
+      display: block;
+      width: 100%;
+
+      .table__header {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      .table__body {
+        display: block;
+      }
+
+      .table__row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        background: var(--surface);
+      }
+
+      .table__cell {
+        display: block;
+        min-width: 0;
+        border-bottom: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .resource-table-mobile-full {
+        grid-column: 1 / -1;
+      }
+
+      .resource-table-mobile-label {
+        @apply text-sm font-normal text-muted;
+        display: block;
+        margin-bottom: 4px;
+      }
+    }
+  }
+}

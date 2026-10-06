@@ -27,6 +27,7 @@ import { MembersTable } from "../src/patterns/team-settings/members-table.js";
 import { InvitationsTable } from "../src/patterns/team-settings/invitations-table.js";
 import { CodeBlock } from "../src/typography/code-block.js";
 
+import { ResourceTable } from "../src/patterns/resource-table.js";
 import { QueryLoading } from "../src/patterns/feedback/query-state.js";
 
 let dangerMessages: ReactNode[] = [];
@@ -1082,6 +1083,65 @@ test("API key names reject whitespace with toast and focus, retain the draft, an
     assert.equal(calls, 1);
     await act(async () => pending.resolve());
     assert.match(document.body.textContent ?? "", /preview-key/);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("stacked resource tables keep one native row, every field and one action per record", async () => {
+  const items = [{ id: "one", name: "Automation", permission: "Read only" }];
+  let activations = 0;
+  const columns = [
+    {
+      key: "name",
+      header: "Name",
+      isRowHeader: true,
+      cell: (item: (typeof items)[number]) => item.name,
+    },
+    {
+      key: "permissions",
+      header: "Permissions",
+      mobileFullWidth: true,
+      cell: (item: (typeof items)[number]) => item.permission,
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      mobileFullWidth: true,
+      cell: () => <button onClick={() => activations++}>Inspect</button>,
+    },
+  ];
+  const view = await mount(
+    <ResourceTable
+      ariaLabel="Credentials"
+      items={items}
+      columns={columns}
+      getRowKey={(item) => item.id}
+      emptyTitle="No keys"
+      emptyDescription="Create a key"
+      mobileLayout="stacked"
+    />,
+  );
+  try {
+    assert.equal(document.querySelectorAll('[role="rowheader"]').length, 1);
+    assert.equal(document.querySelectorAll('[role="gridcell"]').length, 2);
+    assert.deepEqual(
+      [...document.querySelectorAll('[role="columnheader"]')].map(
+        (element) => element.textContent,
+      ),
+      ["Name", "Permissions", "Actions"],
+    );
+    assert.equal(document.querySelectorAll("button").length, 1);
+    await click(button("Inspect"));
+    assert.equal(activations, 1);
+    assert.match(
+      document.querySelector('[role="rowheader"]')?.textContent ?? "",
+      /Automation/,
+    );
+    assert.match(
+      document.querySelector('[role="gridcell"]')?.textContent ?? "",
+      /Read only/,
+    );
   } finally {
     await view.unmount();
   }

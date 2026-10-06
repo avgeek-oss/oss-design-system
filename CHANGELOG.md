@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add an opt-in stacked mobile ResourceTable layout and enable it for API keys, preserving desktop columns, native table semantics and all credential metadata.
+
 - Keep breadcrumb popover geometry steady through an opacity-only fade and restore native focus on interrupted-exit reopening without remounting the menu.
 - Reject whitespace-only API-key names with toast feedback and input focus, retaining the draft for correction without creating a key.
 - Restore mobile navigation focus to the current toggle after drawer exit when navigation replaced the original opener, while preserving deliberate destination focus.
