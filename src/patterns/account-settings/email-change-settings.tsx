@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { Widget } from "../../data-display/widget.js";
 import { Field, FieldDescription, FieldError } from "../../forms/field.js";
 import { Input } from "../../forms/input.js";
@@ -13,19 +13,68 @@ import { AsyncActionButton } from "../actions/async-action-button.js";
 import { useAsyncAction } from "../use-async-action.js";
 
 export type PendingEmailChange = { email: string; expiresAt: string };
-export type EmailChangeSettingsProps = {
+type EmailSettingsIdentity = {
   email: string;
   isVerified: boolean;
-  pendingChange?: PendingEmailChange | null;
-  resendAvailableAt?: number;
-  formatDate?: (value: string) => string;
-  error?: string;
-  onRequestChange: (email: string) => Promise<void>;
-  onCancelChange: () => Promise<void>;
-  onResendVerification: () => Promise<void>;
 };
+export type EmailChangeSettingsProps = EmailSettingsIdentity &
+  (
+    | { mode: "read-only"; children?: ReactNode }
+    | {
+        mode?: "editable";
+        pendingChange?: PendingEmailChange | null;
+        resendAvailableAt?: number;
+        formatDate?: (value: string) => string;
+        error?: string;
+        onRequestChange: (email: string) => Promise<void>;
+        onCancelChange: () => Promise<void>;
+        onResendVerification: () => Promise<void>;
+      }
+  );
 
-export function EmailChangeSettings({
+export function EmailChangeSettings(props: EmailChangeSettingsProps) {
+  return props.mode === "read-only" ? (
+    <ReadOnlyEmailSettings {...props} />
+  ) : (
+    <EditableEmailSettings {...props} />
+  );
+}
+function ReadOnlyEmailSettings({
+  email,
+  isVerified,
+  children,
+}: EmailSettingsIdentity & { children?: ReactNode }) {
+  const id = useId();
+  return (
+    <Widget>
+      <Widget.Header
+        endContent={
+          <StatusIndicator
+            label={isVerified ? "Verified" : "Unverified"}
+            color={isVerified ? "success" : "warning"}
+          />
+        }
+      >
+        <Widget.Title>Email address</Widget.Title>
+      </Widget.Header>
+      <Widget.Content className="grid gap-4">
+        <Field>
+          <Label htmlFor={id}>Current email</Label>
+          <Input
+            id={id}
+            type="email"
+            value={email}
+            readOnly
+            variant="secondary"
+          />
+        </Field>
+        {children}
+      </Widget.Content>
+    </Widget>
+  );
+}
+
+function EditableEmailSettings({
   email,
   isVerified,
   pendingChange,
@@ -35,7 +84,7 @@ export function EmailChangeSettings({
   onRequestChange,
   onCancelChange,
   onResendVerification,
-}: EmailChangeSettingsProps) {
+}: Extract<EmailChangeSettingsProps, { mode?: "editable" }>) {
   const id = useId();
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [secondsUntilResend, setSecondsUntilResend] = useState(0);

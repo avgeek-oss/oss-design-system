@@ -27,6 +27,7 @@ export type McpAuthorizationProps = {
   productName: string;
   details: McpAuthorizationDetails;
   isPending?: boolean;
+  isDisabled?: boolean;
   error?: ReactNode;
   approvalBlockedReason?: ReactNode;
   onAllow: () => void;
@@ -39,6 +40,7 @@ export function McpAuthorization({
   productName,
   details,
   isPending = false,
+  isDisabled = false,
   error,
   approvalBlockedReason,
   onAllow,
@@ -62,7 +64,7 @@ export function McpAuthorization({
         aria-busy={isPending}
         onSubmit={(event) => {
           event.preventDefault();
-          if (!isPending && !approvalBlocked) onAllow();
+          if (!isPending && !isDisabled && !approvalBlocked) onAllow();
         }}
       >
         <div className="grid gap-2">
@@ -140,7 +142,7 @@ export function McpAuthorization({
         <div className="flex flex-wrap gap-2">
           <Button
             type="submit"
-            isDisabled={isPending || approvalBlocked}
+            isDisabled={isPending || isDisabled || approvalBlocked}
             isPending={isPending}
           >
             Allow access
@@ -148,7 +150,7 @@ export function McpAuthorization({
           <Button
             type="button"
             variant="secondary"
-            isDisabled={isPending}
+            isDisabled={isPending || isDisabled}
             onPress={onDeny}
           >
             Deny

@@ -10,27 +10,54 @@ import { CodeBlock } from "../../typography/code-block.js";
 import { ChoiceField, type ChoiceOption } from "../choice-field.js";
 import { useAsyncAction } from "../use-async-action.js";
 
-export type CreateApiKeyValues = {
-  name: string;
+export type CreateApiKeyMetadataValues = { name: string; expiry: string };
+export type CreateApiKeyValues = CreateApiKeyMetadataValues & {
   permission: string;
-  expiry: string;
 };
 export type CreatedApiKey = { token: string | null };
-export type CreateApiKeyDialogProps = {
+type CreateApiKeyDialogBaseProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  permissionOptions: readonly ChoiceOption[];
   expiryOptions: readonly ChoiceOption[];
-  defaultPermission?: string;
   defaultExpiry?: string;
-  onCreate: (values: CreateApiKeyValues) => Promise<CreatedApiKey>;
   children?: ReactNode;
 };
-export function CreateApiKeyDialog({
-  isOpen,
-  ...props
-}: CreateApiKeyDialogProps) {
-  return isOpen ? <CreateContent {...props} /> : null;
+export type CreateApiKeyDialogProps = CreateApiKeyDialogBaseProps &
+  (
+    | {
+        permissionOptions: readonly ChoiceOption[];
+        defaultPermission?: string;
+        onCreate: (values: CreateApiKeyValues) => Promise<CreatedApiKey>;
+      }
+    | {
+        permissionOptions?: undefined;
+        defaultPermission?: never;
+        onCreate: (
+          values: CreateApiKeyMetadataValues,
+        ) => Promise<CreatedApiKey>;
+      }
+  );
+type CreateContentProps = Omit<CreateApiKeyDialogBaseProps, "isOpen"> & {
+  permissionOptions?: readonly ChoiceOption[];
+  defaultPermission?: string;
+  onCreate: (values: CreateApiKeyValues) => Promise<CreatedApiKey>;
+};
+export function CreateApiKeyDialog(
+  props: Extract<
+    CreateApiKeyDialogProps,
+    { permissionOptions: readonly ChoiceOption[] }
+  >,
+): ReactNode;
+export function CreateApiKeyDialog(
+  props: Extract<CreateApiKeyDialogProps, { permissionOptions?: undefined }>,
+): ReactNode;
+export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactNode;
+export function CreateApiKeyDialog(props: CreateApiKeyDialogProps) {
+  const create = (values: CreateApiKeyValues) =>
+    props.permissionOptions === undefined
+      ? props.onCreate({ name: values.name, expiry: values.expiry })
+      : props.onCreate(values);
+  return props.isOpen ? <CreateContent {...props} onCreate={create} /> : null;
 }
 function CreateContent({
   onOpenChange,
@@ -40,10 +67,10 @@ function CreateContent({
   defaultExpiry,
   onCreate,
   children,
-}: Omit<CreateApiKeyDialogProps, "isOpen">) {
+}: CreateContentProps) {
   const nameId = useId();
   const [permission, setPermission] = useState(
-    defaultPermission ?? permissionOptions[0]?.id ?? "",
+    defaultPermission ?? permissionOptions?.[0]?.id ?? "",
   );
   const [expiry, setExpiry] = useState(
     defaultExpiry ?? expiryOptions[0]?.id ?? "",
@@ -55,7 +82,8 @@ function CreateContent({
   }, [created]);
   const action = useAsyncAction("Could not create key");
   const canCreate =
-    permissionOptions.some((option) => option.id === permission) &&
+    (permissionOptions === undefined ||
+      permissionOptions.some((option) => option.id === permission)) &&
     expiryOptions.some((option) => option.id === expiry);
   return (
     <Modal.Backdrop
@@ -128,14 +156,16 @@ function CreateContent({
                     disabled={action.isPending}
                   />
                 </Field>
-                <ChoiceField
-                  label="Permissions"
-                  value={permission}
-                  options={permissionOptions}
-                  onChange={setPermission}
-                  isRequired
-                  isDisabled={action.isPending}
-                />
+                {permissionOptions && (
+                  <ChoiceField
+                    label="Permissions"
+                    value={permission}
+                    options={permissionOptions}
+                    onChange={setPermission}
+                    isRequired
+                    isDisabled={action.isPending}
+                  />
+                )}
                 <ChoiceField
                   label="Expires after"
                   value={expiry}

@@ -25,12 +25,14 @@ export type MembersTableProps<T extends Member = Member> = {
   items: T[];
   actions: (item: T) => ReactNode;
   roles?: readonly ChoiceOption[];
+  currentUserId?: string;
   emptyDescription?: string;
 };
 export function MembersTable<T extends Member>({
   items,
   actions,
   roles,
+  currentUserId,
   emptyDescription = "Add a team member to get started.",
 }: MembersTableProps<T>) {
   const security = items.some((item) => item.securityStatus !== undefined);
@@ -42,7 +44,12 @@ export function MembersTable<T extends Member>({
         <div className="flex min-w-0 items-center gap-2">
           <UserAvatar email={item.email} name={item.name} />
           <div className="grid gap-1">
-            <ResourceName name={item.name} description={item.email} />
+            <ResourceName
+              name={
+                item.id === currentUserId ? `${item.name} (you)` : item.name
+              }
+              description={item.email}
+            />
             {item.emailVerified === false ? (
               <StatusIndicator label="Email unverified" color="warning" />
             ) : null}

@@ -17,6 +17,16 @@ import { toast } from "../src/overlays/toast.js";
 import { IdentityCredentialsForm } from "../src/patterns/auth/identity-credentials-form.js";
 import { McpAuthorization } from "../src/patterns/auth/mcp-authorization.js";
 
+import { NameSettingsForm } from "../src/patterns/settings/name-form.js";
+import { SignIn } from "../src/patterns/auth/sign-in.js";
+import { PasskeyVerification } from "../src/patterns/auth/passkey-verification.js";
+import { ConfirmIdentityDialog } from "../src/patterns/auth/confirm-identity-dialog.js";
+import { PasskeySettings } from "../src/patterns/account-settings/passkey-settings.js";
+import { MemberEditDialog } from "../src/patterns/team-settings/member-edit-dialog.js";
+import { MembersTable } from "../src/patterns/team-settings/members-table.js";
+import { InvitationsTable } from "../src/patterns/team-settings/invitations-table.js";
+import { CodeBlock } from "../src/typography/code-block.js";
+
 let dangerMessages: ReactNode[] = [];
 beforeEach(() => {
   dangerMessages = [];
@@ -207,6 +217,7 @@ test("API key creation retains the name on failure and removes the revealed secr
         expiryOptions={[{ id: "90", label: "90 days" }]}
         onCreate={async (values) => {
           calls++;
+          assert.equal(values.permission.toUpperCase(), "READ");
           assert.deepEqual(values, {
             name: "Automation",
             permission: "read",
@@ -244,6 +255,7 @@ test("invitation link appears only after success and failed invitations retain t
       isOpen
       onOpenChange={() => {}}
       roles={[{ id: "member", label: "Member" }]}
+      resultGuidance={<p>Email delivery is not configured.</p>}
       onInvite={async (values) => {
         calls++;
         assert.deepEqual(values, { email: "sam@example.test", role: "member" });
@@ -262,7 +274,10 @@ test("invitation link appears only after success and failed invitations retain t
       "sam@example.test",
     );
     await submit();
-    assert.match(document.body.textContent ?? "", /Invitation created/);
+    assert.match(
+      document.body.textContent ?? "",
+      /Share this private invitation link/,
+    );
     assert.match(
       document.body.textContent ?? "",
       /https:\/\/example.test\/invite\/new/,
@@ -536,6 +551,417 @@ test("operation failures expand initially, remain collapsible, and waiting steps
     assert.equal(waiting.getAttribute("aria-expanded"), "false");
     await click(failed);
     assert.equal(failed.getAttribute("aria-expanded"), "false");
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("external sign-in pending blocks all submit paths and preserves the credentials", async () => {
+  let calls = 0;
+  const props = {
+    brand: "Example",
+    onSubmit: async () => {
+      calls++;
+    },
+    onForgotPassword: () => {
+      calls++;
+    },
+    onPasskeySignIn: () => {
+      calls++;
+    },
+  };
+  const view = await mount(<SignIn {...props} />);
+  try {
+    await fill("identifier", "alex@example.test");
+    await fill("password", "preview password");
+    await view.render(<SignIn {...props} isPending />);
+    for (const label of [
+      "Signing in…",
+      "Forgot password?",
+      "Sign in with Passkey",
+    ]) {
+      assert.equal(button(label).disabled, true);
+      await click(button(label));
+    }
+    await submit();
+    assert.equal(calls, 0);
+    await view.render(<SignIn {...props} />);
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="password"]')?.value,
+      "preview password",
+    );
+    await submit();
+    assert.equal(calls, 1);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("passkey verification exposes only supported fallbacks and keeps cancellation available", async () => {
+  let cancels = 0;
+  let fallback = 0;
+  const props = {
+    brand: "Example",
+    onRetry: () => {},
+    onCancelRequest: () => {
+      cancels++;
+    },
+    onBackToSignIn: () => {},
+  };
+  const view = await mount(<PasskeyVerification {...props} />);
+  try {
+    assert.doesNotMatch(
+      document.body.textContent ?? "",
+      /Use a recovery code|Use an authenticator code/,
+    );
+    await view.render(
+      <PasskeyVerification
+        {...props}
+        isPending
+        onRecoverySignIn={() => {
+          fallback++;
+        }}
+        onAuthenticatorSignIn={() => {
+          fallback++;
+        }}
+      />,
+    );
+    assert.equal(button("Use a recovery code").disabled, true);
+    assert.equal(button("Use an authenticator code").disabled, true);
+    await click(button("Cancel passkey request"));
+    assert.equal(cancels, 1);
+    assert.equal(fallback, 0);
+    await view.render(
+      <PasskeyVerification
+        {...props}
+        onRecoverySignIn={() => {
+          fallback++;
+        }}
+      />,
+    );
+    await click(button("Use a recovery code"));
+    assert.equal(fallback, 1);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("custom identity verification supports app-owned ceremonies and explicit abort dismissal", async () => {
+  let closes = 0;
+  const props = {
+    isOpen: true,
+    onOpenChange: (open: boolean) => {
+      if (!open) closes++;
+    },
+  };
+  const view = await mount(
+    <ConfirmIdentityDialog {...props} method="custom" isPending>
+      <p>Waiting for authenticator verification</p>
+    </ConfirmIdentityDialog>,
+  );
+  try {
+    assert.equal(document.querySelector('input[type="password"]'), null);
+    assert.equal(button("Cancel").disabled, true);
+    await view.render(
+      <ConfirmIdentityDialog
+        {...props}
+        method="custom"
+        isPending
+        isDismissDisabled={false}
+      >
+        <p>Waiting for passkey verification</p>
+      </ConfirmIdentityDialog>,
+    );
+    await click(button("Cancel"));
+    assert.equal(closes, 1);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("API keys without permission policy submit only name and expiry", async () => {
+  let calls = 0;
+  const view = await mount(
+    <CreateApiKeyDialog
+      isOpen
+      onOpenChange={() => {}}
+      expiryOptions={[{ id: "90", label: "90 days" }]}
+      onCreate={async (values) => {
+        calls++;
+        assert.deepEqual(values, { name: "Automation", expiry: "90" });
+        return { token: "preview-key" };
+      }}
+    />,
+  );
+  try {
+    assert.doesNotMatch(document.body.textContent ?? "", /Permissions/);
+    await fill("name", "Automation");
+    await submit();
+    assert.equal(calls, 1);
+    assert.match(document.body.textContent ?? "", /preview-key/);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("read-only email settings expose identity without invented change or resend capabilities", async () => {
+  const view = await mount(
+    <EmailChangeSettings
+      email="alex@example.test"
+      isVerified={false}
+      mode="read-only"
+    >
+      <p>Managed by your instance administrator.</p>
+    </EmailChangeSettings>,
+  );
+  try {
+    assert.equal(document.querySelector("form"), null);
+    assert.equal(document.querySelector("button"), null);
+    const input = document.querySelector<HTMLInputElement>(
+      'input[type="email"]',
+    );
+    assert.equal(input?.readOnly, true);
+    assert.equal(input?.value, "alex@example.test");
+    assert.match(
+      document.body.textContent ?? "",
+      /Unverified|Managed by your instance administrator/,
+    );
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("passkey settings omit unsupported rename and recovery actions", async () => {
+  const view = await mount(
+    <PasskeySettings
+      items={[
+        { id: "key", name: "Security key", createdAt: "2026-10-06T00:00:00Z" },
+      ]}
+      formatDate={() => "Today"}
+      onAdd={async () => {}}
+      onRemove={async () => {}}
+    />,
+  );
+  try {
+    assert.equal(button("Add passkey").disabled, false);
+    assert.equal(button("Remove").disabled, false);
+    assert.doesNotMatch(
+      document.body.textContent ?? "",
+      /Rename|Replace recovery codes/,
+    );
+    assert.equal(document.querySelector('[aria-label="More actions"]'), null);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("role-only member edits cannot mutate identity fields and retain the role draft on rejection", async () => {
+  let calls = 0;
+  const view = await mount(
+    <MemberEditDialog
+      isOpen
+      mode="role-only"
+      member={{
+        id: "alex",
+        name: "Alex",
+        email: "alex@example.test",
+        role: "member",
+      }}
+      roles={[{ id: "member", label: "Member" }]}
+      onOpenChange={() => {}}
+      onSave={async (values) => {
+        calls++;
+        assert.deepEqual(values, { role: "member" });
+        if (calls === 1) throw new Error("Role update failed");
+      }}
+    />,
+  );
+  try {
+    assert.equal(document.querySelector('input[name="name"]'), null);
+    await submit();
+    assertFailureToast("Role update failed");
+    assert.ok(document.querySelector('[role="dialog"]'));
+    await submit();
+    assert.equal(calls, 2);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("invitations display avatar identity and members identify the current user without altering records", async () => {
+  const invitation = await mount(
+    <InvitationsTable
+      items={[
+        {
+          id: "invite",
+          email: "sam@example.test",
+          name: "Sam",
+          role: "member",
+          expiresAt: "2026-10-07T00:00:00Z",
+        },
+      ]}
+      roles={[{ id: "member", label: "Member" }]}
+      formatDate={() => "Tomorrow"}
+    />,
+  );
+  try {
+    assert.ok(document.querySelector('[role="img"][aria-label="Sam"]'));
+  } finally {
+    await invitation.unmount();
+  }
+  const member = {
+    id: "alex",
+    name: "Alex",
+    email: "alex@example.test",
+    role: "member",
+  };
+  const members = await mount(
+    <MembersTable items={[member]} currentUserId="alex" actions={() => null} />,
+  );
+  try {
+    assert.match(document.body.textContent ?? "", /Alex \(you\)/);
+    assert.equal(member.name, "Alex");
+  } finally {
+    await members.unmount();
+  }
+});
+
+test("code copying emits toast feedback on every attempt and keeps a stable accessible action", async () => {
+  const successes: ReactNode[] = [];
+  mock.method(toast, "success", (message: ReactNode) => {
+    successes.push(message);
+    return "preview-success";
+  });
+  const view = await mount(
+    <CodeBlock>
+      <CodeBlock.Header>
+        <CodeBlock.CopyButton code="preview-code" />
+      </CodeBlock.Header>
+      <CodeBlock.Code code="preview-code" />
+    </CodeBlock>,
+  );
+  try {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: undefined,
+    });
+    await click(button("Copy"));
+    await click(button("Copy"));
+    assert.equal(dangerMessages.length, 2);
+    assert.doesNotMatch(
+      document.body.textContent ?? "",
+      /Could not copy|Copied/,
+    );
+    let copied = "";
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => {
+          copied = value;
+        },
+      },
+    });
+    await click(button("Copy"));
+    assert.equal(copied, "preview-code");
+    assert.deepEqual(successes, ["Copied to clipboard."]);
+    assert.equal(button("Copy").getAttribute("aria-label"), "Copy code");
+  } finally {
+    await view.unmount();
+    Reflect.deleteProperty(navigator, "clipboard");
+  }
+});
+
+test("disabled authorization decisions cannot replay a consumed request and do not present pending state", async () => {
+  let calls = 0;
+  const view = await mount(
+    <McpAuthorization
+      brand="Example"
+      productName="Example"
+      isDisabled
+      details={{
+        clientName: "Client",
+        clientId: "client",
+        clientTrust: "unverified",
+        identityDescription: "Unverified metadata",
+        redirectUri: "https://example.test/callback",
+        account: { email: "alex@example.test" },
+        permissionSummary: "Read tasks",
+        accessDescription: "Read tasks in this team",
+        accessLifetime: "7 days",
+        revocationDescription: "Revoke in account settings",
+        restrictions: "Account management excluded",
+      }}
+      onAllow={() => {
+        calls++;
+      }}
+      onDeny={() => {
+        calls++;
+      }}
+    />,
+  );
+  try {
+    await submit();
+    const decisions = [...document.querySelectorAll("button")].filter((item) =>
+      /Allow|Deny/.test(item.textContent ?? ""),
+    );
+    assert.equal(decisions.length, 2);
+    for (const decision of decisions) {
+      assert.equal(decision.disabled, true);
+      await click(decision);
+    }
+    assert.equal(calls, 0);
+    assert.equal(
+      document.querySelector("form")?.getAttribute("aria-busy"),
+      "false",
+    );
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("name settings lock simultaneous submissions and retain the draft for retry after failure", async () => {
+  let calls = 0;
+  const pending = deferred();
+  const view = await mount(
+    <NameSettingsForm
+      title="Team details"
+      value="Existing team"
+      onSave={async (name) => {
+        calls++;
+        assert.equal(name, "New team");
+        if (calls === 1) {
+          await pending.promise;
+          throw new Error("Team update failed");
+        }
+      }}
+    />,
+  );
+  try {
+    const input = document.querySelector("input");
+    assert.ok(input);
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )?.set;
+      assert.ok(setter);
+      setter.call(input, "New team");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    const form = document.querySelector("form");
+    assert.ok(form);
+    await act(async () => {
+      for (let i = 0; i < 2; i++)
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        );
+    });
+    assert.equal(calls, 1);
+    await act(async () => pending.resolve());
+    assertFailureToast("Team update failed");
+    assert.equal(input.value, "New team");
+    await submit();
+    assert.equal(calls, 2);
   } finally {
     await view.unmount();
   }

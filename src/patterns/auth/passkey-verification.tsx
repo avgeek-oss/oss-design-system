@@ -12,7 +12,8 @@ export type PasskeyVerificationProps = {
   isPending?: boolean;
   onRetry: () => void;
   onCancelRequest: () => void;
-  onRecoverySignIn: () => void;
+  onRecoverySignIn?: () => void;
+  onAuthenticatorSignIn?: () => void;
   onBackToSignIn: () => void;
 };
 
@@ -22,6 +23,7 @@ export function PasskeyVerification({
   onRetry,
   onCancelRequest,
   onRecoverySignIn,
+  onAuthenticatorSignIn,
   onBackToSignIn,
 }: PasskeyVerificationProps) {
   return (
@@ -41,9 +43,18 @@ export function PasskeyVerification({
       )}
       <div className="flex items-center justify-between gap-4">
         <BackToSignIn onClick={onBackToSignIn} />
-        <AuthAction className="text-right" onClick={onRecoverySignIn}>
-          Use a recovery code
-        </AuthAction>
+        <div className="grid justify-items-end gap-3">
+          {onAuthenticatorSignIn && (
+            <AuthAction disabled={isPending} onClick={onAuthenticatorSignIn}>
+              Use an authenticator code
+            </AuthAction>
+          )}
+          {onRecoverySignIn && (
+            <AuthAction disabled={isPending} onClick={onRecoverySignIn}>
+              Use a recovery code
+            </AuthAction>
+          )}
+        </div>
       </div>
     </AuthScreen>
   );

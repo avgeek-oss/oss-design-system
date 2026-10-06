@@ -141,6 +141,7 @@ export {
   CreateApiKeyDialog,
   type CreateApiKeyDialogProps,
   type CreateApiKeyValues,
+  type CreateApiKeyMetadataValues,
   type CreatedApiKey,
 } from "./patterns/account-settings/create-api-key-dialog.js";
 

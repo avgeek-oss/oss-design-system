@@ -12,6 +12,7 @@ export type SignInProps = {
   brand: ReactNode;
   description?: ReactNode;
   defaultEmail?: string;
+  isPending?: boolean;
   onSubmit: ComponentProps<typeof IdentityCredentialsForm>["onSubmit"];
   onForgotPassword: () => void;
   onPasskeySignIn?: () => void;
@@ -21,6 +22,7 @@ export function SignIn({
   brand,
   description = "Sign in to your team’s instance.",
   defaultEmail,
+  isPending = false,
   onSubmit,
   onForgotPassword,
   onPasskeySignIn,
@@ -28,18 +30,24 @@ export function SignIn({
   return (
     <AuthScreen brand={brand} title="Sign in" description={description}>
       <IdentityCredentialsForm
+        disabled={isPending}
+        aria-busy={isPending}
+        submitLabel={isPending ? "Signing in…" : "Sign in"}
         identifierLabel="Email"
         identifierType="email"
         identifierAutoComplete="email"
         defaultIdentifier={defaultEmail}
         submitIcon={<HugeiconsIcon aria-hidden icon={Login01Icon} size={16} />}
         passwordAction={
-          <AuthAction onClick={onForgotPassword}>Forgot password?</AuthAction>
+          <AuthAction disabled={isPending} onClick={onForgotPassword}>
+            Forgot password?
+          </AuthAction>
         }
         onSubmit={onSubmit}
       />
       {onPasskeySignIn && (
         <Button
+          isDisabled={isPending}
           className="w-full"
           variant="secondary"
           onPress={onPasskeySignIn}

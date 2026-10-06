@@ -3,9 +3,6 @@
 import {
   forwardRef,
   Fragment,
-  useEffect,
-  useRef,
-  useState,
   type ComponentPropsWithRef,
   type ReactNode,
 } from "react";
@@ -13,6 +10,7 @@ import { Highlight, type PrismTheme } from "prism-react-renderer";
 import { SourceCodeIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Widget, type WidgetActionProps } from "../data-display/widget.js";
+import { toast } from "../overlays/toast.js";
 import { cn } from "../lib/utils.js";
 
 const htmlTheme: PrismTheme = {
@@ -115,33 +113,26 @@ type CopyButtonProps = Omit<WidgetActionProps, "children" | "onPress"> & {
 
 const CopyButton = forwardRef<HTMLButtonElement, CopyButtonProps>(
   ({ code, ...props }, ref) => {
-    const [copied, setCopied] = useState(false);
-    const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    useEffect(
-      () => () => {
-        if (resetTimer.current) clearTimeout(resetTimer.current);
-      },
-      [],
-    );
-
     const copyCode = async () => {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      if (resetTimer.current) clearTimeout(resetTimer.current);
-      resetTimer.current = setTimeout(() => setCopied(false), 1800);
+      try {
+        await navigator.clipboard.writeText(code);
+        toast.success("Copied to clipboard.");
+      } catch {
+        toast.danger(
+          "Could not copy to the clipboard. Select and copy the text instead.",
+        );
+      }
     };
 
-    const label = copied ? "Code copied" : "Copy code";
     return (
       <Widget.Action
         {...props}
         ref={ref}
-        aria-label={props["aria-label"] ?? label}
+        aria-label={props["aria-label"] ?? "Copy code"}
         data-slot="code-block-copy"
         onPress={copyCode}
       >
-        {copied ? "Copied" : "Copy"}
+        Copy
       </Widget.Action>
     );
   },
