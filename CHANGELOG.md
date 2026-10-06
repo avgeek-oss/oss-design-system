@@ -4,6 +4,7 @@
 
 - Add controlled email-link confirmation with explicit awaited actions, and invitation-code resend with a shared pending lock and server cooldown.
 - Allow notification activation to return `false` without dismissing the menu or reporting a failure.
+- Expose mobile navigation focus-restoration progress so destination autofocus can wait for native drawer dismissal without stealing focus.
 
 ## 1.2.2 — 2026-10-07
 

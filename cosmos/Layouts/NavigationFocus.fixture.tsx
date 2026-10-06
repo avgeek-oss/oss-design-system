@@ -5,7 +5,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { AppLayout } from "../../src/navigation/app-layout";
+import {
+  AppLayout,
+  useMobileNavigation,
+} from "../../src/navigation/app-layout";
 import { RouteProvider } from "../../src/hooks/route-context";
 import { Button } from "../../src/buttons/button";
 import {
@@ -28,14 +31,48 @@ function Destination({
   return <Button ref={control}>Destination action</Button>;
 }
 
+function DestinationHeading({
+  title,
+  autoFocus,
+}: {
+  title: string;
+  autoFocus: boolean;
+}) {
+  const heading = useRef<HTMLHeadingElement>(null);
+  const { isRestoringFocus: restoring } = useMobileNavigation();
+  useEffect(() => {
+    if (!autoFocus || restoring) return;
+    const element = heading.current;
+    const document = element?.ownerDocument;
+    if (
+      document?.hasFocus() &&
+      document.activeElement === document.body &&
+      !document.querySelector('[role="dialog"]')
+    ) {
+      element?.focus({ preventScroll: true });
+    }
+  }, [autoFocus, restoring]);
+  return (
+    <h1
+      ref={heading}
+      tabIndex={-1}
+      data-navigation-restoring={Boolean(restoring)}
+    >
+      {title}
+    </h1>
+  );
+}
+
 function NavigationFocus({
   replaceNavbar = false,
   deliberateFocus = false,
   reopenOnArrival = false,
+  autoFocusHeading = false,
 }: {
   replaceNavbar?: boolean;
   deliberateFocus?: boolean;
   reopenOnArrival?: boolean;
+  autoFocusHeading?: boolean;
 }) {
   const [pathname, setPathname] = useState("/task");
   const [open, setOpen] = useState(false);
@@ -81,7 +118,11 @@ function NavigationFocus({
             />
           ) : null}
           <div className="grid gap-3 p-4 text-sm">
-            <h1>{pathname === "/board" ? "Board" : "Task"}</h1>
+            <DestinationHeading
+              key={pathname}
+              title={pathname === "/board" ? "Board" : "Task"}
+              autoFocus={autoFocusHeading}
+            />
             {pathname === "/task" ? (
               <Destination
                 deliberateFocus={deliberateFocus}
@@ -99,6 +140,9 @@ function NavigationFocus({
 export default {
   "Stable navbar": <NavigationFocus />,
   "Replaced navbar": <NavigationFocus replaceNavbar />,
+  "Destination heading": <NavigationFocus replaceNavbar autoFocusHeading />,
   "Destination focus": <NavigationFocus replaceNavbar deliberateFocus />,
-  "Reopen on arrival": <NavigationFocus replaceNavbar reopenOnArrival />,
+  "Reopen on arrival": (
+    <NavigationFocus replaceNavbar reopenOnArrival autoFocusHeading />
+  ),
 };
