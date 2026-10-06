@@ -3,7 +3,7 @@
 ## 1.2.1 — 2026-10-07
 
 - Share profile-image settings, invitation password setup, passkey recovery verification, team details settings, and team removal/revocation confirmations with fixed copy.
-- Label team member security as Passkeys consistently.
+- Label team member security as Passkeys consistently and preserve a readable identity column on narrow member tables.
 - Allow apps to cancel a pending passkey confirmation safely. Standardize new integrations on passkeys and deprecate the legacy authenticator fallback.
 
 - Add an opt-in stacked mobile ResourceTable layout and enable it for API keys, preserving desktop columns, native table semantics and all credential metadata.

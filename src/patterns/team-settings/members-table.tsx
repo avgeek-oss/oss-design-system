@@ -39,6 +39,7 @@ export function MembersTable<T extends Member>({
     {
       key: "member",
       header: "Member",
+      className: "min-w-48",
       cell: (item) => (
         <div className="flex min-w-0 items-center gap-2">
           <UserAvatar email={item.email} name={item.name} />

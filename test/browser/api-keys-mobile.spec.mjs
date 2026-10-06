@@ -122,3 +122,24 @@ test("API keys retain every field, native row headers and reachable actions at m
     table.getByRole("button", { name: "Revoke", exact: true }),
   ).toBeVisible();
 });
+
+test("member identity remains visible beside account status and actions on narrow tables", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/Team Settings/MembersTable.fixture.tsx"),
+  );
+  const table = page.getByRole("grid", { name: "Members", exact: true });
+  await expect(table).toBeVisible();
+  const row = table.getByRole("rowheader").first();
+  const identity = row.locator('[data-slot="tooltip-trigger"]');
+  await expect(identity).toHaveCount(2);
+  for (const label of await identity.all()) {
+    await expect(label).toBeVisible();
+    expect((await label.boundingBox()).width).toBeGreaterThan(0);
+  }
+  await expect(
+    table.getByRole("columnheader", { name: "Passkeys", exact: true }),
+  ).toBeAttached();
+});
