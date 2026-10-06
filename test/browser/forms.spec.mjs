@@ -231,3 +231,321 @@ test("sign-in verification navigation uses the shared request and private acknow
     page.getByRole("heading", { name: "Sign in", exact: true }),
   ).toBeVisible();
 });
+
+const suspensionFixture =
+  "cosmos/Primitives/Overlays/OverlaySuspensionScope.fixture.tsx";
+async function previewEvent(page, type) {
+  await page.evaluate(
+    (name) => globalThis.dispatchEvent(new Event(`preview:${name}`)),
+    type,
+  );
+}
+for (const scenario of [
+  {
+    variant: "Passkey",
+    opener: "Add passkey",
+    field: /^Name/,
+    draft: "Travel key",
+    submit: "Continue",
+    settlement: "resolve",
+    result: "Passkey added",
+  },
+  {
+    variant: "ApiKey",
+    opener: "Create key",
+    field: /^Name/,
+    draft: "Automation",
+    submit: "Create key",
+    settlement: "reject",
+    result: "preview-key",
+  },
+  {
+    variant: "Invitation",
+    opener: "Create invitation",
+    field: /^Email/,
+    draft: "alex@example.test",
+    submit: "Create invitation",
+    settlement: "resolve",
+    result: "https://example.test/invite/preview",
+  },
+]) {
+  test(`${scenario.variant} suspension releases native locks, retains drafts and ignores old settlements`, async ({
+    page,
+    fixtureUrl,
+    theme,
+  }, testInfo) => {
+    await page.goto(fixtureUrl(suspensionFixture, scenario.variant));
+    await page.bringToFront();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    const originalOverflow = await page.evaluate(
+      () => globalThis.document.documentElement.style.overflow,
+    );
+    await page
+      .getByRole("button", { name: scenario.opener, exact: true })
+      .click();
+    let dialog = page.getByRole("dialog");
+    await dialog
+      .getByRole("textbox", { name: scenario.field })
+      .fill(scenario.draft);
+    await dialog
+      .getByRole("button", { name: scenario.submit, exact: true })
+      .click();
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 1");
+    await previewEvent(page, "suspend");
+    await expect(page.locator('[data-slot="modal-backdrop"]')).toHaveCount(0);
+    await expect
+      .poll(() =>
+        page.evaluate(() => globalThis.document.documentElement.style.overflow),
+      )
+      .toBe(originalOverflow);
+    const resume = page.getByRole("button", {
+      name: "Resume same account",
+      exact: true,
+    });
+    await expect(resume).toBeVisible();
+    expect(
+      await resume.evaluate((node) => Boolean(node.closest("[inert]"))),
+    ).toBe(false);
+    await page.screenshot({ path: testInfo.outputPath("suspended.png") });
+    await resume.click();
+    dialog = page.getByRole("dialog");
+    const field = dialog.getByRole("textbox", { name: scenario.field });
+    await expect(field).toHaveValue(scenario.draft);
+    await expect(field).toBeDisabled();
+    await previewEvent(page, scenario.settlement);
+    await expect(field).toBeEnabled();
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+    await expect(field).toHaveValue(scenario.draft);
+    await dialog
+      .getByRole("button", { name: scenario.submit, exact: true })
+      .click();
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 2");
+    await previewEvent(page, "reject");
+    const toast = page.locator('[data-slot="toast"]');
+    await expect(toast).toHaveCount(1);
+    await expect(toast).toContainText("Request rejected");
+    await expect(field).toHaveValue(scenario.draft);
+    await toast.locator('[data-slot="toast-close"]').click();
+    await expect(toast).toHaveCount(0);
+    await dialog
+      .getByRole("button", { name: scenario.submit, exact: true })
+      .click();
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 3");
+    await previewEvent(page, "resolve");
+    if (scenario.variant === "Passkey") {
+      await expect(dialog).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Add passkey", exact: true }),
+      ).toBeFocused();
+      await expect(page.locator('[data-slot="toast"]')).toHaveCount(1);
+      await expect(page.locator('[data-slot="toast"]')).toContainText(
+        scenario.result,
+      );
+    } else {
+      await expect(dialog).toContainText(scenario.result);
+      await expect(
+        dialog.getByRole("button", { name: "Done", exact: true }),
+      ).toBeFocused();
+    }
+    await page.screenshot({ path: testInfo.outputPath("resumed-result.png") });
+  });
+}
+for (const settlement of ["resolve", "reject"]) {
+  test(`a new account ignores the old passkey ${settlement} without restoring its draft`, async ({
+    page,
+    fixtureUrl,
+  }) => {
+    await page.goto(fixtureUrl(suspensionFixture, "Passkey"));
+    await page
+      .getByRole("button", { name: "Add passkey", exact: true })
+      .click();
+    await page.getByRole("textbox", { name: /^Name/ }).fill("Old account key");
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await previewEvent(page, "suspend");
+    await page
+      .getByRole("button", { name: "Switch account", exact: true })
+      .click();
+    await previewEvent(page, settlement);
+    await page
+      .getByRole("button", { name: "Add passkey", exact: true })
+      .click();
+    await expect(page.getByRole("textbox", { name: /^Name/ })).toHaveValue("");
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+  });
+}
+for (const scenario of [
+  { variant: "Modal", opener: "Open overlay", role: "dialog" },
+  {
+    variant: "AlertDialog",
+    opener: "Open overlay",
+    role: "alertdialog",
+    dismissal: "keyboard",
+  },
+  {
+    variant: "AlertDialog",
+    opener: "Open overlay",
+    role: "alertdialog",
+    dismissal: "pointer",
+  },
+  { variant: "Dropdown", opener: "Open dropdown", role: "menu" },
+  { variant: "Popover", opener: "Open popover", role: "dialog" },
+  { variant: "Confirmation", opener: "Revoke access", role: "dialog" },
+]) {
+  test(`${scenario.variant}${scenario.dismissal ? ` ${scenario.dismissal}` : ""} suspension preserves logical open state and releases the native portal`, async ({
+    page,
+    fixtureUrl,
+  }) => {
+    await page.goto(fixtureUrl(suspensionFixture, scenario.variant));
+    await page.bringToFront();
+    const originalOverflow = await page.evaluate(
+      () => globalThis.document.documentElement.style.overflow,
+    );
+    await page
+      .getByRole("button", { name: scenario.opener, exact: true })
+      .click();
+    await expect(page.getByRole(scenario.role)).toBeVisible();
+    if (["Modal", "AlertDialog"].includes(scenario.variant)) {
+      await page
+        .getByRole("textbox", { name: "Name", exact: true })
+        .fill("Retained draft");
+      await expect(page.getByTestId("logical-open")).toHaveText("Open: true");
+    }
+    await previewEvent(page, "suspend");
+    await expect(page.getByRole(scenario.role)).toHaveCount(0);
+    await expect
+      .poll(() =>
+        page.evaluate(() => globalThis.document.documentElement.style.overflow),
+      )
+      .toBe(originalOverflow);
+    await page
+      .getByRole("button", { name: "Resume same account", exact: true })
+      .click();
+    await expect(page.getByRole(scenario.role)).toBeVisible();
+    if (["Modal", "AlertDialog"].includes(scenario.variant)) {
+      await expect(
+        page.getByRole("textbox", { name: "Name", exact: true }),
+      ).toHaveValue("Retained draft");
+      await expect(page.getByTestId("logical-open")).toHaveText("Open: true");
+      await page.keyboard.press("Escape");
+      if (scenario.variant === "AlertDialog") {
+        await expect(page.getByRole(scenario.role)).toBeVisible();
+        const close = page.getByRole("button", { name: "Close", exact: true });
+        if (scenario.dismissal === "pointer") await close.click();
+        else {
+          await close.focus();
+          await page.keyboard.press("Enter");
+        }
+      }
+      await expect(page.getByRole(scenario.role)).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: scenario.opener, exact: true }),
+      ).toBeFocused();
+    }
+  });
+}
+
+for (const variant of ["AlertRerender", "AlertDestination"]) {
+  test(`${variant} close recovery respects committed rerenders and deliberate destination focus`, async ({
+    page,
+    fixtureUrl,
+  }) => {
+    await page.goto(fixtureUrl(suspensionFixture, variant));
+    await page.bringToFront();
+    await page
+      .getByRole("button", { name: "Open overlay", exact: true })
+      .click();
+    await expect(page.getByRole("alertdialog")).toBeVisible();
+    await previewEvent(page, "suspend");
+    await page
+      .getByRole("button", { name: "Resume same account", exact: true })
+      .click();
+    await expect(page.getByRole("alertdialog")).toBeVisible();
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(page.getByRole("alertdialog")).toHaveCount(0);
+    if (variant === "AlertRerender")
+      await expect(page.getByTestId("revision")).toHaveText("Revision: 1");
+    await expect(
+      page.getByRole("button", {
+        name:
+          variant === "AlertDestination" ? "Destination focus" : "Open overlay",
+        exact: true,
+      }),
+    ).toBeFocused();
+  });
+}
+for (const name of ["Date format", "Time format", "Time zone"]) {
+  test(`retained preferences ${name.toLowerCase()} releases its native picker during suspension`, async ({
+    page,
+    fixtureUrl,
+  }) => {
+    await page.goto(fixtureUrl(suspensionFixture, "Preferences"));
+    await page.bringToFront();
+    const opener = page.getByRole("button", { name: new RegExp(name) });
+    await opener.click();
+    await expect(page.getByRole("listbox")).toBeVisible();
+    await previewEvent(page, "suspend");
+    await expect(page.getByRole("listbox")).toHaveCount(0);
+    await expect(page.locator('[data-slot="select-popover"]')).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Resume same account", exact: true })
+      .click();
+    await expect(page.getByRole("listbox")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("listbox")).toHaveCount(0);
+    await expect(opener).toBeFocused();
+  });
+}
+
+for (const variant of ["PasskeyRename", "PasskeyRecovery"]) {
+  test(`${variant} returns to its live management opener after a suspended fresh request`, async ({
+    page,
+    fixtureUrl,
+  }) => {
+    await page.goto(fixtureUrl(suspensionFixture, variant));
+    await page.bringToFront();
+    const opener = page.getByRole("button", {
+      name: variant === "PasskeyRename" ? "Rename" : "Add passkey",
+      exact: true,
+    });
+    await opener.click();
+    await page.getByRole("textbox", { name: /^Name/ }).fill("Travel key");
+    const submit = page.getByRole("button", {
+      name: variant === "PasskeyRename" ? "Update" : "Continue",
+      exact: true,
+    });
+    await submit.click();
+    await previewEvent(page, "suspend");
+    await page
+      .getByRole("button", { name: "Resume same account", exact: true })
+      .click();
+    await previewEvent(page, "reject");
+    await expect(page.getByRole("textbox", { name: /^Name/ })).toHaveValue(
+      "Travel key",
+    );
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+    await submit.click();
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 2");
+    await previewEvent(page, "resolve");
+    if (variant === "PasskeyRecovery") {
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toContainText("Save recovery codes");
+      await expect(dialog).toContainText("demo-0001-preview");
+      await expect(page.locator('[data-slot="toast"]')).toHaveCount(1);
+      await page
+        .locator('[data-slot="toast"]')
+        .getByRole("button", { name: "Close", exact: true })
+        .click();
+      await dialog
+        .getByRole("button", { name: "Continue", exact: true })
+        .click();
+    } else
+      await expect(
+        page.getByRole("row").filter({ hasText: "Travel key" }),
+      ).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(opener).toBeFocused();
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(
+      variant === "PasskeyRecovery" ? 0 : 1,
+    );
+  });
+}

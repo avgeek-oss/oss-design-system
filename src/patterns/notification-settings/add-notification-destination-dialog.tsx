@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { Modal } from "../../overlays/modal.js";
 import { AuthForm, type AuthField } from "../auth/auth-form.js";
+import { useFormDraft } from "../use-form-draft.js";
+import { useAsyncAction } from "../use-async-action.js";
 
 export type AddNotificationDestinationDialogProps = {
   isOpen: boolean;
@@ -23,10 +24,11 @@ function DestinationContent({
   fields,
   onAdd,
 }: Omit<AddNotificationDestinationDialogProps, "isOpen">) {
-  const pending = useRef(false);
-  const [busy, setBusy] = useState(false);
+  const draftFields = useFormDraft(fields);
+  const action = useAsyncAction();
+  const busy = action.isPending;
   const changeOpen = (open: boolean) => {
-    if (!pending.current) onOpenChange(open);
+    if (!busy) onOpenChange(open);
   };
   return (
     <Modal.Backdrop isOpen onOpenChange={changeOpen}>
@@ -38,20 +40,17 @@ function DestinationContent({
           </Modal.Header>
           <Modal.Body>
             <AuthForm
+              isPending={busy}
               variant="secondary"
-              fields={fields}
+              fields={draftFields.map((field) => ({
+                ...field,
+                disabled: field.disabled || busy,
+              }))}
               submitLabel="Add destination"
               onCancel={() => changeOpen(false)}
               onSubmit={async (values) => {
-                pending.current = true;
-                setBusy(true);
-                try {
-                  await onAdd(values);
-                  onOpenChange(false);
-                } finally {
-                  pending.current = false;
-                  setBusy(false);
-                }
+                const result = await action.run(() => onAdd(values));
+                if (result.ok) onOpenChange(false);
               }}
             />
           </Modal.Body>

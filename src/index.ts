@@ -15,6 +15,11 @@ export { Page, PageSection } from "./layouts/page.js";
 export { RouteProvider } from "./hooks/route-context.js";
 export { Providers, useTheme } from "./utilities/providers.js";
 export {
+  OverlaySuspensionScope,
+  useOverlaySuspension,
+  type OverlaySuspensionScopeProps,
+} from "./overlays/overlay-suspension.js";
+export {
   TypographyHeading,
   TypographyParagraph,
   TypographyText,

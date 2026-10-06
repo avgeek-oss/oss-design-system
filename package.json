@@ -672,6 +672,10 @@
     "./patterns/auth/verification-email": {
       "types": "./dist/patterns/auth/verification-email.d.ts",
       "import": "./dist/patterns/auth/verification-email.js"
+    },
+    "./overlays/overlay-suspension": {
+      "types": "./dist/overlays/overlay-suspension.d.ts",
+      "import": "./dist/overlays/overlay-suspension.js"
     }
   }
 }

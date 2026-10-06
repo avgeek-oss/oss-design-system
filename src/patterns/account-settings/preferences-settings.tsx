@@ -5,6 +5,7 @@ import { Widget } from "../../data-display/widget.js";
 import { Button } from "../../buttons/button.js";
 import { FieldDescription } from "../../forms/field.js";
 import { toast } from "../../overlays/toast.js";
+import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 import {
   DateTimePreferenceFields,
   type DateTimePreferenceOptions,
@@ -27,6 +28,7 @@ export function PreferencesSettings({
   const [draft, setDraft] = useState(value);
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
+  const suspension = useOverlaySuspension();
   const changed =
     draft.dateFormat !== value.dateFormat ||
     draft.timeFormat !== value.timeFormat ||
@@ -42,17 +44,19 @@ export function PreferencesSettings({
           onSubmit={async (event) => {
             event.preventDefault();
             if (pending.current || !changed) return;
+            const isCurrent = suspension.capture();
             pending.current = true;
             setBusy(true);
             try {
               await onSave(draft);
-              toast.success("Preferences updated");
+              if (isCurrent()) toast.success("Preferences updated");
             } catch (cause) {
-              toast.danger(
-                cause instanceof Error
-                  ? cause.message
-                  : "Could not save preferences. Try again.",
-              );
+              if (isCurrent())
+                toast.danger(
+                  cause instanceof Error
+                    ? cause.message
+                    : "Could not save preferences. Try again.",
+                );
             } finally {
               pending.current = false;
               setBusy(false);

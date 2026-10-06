@@ -7,6 +7,8 @@ import { CodeBlock } from "../../typography/code-block.js";
 import { FieldDescription } from "../../forms/field.js";
 import { AuthForm, type AuthField } from "../auth/auth-form.js";
 import { ChoiceField, type ChoiceOption } from "../choice-field.js";
+import { useFormDraft } from "../use-form-draft.js";
+import { useAsyncAction } from "../use-async-action.js";
 
 export type MemberFormDialogProps = {
   isOpen: boolean;
@@ -48,10 +50,11 @@ function MemberFormContent({
   useEffect(() => {
     if (inviteUrl) doneRef.current?.focus();
   }, [inviteUrl]);
-  const [busy, setBusy] = useState(false);
-  const lock = useRef(false);
+  const draftFields = useFormDraft(fields);
+  const action = useAsyncAction();
+  const busy = action.isPending;
   const changeOpen = (open: boolean) => {
-    if (!lock.current) onOpenChange(open);
+    if (!busy) onOpenChange(open);
   };
   return (
     <Modal.Backdrop isOpen onOpenChange={changeOpen}>
@@ -88,22 +91,23 @@ function MemberFormContent({
               </div>
             ) : (
               <AuthForm
+                isPending={busy}
                 variant="secondary"
-                fields={fields}
+                fields={draftFields.map((field) => ({
+                  ...field,
+                  disabled: field.disabled || busy,
+                }))}
                 submitLabel={submitLabel}
                 onCancel={() => changeOpen(false)}
                 onSubmit={async (values) => {
-                  if (!roles.some((item) => item.id === role))
-                    throw new Error("Choose a role");
-                  lock.current = true;
-                  setBusy(true);
-                  try {
-                    const result = await onSubmit(values, role);
-                    if (result) setInviteUrl(result.inviteUrl);
+                  const result = await action.run(() => {
+                    if (!roles.some((item) => item.id === role))
+                      throw new Error("Choose a role");
+                    return onSubmit(values, role);
+                  });
+                  if (result.ok) {
+                    if (result.value) setInviteUrl(result.value.inviteUrl);
                     else onOpenChange(false);
-                  } finally {
-                    lock.current = false;
-                    setBusy(false);
                   }
                 }}
               >
