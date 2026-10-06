@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Keep initial query loading announcements visually hidden by default, matching Towbar without removing the accessible live status.
+
 ## 1.2.0 — 2026-10-06
 
 - Support real secondary navigation links alongside action buttons, preserving native menu density, router integration, modified clicks, and mobile dismissal.
