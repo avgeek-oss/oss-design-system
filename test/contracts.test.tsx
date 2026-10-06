@@ -83,13 +83,17 @@ test("role validation stays scoped to each app", () => {
 test("structured data cannot close its script element and preserves its values", () => {
   const data = {
     name: '</script><script>alert("untrusted")</script>',
+    alternate: '</ScRiPt ><SCRIPT>alert("untrusted")</SCRIPT>',
     comparison: "a < b",
   };
   const markup = renderToStaticMarkup(
     <Page structuredData={data}>Content</Page>,
   );
-  assert.equal([...markup.matchAll(/<script\b/g)].length, 1);
-  const content = markup.match(/<script[^>]*>(.*?)<\/script>/)?.[1];
+  const scripts = markup.split('<script type="application/ld+json">');
+  assert.equal(scripts.length, 2);
+  const closing = scripts[1]?.split("</script>");
+  assert.equal(closing?.length, 2);
+  const content = closing?.[0];
   assert.ok(content);
   assert.doesNotMatch(content, /</);
   assert.deepEqual(JSON.parse(content), data);
