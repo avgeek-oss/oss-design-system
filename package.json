@@ -39,13 +39,14 @@
     "cosmos": "cosmos",
     "cosmos:export": "cosmos-export",
     "prepack": "pnpm build",
-    "verify": "pnpm format:check && pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm cosmos:export && pnpm verify:package",
+    "verify": "pnpm format:check && pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm cosmos:export && pnpm test:navigation-browser && pnpm verify:package",
     "lint": "eslint src cosmos studio test scripts *.mjs vite.config.ts --max-warnings 0 && pnpm lint:styles",
     "lint:styles": "stylelint \"src/**/*.css\"",
     "verify:package": "node scripts/verify-package.mjs",
     "prepublishOnly": "pnpm verify",
     "check:docs": "node scripts/check-docs.mjs",
-    "test:published": "node scripts/verify-package.mjs --published"
+    "test:published": "node scripts/verify-package.mjs --published",
+    "test:navigation-browser": "node scripts/test-navigation-browser.mjs"
   },
   "peerDependencies": {
     "next": "^16.0.0",
@@ -79,6 +80,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "4.3.3",
     "@types/css.escape": "^1.5.2",
     "@types/jsdom": "^30.0.0",

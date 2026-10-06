@@ -28,6 +28,7 @@ jobs:
           node scripts/check-release.mjs
           git merge-base --is-ancestor HEAD origin/main
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm verify
       - name: Check npm tarball publication without uploading
         run: npm publish ./artifacts/avgeek-oss-design-system-*.tgz --dry-run --ignore-scripts --registry=https://npm.pkg.github.com

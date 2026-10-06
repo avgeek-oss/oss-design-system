@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Support real secondary navigation links alongside action buttons, preserving native menu density, router integration, modified clicks, and mobile dismissal.
+- Expose matching internal primary navigation links as the current page, with the same section boundaries and preserved child routes as visual selection.
+- Await app-owned notification activation with duplicate request protection, toast-only failures, pending announcements, and retry/pagination composition slots. Use “Mark all as read” for the default header action.
+
 ## 1.1.0 — 2026-10-06
 
 - Restore full-width section dividers in the sidebar account menu while retaining padded labels and actions.

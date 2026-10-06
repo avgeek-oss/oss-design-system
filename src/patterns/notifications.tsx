@@ -1,5 +1,11 @@
 "use client";
-import { useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Notification02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "../buttons/button.js";
@@ -7,6 +13,7 @@ import { Widget } from "../data-display/widget.js";
 import { Popover } from "../overlays/popover.js";
 import { ScrollShadow } from "../utilities/scroll-shadow.js";
 import { RouteLink } from "../navigation/route-link.js";
+import { useAsyncAction } from "./use-async-action.js";
 
 export type NotificationItem = {
   id: string;
@@ -30,6 +37,9 @@ export interface NotificationMenuProps {
   headerEnd?: ReactNode;
   onMarkAllRead?: () => void;
   markingRead?: boolean;
+  onActivate?: (item: NotificationItem) => void | Promise<void>;
+  emptyContent?: ReactNode;
+  footer?: ReactNode;
 }
 
 export function NotificationMenu({
@@ -42,10 +52,28 @@ export function NotificationMenu({
   defaultIsOpen = false,
   onOpenChange,
   headerEnd,
+  onActivate,
+  emptyContent,
+  footer,
 }: NotificationMenuProps) {
   const [internalOpen, setInternalOpen] = useState(defaultIsOpen);
+  const activation = useAsyncAction("Could not open the notification");
+  const [activeId, setActiveId] = useState<string>();
+  const openGeneration = useRef(0);
+  const observedOpen = useRef(false);
+  const invalidateOpenSession = useCallback(() => {
+    openGeneration.current++;
+  }, []);
   const open = isOpen ?? internalOpen;
+  useEffect(() => {
+    if (observedOpen.current !== open) {
+      observedOpen.current = open;
+      invalidateOpenSession();
+    }
+    return invalidateOpenSession;
+  }, [open, invalidateOpenSession]);
   const setOpen = (nextOpen: boolean) => {
+    invalidateOpenSession();
     if (isOpen === undefined) setInternalOpen(nextOpen);
     onOpenChange?.(nextOpen);
   };
@@ -88,7 +116,7 @@ export function NotificationMenu({
                     isDisabled={!unreadCount || markingRead}
                     onPress={onMarkAllRead}
                   >
-                    {markingRead ? "Marking read…" : "Mark all read"}
+                    {markingRead ? "Marking read…" : "Mark all as read"}
                   </Widget.Action>
                 ) : null)
               }
@@ -107,16 +135,49 @@ export function NotificationMenu({
                     Loading notifications…
                   </p>
                 ) : !items.length ? (
-                  <p className="px-4 py-6 text-center text-sm text-muted">
-                    No notifications yet
-                  </p>
+                  (emptyContent ?? (
+                    <p className="px-4 py-6 text-center text-sm text-muted">
+                      No notifications yet
+                    </p>
+                  ))
                 ) : (
-                  <ul className="w-full divide-y divide-separator [&>li:first-child>a]:rounded-t-xl [&>li:last-child>a]:rounded-b-xl">
+                  <ul
+                    aria-busy={activation.isPending}
+                    className="w-full divide-y divide-separator [&>li:first-child>a]:rounded-t-xl [&>li:last-child>a]:rounded-b-xl"
+                  >
                     {items.map((item) => (
                       <li key={item.id}>
                         <RouteLink
                           href={item.href}
-                          onClick={() => setOpen(false)}
+                          aria-busy={
+                            activation.isPending && activeId === item.id
+                          }
+                          onClick={async (event) => {
+                            if (
+                              event.defaultPrevented ||
+                              event.button !== 0 ||
+                              event.metaKey ||
+                              event.ctrlKey ||
+                              event.altKey ||
+                              event.shiftKey
+                            )
+                              return;
+                            if (!onActivate) {
+                              setOpen(false);
+                              return;
+                            }
+                            event.preventDefault();
+                            const generation = openGeneration.current;
+                            const result = await activation.run(async () => {
+                              setActiveId(item.id);
+                              await onActivate(item);
+                            });
+                            if (
+                              result.ok &&
+                              generation === openGeneration.current
+                            )
+                              setOpen(false);
+                          }}
                           className="flex w-full min-w-0 gap-3 rounded-none px-4 py-3 outline-none transition-colors hover:bg-default/60 focus-visible:bg-default/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
                         >
                           <span
@@ -160,7 +221,13 @@ export function NotificationMenu({
                   </ul>
                 )}
               </ScrollShadow>
+              {activation.isPending ? (
+                <p role="status" className="sr-only">
+                  Opening notification…
+                </p>
+              ) : null}
             </Widget.Content>
+            {footer ? <Widget.Footer>{footer}</Widget.Footer> : null}
           </Widget>
         </Popover.Dialog>
       </Popover.Content>
