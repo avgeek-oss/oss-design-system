@@ -2,7 +2,7 @@
 
 ## 1.2.2 — 2026-10-07
 
-- Add the public VerificationEmail flow and optional sign-in verification-email action, with neutral account copy and pending navigation guards.
+- Add the public VerificationEmail flow and optional sign-in verification-email action, with neutral account copy, supported recovery actions, pending navigation guards and password clearing after completed sign-in attempts.
 
 - Keep notification trigger geometry steady during pointer, touch and keyboard presses while retaining native popover interaction and other button behavior.
 

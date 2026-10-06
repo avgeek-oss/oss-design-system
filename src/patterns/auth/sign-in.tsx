@@ -14,7 +14,7 @@ export type SignInProps = {
   defaultEmail?: string;
   isPending?: boolean;
   onSubmit: ComponentProps<typeof IdentityCredentialsForm>["onSubmit"];
-  onForgotPassword: () => void;
+  onForgotPassword?: () => void;
   onResendVerification?: () => void;
   onPasskeySignIn?: () => void;
 };
@@ -43,9 +43,11 @@ export function SignIn({
         defaultIdentifier={defaultEmail}
         submitIcon={<HugeiconsIcon aria-hidden icon={Login01Icon} size={16} />}
         passwordAction={
-          <AuthAction disabled={pending} onClick={onForgotPassword}>
-            Forgot password?
-          </AuthAction>
+          onForgotPassword ? (
+            <AuthAction disabled={pending} onClick={onForgotPassword}>
+              Forgot password?
+            </AuthAction>
+          ) : undefined
         }
         onSubmit={async (credentials) => {
           setSubmitting(true);

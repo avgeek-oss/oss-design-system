@@ -603,6 +603,10 @@ test("external sign-in pending blocks all submit paths and preserves the credent
     );
     await submit();
     assert.equal(calls, 1);
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="password"]')?.value,
+      "",
+    );
   } finally {
     await view.unmount();
   }
@@ -1436,8 +1440,38 @@ test("sign-in blocks verification navigation during its own request and allows r
     assert.equal(navigations, 0);
     await act(async () => pending.resolve());
     assertFailureToast("Sign-in failed");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="password"]')?.value,
+      "",
+    );
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="identifier"]')
+        ?.value,
+      "alex@example.test",
+    );
+    await fill("password", "another password");
+    await act(async () => window.dispatchEvent(new Event("pagehide")));
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="password"]')?.value,
+      "",
+    );
     await click(button("Need a new verification email?"));
     assert.equal(navigations, 1);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("sign-in omits actions whose capabilities are unavailable", async () => {
+  const view = await mount(
+    <SignIn brand="Example" onSubmit={async () => {}} />,
+  );
+  try {
+    assert.doesNotMatch(
+      document.body.textContent ?? "",
+      /Forgot password|Need a new verification email|Sign in with Passkey/,
+    );
+    assert.match(document.body.textContent ?? "", /Sign in to your account/);
   } finally {
     await view.unmount();
   }

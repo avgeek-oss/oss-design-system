@@ -1,5 +1,26 @@
 import { test, expect } from "./fixtures.mjs";
 
+test("sign-in clears completed passwords and cached-page credentials while retaining email", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", "Credential retry"),
+  );
+  const email = page.getByRole("textbox", { name: /^Email/ });
+  const password = page.getByLabel("Password", { exact: true });
+  await email.fill("alex@example.test");
+  await password.fill("preview password");
+  await password.press("Enter");
+  await expect(page.locator('[data-slot="toast"]')).toHaveCount(1);
+  await expect(password).toHaveValue("");
+  await expect(email).toHaveValue("alex@example.test");
+  await password.fill("another password");
+  await page.evaluate(() => globalThis.dispatchEvent(new Event("pagehide")));
+  await expect(password).toHaveValue("");
+  await expect(email).toHaveValue("alex@example.test");
+});
+
 for (const variant of ["Name validation", "Permission name validation"]) {
   test(`API key ${variant.toLowerCase()} keeps invalid drafts and allows one trimmed submission`, async ({
     page,
