@@ -11,7 +11,10 @@ import {
   invitationSchema,
 } from "../src/patterns/settings/schemas.js";
 
-test("app-specific name limits are preserved and invitations reject unexpected fields", () => {
+test("common name limits, explicit domain limits and strict invitation fields are preserved", () => {
+  assert.equal(createNameSchema().safeParse("x".repeat(120)).success, true);
+  assert.equal(createNameSchema().safeParse("x".repeat(121)).success, false);
+  assert.equal(createNameSchema().safeParse("   ").success, false);
   assert.equal(createNameSchema(100).safeParse("x".repeat(101)).success, false);
   assert.equal(createNameSchema(120).safeParse("x".repeat(101)).success, true);
   assert.equal(
@@ -63,7 +66,7 @@ test("the shared runtime has no Next.js or application package dependency", asyn
   await check("src");
 });
 
-test("role validation stays scoped to each app", () => {
+test("distinct domain role validation does not broaden common team roles", () => {
   const domainRoles = createInvitationSchema(["owner", "contributor"]);
   assert.equal(
     domainRoles.safeParse({ email: "alex@example.test", role: "contributor" })

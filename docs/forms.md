@@ -57,6 +57,8 @@ Mount one `Toast.Provider` for the application, including public auth routes. Us
 
 The shared provider retains HeroUI's props and native rendering. It restores the connected control that preceded toast focus when the final toast exits and native focus was stranded on the document body. It does not move focus away from a control the user has since chosen, into an inert surface, or into a background browser tab. This keeps an initiating modal usable after pointer or keyboard toast dismissal.
 
+Common identity and team names are trimmed, non-empty and limited to 120 characters; email addresses allow up to 320, and new passwords use 15–1024 characters. Keep API and database constraints aligned with these UI limits.
+
 Use the standard Admin/Member/Viewer roles for common team settings. Apps enforce the permissions behind those roles; rendering a role label does not grant access. `createInvitationSchema` can validate a distinct domain-specific role set when a separate feature requires it.
 
 ## Notifications and charts
