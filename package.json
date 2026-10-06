@@ -664,6 +664,10 @@
     "./patterns/team-settings/revoke-invitation-dialog": {
       "types": "./dist/patterns/team-settings/revoke-invitation-dialog.d.ts",
       "import": "./dist/patterns/team-settings/revoke-invitation-dialog.js"
+    },
+    "./patterns/team-settings/team-general-settings": {
+      "types": "./dist/patterns/team-settings/team-general-settings.d.ts",
+      "import": "./dist/patterns/team-settings/team-general-settings.js"
     }
   }
 }

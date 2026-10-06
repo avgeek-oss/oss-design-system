@@ -91,3 +91,5 @@ Use `PasskeyRecoveryVerification` after the password has already passed and the 
 `ConfirmIdentityDialog` with `method="passkey"` accepts optional `onCancelRequest`. When supplied, Cancel stays enabled during the ceremony, invokes cancellation, then requests dismissal. The app must abort WebAuthn before dismissal, handle deliberate cancellation without an error toast, and avoid supplying this callback during an irreversible mutation. Other pending confirmations remain protected from dismissal.
 
 Use `RemoveMemberDialog` and `RevokeInvitationDialog` for the standard team confirmations. Apps enforce permissions and last-administrator protections, supply identity/email and await the real mutation. Rejection retains the dialog for retry with one toast. These surfaces describe access removal without promising deletion of historical work.
+
+Use `TeamGeneralSettings` for general team identity. Supply the saved name and callback; set `mode="details"` only when the server supports a description. Apps retain name limits, permissions, persistence and identity refresh. Do not show unsupported fields.

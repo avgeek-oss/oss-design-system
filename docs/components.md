@@ -138,3 +138,5 @@ Additional shared account, invitation and passkey surfaces:
 | `PasskeyRecoveryVerification` | [PasskeyRecoveryVerification](../src/patterns/auth/passkey-recovery-verification.tsx) | Code-only completion of a password sign-in already gated on passkeys.                                                                                |
 | `RemoveMemberDialog`          | [RemoveMemberDialog](../src/patterns/team-settings/remove-member-dialog.tsx)          | Shared removal copy and awaited access removal.                                                                                                      |
 | `RevokeInvitationDialog`      | [RevokeInvitationDialog](../src/patterns/team-settings/revoke-invitation-dialog.tsx)  | Shared invitation revocation copy and awaited mutation.                                                                                              |
+
+`TeamGeneralSettings` ([source](../src/patterns/team-settings/team-general-settings.tsx)) owns the Team details widget and Team name copy. The default mode saves a name; `mode="details"` saves name and description together for apps that support a team description.

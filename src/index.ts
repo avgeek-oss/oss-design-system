@@ -283,3 +283,8 @@ export {
   RevokeInvitationDialog,
   type RevokeInvitationDialogProps,
 } from "./patterns/team-settings/revoke-invitation-dialog.js";
+
+export {
+  TeamGeneralSettings,
+  type TeamGeneralSettingsProps,
+} from "./patterns/team-settings/team-general-settings.js";

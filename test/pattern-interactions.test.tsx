@@ -25,6 +25,7 @@ import { PasskeyVerification } from "../src/patterns/auth/passkey-verification.j
 import { ConfirmIdentityDialog } from "../src/patterns/auth/confirm-identity-dialog.js";
 import { PasskeySettings } from "../src/patterns/account-settings/passkey-settings.js";
 import { MemberEditDialog } from "../src/patterns/team-settings/member-edit-dialog.js";
+import { TeamGeneralSettings } from "../src/patterns/team-settings/team-general-settings.js";
 import { MembersTable } from "../src/patterns/team-settings/members-table.js";
 import { InvitationsTable } from "../src/patterns/team-settings/invitations-table.js";
 import { CodeBlock } from "../src/typography/code-block.js";
@@ -1191,6 +1192,52 @@ test("passkey recovery completes an existing sign-in without collecting credenti
       "preview-once-code",
     );
     assert.equal(button("Sign in").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("team details retain both drafts after a failed save and lock description while pending", async () => {
+  let rejectSave: (error: Error) => void = () => {};
+  let attempts = 0;
+  const view = await mount(
+    <TeamGeneralSettings
+      mode="details"
+      value={{ name: "Example", description: "Original" }}
+      onSave={async (values) => {
+        attempts++;
+        assert.deepEqual(values, {
+          name: "Updated team",
+          description: "Original",
+        });
+        await new Promise<void>((_, reject) => {
+          rejectSave = reject;
+        });
+      }}
+    />,
+  );
+  try {
+    await fill("name", "  Updated team  ");
+    await submit();
+    assert.equal(attempts, 1);
+    assert.equal(
+      document.querySelector<HTMLTextAreaElement>("textarea")?.disabled,
+      true,
+    );
+    await act(async () => rejectSave(new Error("Team update failed")));
+    assertFailureToast("Team update failed");
+    assert.equal(
+      document.querySelector<HTMLTextAreaElement>("textarea")?.disabled,
+      false,
+    );
+    assert.equal(
+      document.querySelector<HTMLTextAreaElement>("textarea")?.value,
+      "Original",
+    );
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="name"]')?.value,
+      "  Updated team  ",
+    );
   } finally {
     await view.unmount();
   }
