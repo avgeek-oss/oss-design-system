@@ -3,6 +3,7 @@
 ## 1.2.2 — 2026-10-07
 
 - Keep auth form values out of URLs by using POST for native submissions before JavaScript handles the form.
+- Allow notification activation to return `false` without dismissing the menu or reporting a failure.
 
 - Lock recovery-code copying during clipboard writes, with one toast outcome and retry after failure.
 

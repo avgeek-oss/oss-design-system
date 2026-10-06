@@ -38,7 +38,7 @@ export interface NotificationMenuProps {
   headerEnd?: ReactNode;
   onMarkAllRead?: () => void;
   markingRead?: boolean;
-  onActivate?: (item: NotificationItem) => void | Promise<void>;
+  onActivate?: (item: NotificationItem) => void | false | Promise<void | false>;
   emptyContent?: ReactNode;
   footer?: ReactNode;
   dialogRef?: Ref<HTMLDivElement>;
@@ -173,10 +173,11 @@ export function NotificationMenu({
                             const generation = openGeneration.current;
                             const result = await activation.run(async () => {
                               setActiveId(item.id);
-                              await onActivate(item);
+                              return onActivate(item);
                             });
                             if (
                               result.ok &&
+                              result.value !== false &&
                               generation === openGeneration.current
                             )
                               setOpen(false);
