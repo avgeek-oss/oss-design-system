@@ -92,3 +92,5 @@ Auth screens are exported from their own files, rather than implemented inside C
 ## Pending forms across overlay suspension
 
 `AuthForm.isPending` accepts owner-level pending state when a suspended native portal remounts while its request is still settling. It combines with the form’s own submit lock, disables fields and actions, and prevents a repeat callback. Keep that state above the portal; clear it when the app cancels or settles the request. A current rejected attempt still shows one danger toast. Shared actions and clipboard controls suppress late feedback from an attempt invalidated by `OverlaySuspensionScope` or owner unmount; suspension does not undo server mutations or a completed clipboard write.
+
+`ProfileSettings` and other uses of `NameSettingsForm` retain their name draft and pending lock through a suspended save. Feedback from that invalidated attempt is suppressed after resume or owner unmount; settlement releases only its own request lock. Current failed saves show one danger toast per attempt and remain retryable. Apps still own committed values, cancellation and keyed unmount on account change.
