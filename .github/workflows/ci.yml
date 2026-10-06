@@ -29,6 +29,8 @@ jobs:
           git merge-base --is-ancestor HEAD origin/main
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      - name: Check npm tarball publication without uploading
+        run: npm publish ./artifacts/avgeek-oss-design-system-*.tgz --dry-run --ignore-scripts --registry=https://npm.pkg.github.com
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: cosmos-and-package
@@ -60,7 +62,7 @@ jobs:
       - name: Check verified package integrity
         run: node scripts/check-release.mjs --candidate
       - name: Publish verified tarball
-        run: npm publish "artifacts/avgeek-oss-design-system-${GITHUB_REF_NAME#v}.tgz" --ignore-scripts --registry=https://npm.pkg.github.com
+        run: npm publish "./artifacts/avgeek-oss-design-system-${GITHUB_REF_NAME#v}.tgz" --ignore-scripts --registry=https://npm.pkg.github.com
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Verify registry package and fresh consumers
