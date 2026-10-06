@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,7 +10,6 @@ import { Field, FieldError, FieldGroup } from "../../forms/field.js";
 import { Input } from "../../forms/input.js";
 import { PasswordInput } from "../../forms/password-input.js";
 import { Label } from "../../forms/label.js";
-import { Alert } from "../../feedback/alert.js";
 import { toast } from "../../overlays/toast.js";
 import type { ComponentRootProps } from "../../lib/component-root-props.js";
 import { cn } from "../../lib/utils.js";
@@ -28,6 +27,7 @@ type IdentityCredentialsFormOwnProps = {
   children?: never;
   defaultIdentifier?: string;
   disabled?: boolean;
+  /** Field validation presentation. Submission failures always use toasts. */
   errorPresentation?: "inline" | "toast";
   identifier?: string;
   identifierAutoComplete?: string;
@@ -67,7 +67,6 @@ export function IdentityCredentialsForm({
 }: IdentityCredentialsFormProps) {
   const identifierId = useId();
   const passwordId = useId();
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
@@ -97,7 +96,6 @@ export function IdentityCredentialsForm({
 
   const submit = handleSubmit(
     async (credentials) => {
-      setSubmissionError(null);
       if (
         identifierType === "email" &&
         !z.email().safeParse(credentials.identifier).success
@@ -112,8 +110,7 @@ export function IdentityCredentialsForm({
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Sign in failed";
-        if (errorPresentation === "toast") toast.danger(message);
-        else setSubmissionError(message);
+        toast.danger(message);
       }
     },
     (errors) => {
@@ -177,14 +174,6 @@ export function IdentityCredentialsForm({
           )}
         </Field>
       </FieldGroup>
-      {submissionError && (
-        <Alert status="danger">
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Description>{submissionError}</Alert.Description>
-          </Alert.Content>
-        </Alert>
-      )}
       <Button
         type="submit"
         isDisabled={disabled || isSubmitting}

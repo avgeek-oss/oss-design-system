@@ -1,7 +1,7 @@
 import "./dom-environment.js";
 import assert from "node:assert/strict";
-import test from "node:test";
-import { act, useState, type ReactNode } from "react";
+import test, { afterEach, beforeEach, mock } from "node:test";
+import { act, StrictMode, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { OperationProgress } from "../src/patterns/operations/operation-progress.js";
 import { AuthForm } from "../src/patterns/auth/auth-form.js";
@@ -13,6 +13,19 @@ import { CreateApiKeyDialog } from "../src/patterns/account-settings/create-api-
 import { InviteMemberDialog } from "../src/patterns/team-settings/invite-member-dialog.js";
 import { NotificationDestinationsSettings } from "../src/patterns/notification-settings/notification-destinations-settings.js";
 import { FilterDialog } from "../src/patterns/filters/filter-dialog.js";
+import { toast } from "../src/overlays/toast.js";
+import { IdentityCredentialsForm } from "../src/patterns/auth/identity-credentials-form.js";
+import { McpAuthorization } from "../src/patterns/auth/mcp-authorization.js";
+
+let dangerMessages: ReactNode[] = [];
+beforeEach(() => {
+  dangerMessages = [];
+  mock.method(toast, "danger", (message: ReactNode) => {
+    dangerMessages.push(message);
+    return "preview-toast";
+  });
+});
+afterEach(() => mock.restoreAll());
 
 async function mount(content: ReactNode) {
   const container = document.createElement("div");
@@ -23,11 +36,18 @@ async function mount(content: ReactNode) {
   });
   return {
     container,
+    async render(content: ReactNode) {
+      await act(async () => root.render(content));
+    },
     async unmount() {
       await act(async () => root.unmount());
       container.remove();
     },
   };
+}
+function assertFailureToast(message: string) {
+  assert.deepEqual(dangerMessages, [message]);
+  assert.doesNotMatch(document.body.textContent ?? "", new RegExp(message));
 }
 function button(label: string) {
   const found = [...document.querySelectorAll("button")].find(
@@ -98,10 +118,7 @@ test("async actions lock repeated presses, surface rejection, and allow retry", 
     await click(button("Please wait…"));
     assert.equal(calls, 1);
     await act(async () => pending.resolve());
-    assert.equal(
-      document.querySelector('[role="alert"]')?.textContent,
-      "Save failed",
-    );
+    assertFailureToast("Save failed");
     await click(button("Save"));
     assert.equal(calls, 2);
     assert.equal(document.querySelector('[role="alert"]'), null);
@@ -139,10 +156,7 @@ test("confirmation stays open during requests and after failure, then closes on 
     await click(button("Cancel"));
     assert.ok(document.querySelector('[role="dialog"]'));
     await act(async () => pending.resolve());
-    assert.equal(
-      document.querySelector('[role="alert"]')?.textContent,
-      "Removal failed",
-    );
+    assertFailureToast("Removal failed");
     assert.ok(document.querySelector('[role="dialog"]'));
     await click(button("Remove"));
     assert.equal(document.querySelector('[role="dialog"]'), null);
@@ -208,10 +222,7 @@ test("API key creation retains the name on failure and removes the revealed secr
   try {
     await fill("name", "Automation");
     await submit();
-    assert.equal(
-      document.querySelector('[role="alert"]')?.textContent,
-      "Creation failed",
-    );
+    assertFailureToast("Creation failed");
     assert.equal(
       document.querySelector<HTMLInputElement>('input[name="name"]')?.value,
       "Automation",
@@ -244,6 +255,7 @@ test("invitation link appears only after success and failed invitations retain t
   try {
     await fill("email", "sam@example.test");
     await submit();
+    assertFailureToast("Invitation failed");
     assert.doesNotMatch(document.body.textContent ?? "", /Invitation created/);
     assert.equal(
       document.querySelector<HTMLInputElement>('input[name="email"]')?.value,
@@ -290,10 +302,7 @@ test("subscription failure leaves controlled choices unchanged", async () => {
     await click(checkbox);
     assert.equal(calls, 1);
     assert.equal(checkbox.checked, false);
-    assert.equal(
-      document.querySelector('[role="alert"]')?.textContent,
-      "Subscription failed",
-    );
+    assertFailureToast("Subscription failed");
   } finally {
     await view.unmount();
   }
@@ -367,6 +376,94 @@ test("form submissions in the same frame invoke the mutation once", async () => 
     });
     assert.equal(calls, 1);
     await act(async () => pending.resolve());
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("form rejection keeps the draft and reports one toast without inline duplication", async () => {
+  const view = await mount(
+    <AuthForm
+      fields={[{ name: "name", label: "Name", required: true }]}
+      submitLabel="Save"
+      onSubmit={async () => {
+        throw new Error("Could not save your name");
+      }}
+    />,
+  );
+  try {
+    await fill("name", "Alex");
+    await submit();
+    assertFailureToast("Could not save your name");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="name"]')?.value,
+      "Alex",
+    );
+    assert.equal(button("Save").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("credential submission errors use toasts even with inline field validation", async () => {
+  const view = await mount(
+    <IdentityCredentialsForm
+      errorPresentation="inline"
+      onSubmit={async () => {
+        throw new Error("Sign in request failed");
+      }}
+    />,
+  );
+  try {
+    await fill("identifier", "alex");
+    await fill("password", "preview password");
+    await submit();
+    assertFailureToast("Sign in request failed");
+    assert.equal(button("Sign in").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("authorization reports changed submission failures once while preserving policy notices", async () => {
+  const render = (error?: string) => (
+    <StrictMode>
+      <McpAuthorization
+        brand="Avgeek"
+        productName="Example"
+        details={{
+          clientName: "Example client",
+          clientId: "example",
+          clientTrust: "metadata-document",
+          identityDescription: "The app supplied its metadata.",
+          redirectUri: "https://example.test/callback",
+          account: { email: "alex@example.test" },
+          permissionSummary: "Read services.",
+          accessDescription: "Read account services.",
+          accessLifetime: "7 days",
+          revocationDescription: "Revoke in account settings.",
+          restrictions: "Account management is excluded.",
+        }}
+        error={error}
+        approvalBlockedReason="Your role cannot grant access."
+        onAllow={() => {}}
+        onDeny={() => {}}
+      />
+    </StrictMode>
+  );
+  const view = await mount(render("Authorization failed"));
+  try {
+    assertFailureToast("Authorization failed");
+    assert.match(
+      document.body.textContent ?? "",
+      /Your role cannot grant access/,
+    );
+    await view.render(render("Authorization failed"));
+    assertFailureToast("Authorization failed");
+    dangerMessages = [];
+    await view.render(render());
+    await view.render(render("Authorization failed"));
+    assertFailureToast("Authorization failed");
   } finally {
     await view.unmount();
   }

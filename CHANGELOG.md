@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Standardize bottom-center toasts and toast-only submission failures across forms, dialogs, confirmations, and shared mutation actions. Preserve drafts and keep dialogs open for retry; inline field validation and load/policy errors remain separate.
+
 - Shared email/password settings, expanded API-key metadata, authorized clients, and save-once API-key creation.
 - Member account/security status, invitation management, and separate invite/add/edit dialogs.
 - History tables, search/filter controls, event details, and a draft-based filter builder.

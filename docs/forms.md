@@ -49,7 +49,11 @@ Do not make Cancel another primary button. Use native HeroUI variants. Chips def
 
 `AuthForm` and `NameSettingsForm` show one validation toast and focus the invalid control. Server failures keep the draft and allow retry. Disable the submit action during its request; show a busy label. Never replace the whole page with an empty loading screen when existing data is available.
 
-`IdentityCredentialsForm` defaults to toast feedback. Inline feedback remains an explicit app option, rather than a second message shown alongside a toast. The Cosmos provider places toasts at the top so they do not cover mobile modal footers; toast styling and close-control behavior follow HeroUI defaults.
+Submission failures use one danger toast, including inside modals. Keep the draft and dialog open, release the pending state, and allow retry. Do not also render an inline error or alert for the same failed submission. Load failures and persistent access restrictions remain in their owning surface.
+
+`IdentityCredentialsForm` defaults to toast feedback. Its `errorPresentation` option controls field validation only; rejected submissions always use a toast. Field validation can mark/focus the invalid control without duplicating a submission failure.
+
+Mount one `Toast.Provider` for the application, including public auth routes. Use `placement="bottom"` for bottom-center toasts; this is the native HeroUI default and the explicit placement used by AppShell and Cosmos. Toast styling, announcements, and close controls follow HeroUI defaults.
 
 Role vocabulary belongs to the app. Use `createInvitationSchema(["admin", "editor", "viewer"])` for Rootset and the existing Admin/Member/Viewer schema for Towbar or Mill. Do not broaden server permissions because the shared table supports another role label.
 

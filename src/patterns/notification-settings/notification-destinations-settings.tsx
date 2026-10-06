@@ -5,7 +5,6 @@ import { ResourceTable } from "../resource-table.js";
 import { ResourceName } from "../resource-table.js";
 import { Checkbox } from "../../forms/checkbox.js";
 import { Label } from "../../forms/label.js";
-import { FieldError } from "../../forms/field.js";
 import { AsyncActionButton } from "../actions/async-action-button.js";
 import { useAsyncAction } from "../use-async-action.js";
 import { actionColumn } from "../settings/table-actions.js";
@@ -59,7 +58,6 @@ export function NotificationDestinationsSettings<
   return (
     <div className="grid min-w-0 gap-4" aria-busy={action.isPending}>
       {toolbar}
-      {action.error ? <FieldError>{action.error}</FieldError> : null}
       <ResourceTable
         ariaLabel="Notification destinations"
         items={items}

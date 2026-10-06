@@ -2,7 +2,6 @@
 
 import { useState, type ComponentProps } from "react";
 import { Button } from "../../buttons/button.js";
-import { FieldError } from "../../forms/field.js";
 import { useAsyncAction } from "../use-async-action.js";
 import {
   ActionConfirmation,
@@ -42,7 +41,6 @@ export function AsyncActionButton({
       >
         {action.isPending ? pendingLabel : children}
       </Button>
-      {action.error ? <FieldError>{action.error}</FieldError> : null}
       {confirmation ? (
         <ActionConfirmation
           {...confirmation}

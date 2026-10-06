@@ -64,7 +64,7 @@ function Root({
       <AppShellBoundary>
         <div className={cn("min-h-dvh", className)} {...props}>
           {children}
-          {policy.toasts ? <Toast.Provider /> : null}
+          {policy.toasts ? <Toast.Provider placement="bottom" /> : null}
         </div>
       </AppShellBoundary>
     </ContentWidthContext.Provider>

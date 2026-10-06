@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Modal } from "../../overlays/modal.js";
 import { Button } from "../../buttons/button.js";
-import { Field, FieldError } from "../../forms/field.js";
+import { Field } from "../../forms/field.js";
 import { Input } from "../../forms/input.js";
 import { Label } from "../../forms/label.js";
 import { CodeBlock } from "../../typography/code-block.js";
@@ -147,7 +147,6 @@ function CreateContent({
                 {children ? (
                   <fieldset disabled={action.isPending}>{children}</fieldset>
                 ) : null}
-                {action.error ? <FieldError>{action.error}</FieldError> : null}
                 <div className="flex justify-end gap-2">
                   <Button
                     variant="secondary"

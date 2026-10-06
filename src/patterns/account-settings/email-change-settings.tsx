@@ -154,7 +154,6 @@ export function EmailChangeSettings({
                 We’ll send a confirmation link to{" "}
                 <span className="break-words font-medium">{email}</span>.
               </p>
-              {resend.error ? <FieldError>{resend.error}</FieldError> : null}
             </Modal.Body>
             <Modal.Footer>
               <Button

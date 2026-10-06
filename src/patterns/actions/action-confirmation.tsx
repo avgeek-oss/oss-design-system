@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { Modal } from "../../overlays/modal.js";
 import { Button, type ButtonVariant } from "../../buttons/button.js";
 import { useAsyncAction } from "../use-async-action.js";
-import { FieldError } from "../../forms/field.js";
 
 export type ActionConfirmationProps = {
   isOpen: boolean;
@@ -43,12 +42,7 @@ function ConfirmationContent({
             <Modal.Heading>{title}</Modal.Heading>
             <Modal.CloseTrigger isDisabled={action.isPending} />
           </Modal.Header>
-          {description || action.error ? (
-            <Modal.Body className="grid gap-3">
-              {description}
-              {action.error ? <FieldError>{action.error}</FieldError> : null}
-            </Modal.Body>
-          ) : null}
+          {description ? <Modal.Body>{description}</Modal.Body> : null}
           <Modal.Footer>
             <Button
               variant="secondary"
