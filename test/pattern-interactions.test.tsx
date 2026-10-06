@@ -966,3 +966,47 @@ test("name settings lock simultaneous submissions and retain the draft for retry
     await view.unmount();
   }
 });
+
+test("code copying locks same-frame presses until the clipboard settles and unlocks after rejection", async () => {
+  const successes: ReactNode[] = [];
+  mock.method(toast, "success", (message: ReactNode) => {
+    successes.push(message);
+    return "copied";
+  });
+  const pending = deferred();
+  let writes = 0;
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: {
+      writeText: async () => {
+        writes++;
+        if (writes === 1) {
+          await pending.promise;
+          throw new Error("Clipboard denied");
+        }
+      },
+    },
+  });
+  const view = await mount(<CodeBlock.CopyButton code="private-key" />);
+  try {
+    const copy = button("Copy");
+    await act(async () => {
+      copy.click();
+      copy.click();
+    });
+    assert.equal(writes, 1);
+    assert.equal(copy.getAttribute("aria-disabled"), "true");
+    assert.equal(copy.getAttribute("aria-label"), "Copy code");
+    assert.equal(successes.length, 0);
+    await act(async () => pending.resolve());
+    assert.equal(dangerMessages.length, 1);
+    assert.notEqual(copy.getAttribute("aria-disabled"), "true");
+    await click(copy);
+    assert.equal(writes, 2);
+    assert.equal(successes.length, 1);
+    assert.equal(copy.textContent, "Copy");
+  } finally {
+    await view.unmount();
+    Reflect.deleteProperty(navigator, "clipboard");
+  }
+});

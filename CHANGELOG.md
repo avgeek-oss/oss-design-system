@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Lock repeat code-copy presses until the clipboard write settles, retaining toast-only feedback and a stable action label.
+
 ## 1.2.0 — 2026-10-06
 
 - Support real secondary navigation links alongside action buttons, preserving native menu density, router integration, modified clicks, and mobile dismissal.

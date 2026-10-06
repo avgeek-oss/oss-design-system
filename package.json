@@ -39,7 +39,7 @@
     "cosmos": "cosmos",
     "cosmos:export": "cosmos-export",
     "prepack": "pnpm build",
-    "verify": "pnpm format:check && pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm cosmos:export && pnpm test:navigation-browser && pnpm test:browser && pnpm verify:package",
+    "verify": "pnpm format:check && pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm cosmos:export && pnpm test:navigation-browser && pnpm test:browser && pnpm test:code-copy-browser && pnpm verify:package",
     "lint": "eslint src cosmos studio test scripts *.mjs vite.config.ts --max-warnings 0 && pnpm lint:styles",
     "lint:styles": "stylelint \"src/**/*.css\"",
     "verify:package": "node scripts/verify-package.mjs",
@@ -47,7 +47,8 @@
     "check:docs": "node scripts/check-docs.mjs",
     "test:published": "node scripts/verify-package.mjs --published",
     "test:navigation-browser": "node scripts/test-navigation-browser.mjs",
-    "test:browser": "node scripts/test-toast-dismissal-browser.mjs"
+    "test:browser": "node scripts/test-toast-dismissal-browser.mjs",
+    "test:code-copy-browser": "node scripts/test-code-copy-browser.mjs"
   },
   "peerDependencies": {
     "next": "^16.0.0",
