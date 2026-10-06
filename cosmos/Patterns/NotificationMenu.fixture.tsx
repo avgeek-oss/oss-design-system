@@ -231,10 +231,43 @@ function FocusManagement() {
   );
 }
 
+function IgnoredActivation({
+  asynchronous = false,
+}: {
+  asynchronous?: boolean;
+}) {
+  const [ignore, setIgnore] = useState(true);
+  const [attempts, setAttempts] = useState(0);
+  const [navigation, setNavigation] = useState("Not navigated");
+  return (
+    <div className="grid justify-items-end gap-4 p-4 text-sm">
+      <NotificationMenu
+        items={initialItems}
+        unreadCount={2}
+        onActivate={(item) => {
+          setAttempts((count) => count + 1);
+          if (ignore)
+            return asynchronous ? Promise.resolve<false>(false) : false;
+          setNavigation(`Navigated to ${item.href}`);
+        }}
+        footer={
+          <Widget.Action onPress={() => setIgnore(false)}>
+            Allow activation
+          </Widget.Action>
+        }
+      />
+      <p data-ignored-attempts>Attempts: {attempts}</p>
+      <p data-navigation>{navigation}</p>
+    </div>
+  );
+}
+
 export default {
   "Mark all read": <Notifications />,
   "App header action": <Notifications clearAction />,
   "Focus management": <FocusManagement />,
   Loading: <Notifications loading />,
+  "Ignored activation": <IgnoredActivation />,
+  "Ignored async activation": <IgnoredActivation asynchronous />,
   "Activation and recovery": <ActivationAndRecovery />,
 };

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3 — 2026-10-07
+
+- Allow notification activation to return `false` without dismissing the menu or reporting a failure.
+
 ## 1.2.2 — 2026-10-07
 
 - Keep auth form values out of URLs by using POST for native submissions before JavaScript handles the form.
