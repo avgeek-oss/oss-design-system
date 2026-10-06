@@ -31,6 +31,10 @@ export default defineConfig({
     ["list"],
     ["json", { outputFile: "artifacts/browser/report.json" }],
   ],
-  use: { browserName: "chromium", screenshot: "only-on-failure" },
+  use: {
+    browserName: "chromium",
+    screenshot: "only-on-failure",
+    trace: "retain-on-failure",
+  },
   projects,
 });
