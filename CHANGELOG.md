@@ -10,6 +10,7 @@
 - Reject whitespace-only API-key names with toast feedback and input focus, retaining the draft for correction without creating a key.
 - Restore mobile navigation focus to the current toggle after drawer exit when navigation replaced the original opener, while preserving deliberate destination focus.
 - Add optional `titleOverflow="truncate"` to page patterns for a shrinking title and fixed-width actions on one row, retaining the wrapping default.
+- Return API-key confirmation focus to its connected Revoke action after native table row or cell restoration.
 - Keep ordinary query loading announcements visually hidden while retaining accessible status and explicit visible progress.
 - Prevent repeated code-copy presses while a clipboard write is pending, with toast feedback and retry after failure.
 - Discover browser regressions through one shared suite and reuse fixture serving, browser setup, and cleanup.
