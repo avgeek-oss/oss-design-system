@@ -1,6 +1,6 @@
 {
   "name": "@avgeek-oss/design-system",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Shared React components, application layouts and UI patterns for Avgeek OSS apps.",
   "type": "module",
   "license": "Apache-2.0",
@@ -680,6 +680,10 @@
     "./overlays/overlay-suspension": {
       "types": "./dist/overlays/overlay-suspension.d.ts",
       "import": "./dist/overlays/overlay-suspension.js"
+    },
+    "./utilities/date-time-preferences": {
+      "types": "./dist/utilities/date-time-preferences.d.ts",
+      "import": "./dist/utilities/date-time-preferences.js"
     }
   }
 }

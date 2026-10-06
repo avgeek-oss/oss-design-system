@@ -7,6 +7,7 @@ import { Label } from "../../forms/label.js";
 import { Field } from "../../forms/field.js";
 import { Widget } from "../../data-display/widget.js";
 import { toast } from "../../overlays/toast.js";
+import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 import { createNameSchema } from "./schemas.js";
 
 export function NameSettingsForm({
@@ -25,7 +26,8 @@ export function NameSettingsForm({
   const id = useId();
   const [draft, setDraft] = useState(value);
   const [busy, setBusy] = useState(false);
-  const pending = useRef(false);
+  const pending = useRef<symbol | null>(null);
+  const suspension = useOverlaySuspension();
   return (
     <Widget>
       <Widget.Header>
@@ -37,27 +39,32 @@ export function NameSettingsForm({
           className="grid gap-4"
           onSubmit={async (event) => {
             event.preventDefault();
-            if (pending.current) return;
+            if (pending.current || suspension.isSuspended) return;
             const parsed = createNameSchema(maxLength).safeParse(draft);
             if (!parsed.success) {
               toast.danger(parsed.error.issues[0]?.message ?? "Enter a name");
               event.currentTarget.querySelector("input")?.focus();
               return;
             }
-            pending.current = true;
+            const isCurrent = suspension.capture();
+            const request = Symbol();
+            pending.current = request;
             setBusy(true);
             try {
               await onSave(parsed.data);
-              toast.success("Changes saved");
+              if (isCurrent()) toast.success("Changes saved");
             } catch (error) {
-              toast.danger(
-                error instanceof Error
-                  ? error.message
-                  : "Could not save changes",
-              );
+              if (isCurrent())
+                toast.danger(
+                  error instanceof Error
+                    ? error.message
+                    : "Could not save changes",
+                );
             } finally {
-              pending.current = false;
-              setBusy(false);
+              if (pending.current === request) {
+                pending.current = null;
+                setBusy(false);
+              }
             }
           }}
         >

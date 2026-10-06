@@ -768,3 +768,133 @@ for (const variant of ["PasskeyRename", "PasskeyRecovery"]) {
     );
   });
 }
+
+const heldNameFixture =
+  "cosmos/Patterns/Account Settings/ProfileSettings.fixture.tsx";
+async function settleNameSave(page, request, outcome) {
+  await page.evaluate(
+    ({ request, outcome }) =>
+      globalThis.window.dispatchEvent(
+        new CustomEvent(`preview:name-${outcome}`, { detail: request }),
+      ),
+    { request, outcome },
+  );
+}
+async function repeatNameSubmit(page) {
+  await page.evaluate(() => {
+    const form = globalThis.document.querySelector("form");
+    if (!(form instanceof globalThis.HTMLFormElement))
+      throw new Error("Missing name form");
+    form.requestSubmit();
+    form.requestSubmit();
+  });
+}
+async function dismissNameToast(page) {
+  const toast = page.locator('[data-slot="toast"]');
+  await expect(toast).toHaveCount(1);
+  await toast.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(toast).toHaveCount(0);
+}
+for (const outcome of ["resolve", "reject"]) {
+  test(`profile save ${outcome} after suspension retains its draft without stale feedback and permits current failure retries`, async ({
+    page,
+    fixtureUrl,
+  }) => {
+    await page.goto(fixtureUrl(heldNameFixture, "Held save"));
+    const name = page.getByRole("textbox", { name: /^Your Name/ });
+    await name.fill("Travel profile");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await repeatNameSubmit(page);
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 1");
+    await page
+      .getByRole("button", { name: "Suspend account", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Resume same account", exact: true })
+      .click();
+    await expect(name).toHaveValue("Travel profile");
+    await expect(name).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Saving…", exact: true }),
+    ).toBeDisabled();
+    await settleNameSave(page, 1, outcome);
+    await expect(name).toBeEnabled();
+    await expect(name).toHaveValue("Travel profile");
+    await expect(page.getByTestId("saved-name")).toHaveText("Saved name: Alex");
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+    for (const request of [2, 3]) {
+      await page.getByRole("button", { name: "Save", exact: true }).click();
+      await repeatNameSubmit(page);
+      await expect(page.getByTestId("requests")).toHaveText(
+        `Requests: ${request}`,
+      );
+      await settleNameSave(page, request, "reject");
+      await expect(page.locator('[data-slot="toast"]')).toHaveText(
+        /Name save rejected/,
+      );
+      await expect(name).toHaveValue("Travel profile");
+      await expect(name).toBeEnabled();
+      await dismissNameToast(page);
+    }
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 4");
+    await settleNameSave(page, 4, "resolve");
+    await expect(page.getByTestId("saved-name")).toHaveText(
+      "Saved name: Travel profile",
+    );
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(1);
+    await expect(page.locator('[data-slot="toast"]')).toHaveText(
+      /Changes saved/,
+    );
+    await expect(name).toBeEnabled();
+    await expect(
+      page.getByRole("button", { name: "Save", exact: true }),
+    ).toBeDisabled();
+  });
+  test(`an unmounted profile save ${outcome} cannot notify or unlock a newer owner's held request`, async ({
+    page,
+    fixtureUrl,
+  }) => {
+    await page.goto(fixtureUrl(heldNameFixture, "Held save"));
+    const name = page.getByRole("textbox", { name: /^Your Name/ });
+    await name.fill("Previous owner");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 1");
+    await page
+      .getByRole("button", { name: "Switch account", exact: true })
+      .click();
+    await expect(name).toHaveValue("Morgan");
+    await name.fill("Current owner");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 2");
+    await settleNameSave(page, 1, outcome);
+    await expect(name).toHaveValue("Current owner");
+    await expect(name).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Saving…", exact: true }),
+    ).toBeDisabled();
+    await expect(page.getByTestId("saved-name")).toHaveText(
+      "Saved name: Morgan",
+    );
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+    await repeatNameSubmit(page);
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 2");
+    await settleNameSave(page, 2, "reject");
+    await expect(name).toHaveValue("Current owner");
+    await expect(name).toBeEnabled();
+    await expect(page.locator('[data-slot="toast"]')).toHaveText(
+      /Name save rejected/,
+    );
+    await dismissNameToast(page);
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByTestId("requests")).toHaveText("Requests: 3");
+    await settleNameSave(page, 3, "resolve");
+    await expect(page.getByTestId("saved-name")).toHaveText(
+      "Saved name: Current owner",
+    );
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(1);
+    await expect(page.locator('[data-slot="toast"]')).toHaveText(
+      /Changes saved/,
+    );
+  });
+}
