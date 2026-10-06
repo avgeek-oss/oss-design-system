@@ -5,6 +5,16 @@ async function press(control, touch) {
   if (touch) await control.tap();
   else await control.click();
 }
+async function openInNewTab(page, context, control) {
+  await page.keyboard.down("ControlOrMeta");
+  try {
+    const opened = context.waitForEvent("page");
+    await control.click();
+    return await opened;
+  } finally {
+    await page.keyboard.up("ControlOrMeta");
+  }
+}
 test("sidebar links preserve navigation, active sections and mobile dismissal", async ({
   page,
   context,
@@ -34,10 +44,9 @@ test("sidebar links preserve navigation, active sections and mobile dismissal", 
     page.getByRole("button", { name: "Restricted", exact: true }),
   ).toBeDisabled();
   if (!touch) {
-    const newTabPromise = context.waitForEvent("page");
-    await preferences.click({ modifiers: ["ControlOrMeta"] });
-    const newTab = await newTabPromise;
+    const newTab = await openInNewTab(page, context, preferences);
     await newTab.waitForLoadState();
+    await expect(newTab).toHaveURL(new URL("/preferences", page.url()).href);
     await newTab.close();
     await page.bringToFront();
     await expect(page.locator("[data-route]")).toHaveText("/profile");
@@ -123,11 +132,11 @@ test("notification activation waits, retries and preserves native modified click
     "Activations: 0",
   );
   const task = page.getByRole("link", { name: /Deployment completed/ });
+  await expect(task).toHaveAttribute("href", "#deployment");
   if (!touch) {
-    const newTabPromise = context.waitForEvent("page");
-    await task.click({ modifiers: ["ControlOrMeta"] });
-    const newTab = await newTabPromise;
+    const newTab = await openInNewTab(page, context, task);
     await newTab.waitForLoadState();
+    await expect(newTab).toHaveURL(new URL("#deployment", page.url()).href);
     await newTab.close();
     await page.bringToFront();
     await expect(page.locator("[data-activation-count]")).toHaveText(
