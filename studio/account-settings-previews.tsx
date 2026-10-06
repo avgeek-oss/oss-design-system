@@ -93,7 +93,13 @@ const previewCodes = [
   "demo-0003-preview",
   "demo-0004-preview",
 ];
-export function PasskeySettingsPreview({ empty = false }: { empty?: boolean }) {
+export function PasskeySettingsPreview({
+  empty = false,
+  management = true,
+}: {
+  empty?: boolean;
+  management?: boolean;
+}) {
   const [items, setItems] = useState<Passkey[]>(
     empty ? [] : [{ id: "key-1", name: "Security key", createdAt: created }],
   );
@@ -112,20 +118,30 @@ export function PasskeySettingsPreview({ empty = false }: { empty?: boolean }) {
             { id: `key-${Date.now()}`, name, createdAt: created },
           ]);
         }}
-        onRename={async (id, name) => {
-          await request();
-          setItems((current) =>
-            current.map((item) => (item.id === id ? { ...item, name } : item)),
-          );
-        }}
+        onRename={
+          management
+            ? async (id, name) => {
+                await request();
+                setItems((current) =>
+                  current.map((item) =>
+                    item.id === id ? { ...item, name } : item,
+                  ),
+                );
+              }
+            : undefined
+        }
         onRemove={async (id) => {
           await request();
           setItems((current) => current.filter((item) => item.id !== id));
         }}
-        onReplaceRecoveryCodes={async () => {
-          await request();
-          setCodes(previewCodes);
-        }}
+        onReplaceRecoveryCodes={
+          management
+            ? async () => {
+                await request();
+                setCodes(previewCodes);
+              }
+            : undefined
+        }
         recoveryCodes={codes}
         onDismissRecoveryCodes={() => setCodes([])}
       />

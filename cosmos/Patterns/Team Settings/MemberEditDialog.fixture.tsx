@@ -1,3 +1,5 @@
 import { MemberEditPreview } from "../../../studio/pattern-previews";
-
-export default MemberEditPreview;
+export default {
+  IdentityAndRole: () => <MemberEditPreview />,
+  RoleOnly: () => <MemberEditPreview mode="role-only" />,
+};

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Modal } from "../../overlays/modal.js";
 import { Button } from "../../buttons/button.js";
 import { CodeBlock } from "../../typography/code-block.js";
@@ -17,6 +17,7 @@ export type MemberFormDialogProps = {
   submitLabel: string;
   fields: AuthField[];
   description?: string;
+  resultGuidance?: ReactNode;
   onSubmit: (
     values: Record<string, string>,
     role: string,
@@ -33,6 +34,7 @@ function MemberFormContent({
   submitLabel,
   fields,
   description,
+  resultGuidance,
   onSubmit,
 }: Omit<MemberFormDialogProps, "isOpen">) {
   const [role, setRole] = useState(
@@ -56,16 +58,16 @@ function MemberFormContent({
       <Modal.Container size="sm" scroll="inside">
         <Modal.Dialog>
           <Modal.Header>
-            <Modal.Heading>{title}</Modal.Heading>
+            <Modal.Heading>
+              {inviteUrl ? "Invitation link" : title}
+            </Modal.Heading>
             <Modal.CloseTrigger isDisabled={busy} />
           </Modal.Header>
           <Modal.Body>
             {inviteUrl ? (
               <div className="grid gap-4">
-                <p>
-                  Invitation created. The recipient must verify their email
-                  before joining.
-                </p>
+                <p>Share this private invitation link with the recipient.</p>
+                {resultGuidance}
                 <CodeBlock>
                   <CodeBlock.Header>
                     <CodeBlock.Filename>Invitation link</CodeBlock.Filename>

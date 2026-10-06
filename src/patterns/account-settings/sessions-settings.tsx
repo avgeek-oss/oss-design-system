@@ -37,6 +37,9 @@ export function SessionsSettings({
       {revoking && (
         <SettingsConfirmation
           title="Revoke session?"
+          description="That browser will lose access immediately and must sign in again."
+          confirmLabel="Revoke session"
+          cancelLabel="Keep session"
           onClose={() => setRevoking(null)}
           onConfirm={async () => {
             if (items.find((item) => item.id === revoking)?.current)

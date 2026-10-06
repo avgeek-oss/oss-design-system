@@ -11,6 +11,7 @@ export type ActionConfirmationProps = {
   title: string;
   description?: ReactNode;
   confirmLabel?: string;
+  cancelLabel?: string;
   variant?: ButtonVariant;
   onConfirm: () => Promise<void>;
 };
@@ -25,6 +26,7 @@ function ConfirmationContent({
   title,
   description,
   confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
   variant = "danger",
   onConfirm,
 }: Omit<ActionConfirmationProps, "isOpen">) {
@@ -49,7 +51,7 @@ function ConfirmationContent({
               isDisabled={action.isPending}
               onPress={() => onOpenChange(false)}
             >
-              Cancel
+              {cancelLabel}
             </Button>
             <Button
               variant={variant}

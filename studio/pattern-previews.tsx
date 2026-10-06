@@ -255,7 +255,11 @@ export function AuthorizedClientsPreview() {
     </Preview>
   );
 }
-export function CreateApiKeyPreview() {
+export function CreateApiKeyPreview({
+  permissions = true,
+}: {
+  permissions?: boolean;
+}) {
   const scenario = useScenario();
   const [isOpen, setOpen] = useState(false);
   return (
@@ -265,19 +269,23 @@ export function CreateApiKeyPreview() {
       <CreateApiKeyDialog
         isOpen={isOpen}
         onOpenChange={setOpen}
-        permissionOptions={[
-          {
-            id: "read",
-            label: "Read-only",
-            description: "View resources and monitoring data.",
-          },
-          {
-            id: "admin",
-            label: "Administrative",
-            description:
-              "Manage deployments and infrastructure within your role.",
-          },
-        ]}
+        permissionOptions={
+          permissions
+            ? [
+                {
+                  id: "read",
+                  label: "Read-only",
+                  description: "View resources and monitoring data.",
+                },
+                {
+                  id: "admin",
+                  label: "Administrative",
+                  description:
+                    "Manage deployments and infrastructure within your role.",
+                },
+              ]
+            : undefined
+        }
         expiryOptions={[
           { id: "30", label: "30 days" },
           { id: "90", label: "90 days" },
@@ -374,6 +382,9 @@ export function InviteMemberPreview() {
         isOpen={isOpen}
         onOpenChange={setOpen}
         roles={roles}
+        resultGuidance={
+          <p>Email delivery is not configured. Share the link privately.</p>
+        }
         onInvite={async () => {
           await scenario.run();
           return { inviteUrl: "https://example.test/invite/demo" };
@@ -382,7 +393,11 @@ export function InviteMemberPreview() {
     </Preview>
   );
 }
-export function MemberEditPreview() {
+export function MemberEditPreview({
+  mode = "identity-and-role",
+}: {
+  mode?: "identity-and-role" | "role-only";
+}) {
   const scenario = useScenario();
   const [isOpen, setOpen] = useState(false);
   return (
@@ -394,6 +409,7 @@ export function MemberEditPreview() {
         onOpenChange={setOpen}
         member={member}
         roles={roles}
+        mode={mode}
         onSave={scenario.run}
       />
     </Preview>

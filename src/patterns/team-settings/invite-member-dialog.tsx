@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { MemberFormDialog } from "./member-form-dialog.js";
 import type { ChoiceOption } from "../choice-field.js";
 
@@ -9,6 +10,7 @@ export type InviteMemberDialogProps = {
   onOpenChange: (isOpen: boolean) => void;
   roles: readonly ChoiceOption[];
   defaultRole?: string;
+  resultGuidance?: ReactNode;
   onInvite: (values: InviteMemberValues) => Promise<{ inviteUrl: string }>;
 };
 export function InviteMemberDialog({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Button } from "../../buttons/button.js";
 import { Input } from "../../forms/input.js";
 import { Label } from "../../forms/label.js";
@@ -25,6 +25,7 @@ export function NameSettingsForm({
   const id = useId();
   const [draft, setDraft] = useState(value);
   const [busy, setBusy] = useState(false);
+  const pending = useRef(false);
   return (
     <Widget>
       <Widget.Header>
@@ -36,13 +37,14 @@ export function NameSettingsForm({
           className="grid gap-4"
           onSubmit={async (event) => {
             event.preventDefault();
-            if (busy) return;
+            if (pending.current) return;
             const parsed = createNameSchema(maxLength).safeParse(draft);
             if (!parsed.success) {
               toast.danger(parsed.error.issues[0]?.message ?? "Enter a name");
               event.currentTarget.querySelector("input")?.focus();
               return;
             }
+            pending.current = true;
             setBusy(true);
             try {
               await onSave(parsed.data);
@@ -54,6 +56,7 @@ export function NameSettingsForm({
                   : "Could not save changes",
               );
             } finally {
+              pending.current = false;
               setBusy(false);
             }
           }}
