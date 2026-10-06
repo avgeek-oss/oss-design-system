@@ -3,6 +3,8 @@
 import {
   forwardRef,
   Fragment,
+  useRef,
+  useState,
   type ComponentPropsWithRef,
   type ReactNode,
 } from "react";
@@ -113,7 +115,12 @@ type CopyButtonProps = Omit<WidgetActionProps, "children" | "onPress"> & {
 
 const CopyButton = forwardRef<HTMLButtonElement, CopyButtonProps>(
   ({ code, ...props }, ref) => {
+    const pending = useRef(false);
+    const [isPending, setIsPending] = useState(false);
     const copyCode = async () => {
+      if (pending.current || props.isDisabled || props.isPending) return;
+      pending.current = true;
+      setIsPending(true);
       try {
         await navigator.clipboard.writeText(code);
         toast.success("Copied to clipboard.");
@@ -121,6 +128,9 @@ const CopyButton = forwardRef<HTMLButtonElement, CopyButtonProps>(
         toast.danger(
           "Could not copy to the clipboard. Select and copy the text instead.",
         );
+      } finally {
+        pending.current = false;
+        setIsPending(false);
       }
     };
 
@@ -130,6 +140,7 @@ const CopyButton = forwardRef<HTMLButtonElement, CopyButtonProps>(
         ref={ref}
         aria-label={props["aria-label"] ?? "Copy code"}
         data-slot="code-block-copy"
+        isPending={isPending || props.isPending}
         onPress={copyCode}
       >
         Copy
