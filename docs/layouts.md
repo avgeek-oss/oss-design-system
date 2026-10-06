@@ -63,7 +63,7 @@ Use `BreadcrumbTrail` for links and current-page labels. Place `BreadcrumbDropdo
 
 For an entity selector, use `BreadcrumbSelect.Trigger`, `BreadcrumbSelect.Value`, and `BreadcrumbSelect.Popover` with `ListBox`; compose `Autocomplete.Filter` and `SearchField` when search is needed. Applications own the options, loading state and navigation.
 
-Mobile drawers retain the outgoing sidebar through dismissal. Test transitions between pages with and without secondary navigation, Escape dismissal, focus return, and reopening. Controls use HeroUI’s native interaction feedback.
+Mobile drawers retain the outgoing sidebar through dismissal. After exit, native focus restoration runs first. If focus remains on the document body because navigation replaced the original opener, AppLayout restores focus to the current `.navigation-toggle` button. It preserves deliberate destination focus, skips disabled or inert controls, and cancels the fallback if the drawer reopens. Apps do not need a post-exit callback or a focus timer; `onSidebarOpenChange` continues to report state changes at dismissal start. Test transitions between pages with and without secondary navigation, Escape dismissal, focus return, and reopening. Controls use HeroUI’s native interaction feedback.
 
 ## Modals
 

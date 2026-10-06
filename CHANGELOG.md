@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Restore mobile navigation focus to the current toggle after drawer exit when navigation replaced the original opener, while preserving deliberate destination focus.
+
 - Keep ordinary query loading announcements visually hidden while retaining accessible status and explicit visible progress.
 - Prevent repeated code-copy presses while a clipboard write is pending, with toast feedback and retry after failure.
 - Discover browser regressions through one shared suite and reuse fixture serving, browser setup, and cleanup.

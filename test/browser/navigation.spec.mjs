@@ -221,3 +221,118 @@ test("notification activation waits, retries and preserves native modified click
   );
   await expect(task).toBeVisible();
 });
+
+for (const variant of [
+  "Stable navbar",
+  "Replaced navbar",
+  "Destination focus",
+]) {
+  test(`browser Back restores navigation focus with ${variant}`, async ({
+    page,
+    fixtureUrl,
+    touch,
+    reducedMotion,
+  }) => {
+    test.skip(!touch, "This regression concerns the mobile drawer");
+    await page.goto(
+      fixtureUrl("cosmos/Layouts/NavigationFocus.fixture.tsx", variant),
+    );
+    await page.bringToFront();
+    await page.addStyleTag({
+      content:
+        ".drawer__dialog {--drawer-exit-duration: 600ms !important;} .drawer__backdrop[data-exiting] {transition-duration:600ms !important;}",
+    });
+    for (let repeat = 0; repeat < 6; repeat++) {
+      await page
+        .getByRole("button", { name: "Back to board", exact: true })
+        .tap();
+      await expect(
+        page.getByRole("heading", { name: "Board", exact: true }),
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Toggle navigation", exact: true })
+        .tap();
+      await expect(
+        page.getByRole("dialog", { name: "Navigation" }),
+      ).toBeVisible();
+      await page.evaluate(async () => {
+        await Promise.all(
+          globalThis.document
+            .getAnimations()
+            .map((animation) => animation.finished),
+        );
+      });
+      const outgoing = await page
+        .getByRole("dialog", { name: "Navigation" })
+        .textContent();
+      await page.goBack();
+      if (reducedMotion !== "reduce") {
+        await expect(
+          page.locator(".drawer__backdrop[data-exiting=true]"),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("dialog", { name: "Navigation" }),
+        ).toHaveText(outgoing);
+      }
+      await expect(
+        page.getByRole("dialog", { name: "Navigation" }),
+      ).toHaveCount(0);
+      const expected =
+        variant === "Destination focus"
+          ? "Destination action"
+          : "Toggle navigation";
+      await expect(
+        page.getByRole("button", { name: expected, exact: true }),
+      ).toBeFocused();
+    }
+  });
+}
+
+test("a drawer reopened as the destination mounts keeps focus inside navigation", async ({
+  page,
+  fixtureUrl,
+  touch,
+}) => {
+  test.skip(!touch, "This regression concerns the mobile drawer");
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Layouts/NavigationFocus.fixture.tsx",
+      "Reopen on arrival",
+    ),
+  );
+  await page.bringToFront();
+  await page.getByRole("button", { name: "Back to board", exact: true }).tap();
+  const toggle = page.getByRole("button", {
+    name: "Toggle navigation",
+    exact: true,
+  });
+  await toggle.tap();
+  await expect(page.getByRole("dialog", { name: "Navigation" })).toBeVisible();
+  await page.evaluate(async () => {
+    await Promise.all(
+      globalThis.document
+        .getAnimations()
+        .map((animation) => animation.finished),
+    );
+  });
+  await page.goBack();
+  await expect(
+    page.getByRole("heading", { name: "Task", exact: true }),
+  ).toBeAttached();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const navigation = page.getByRole("dialog", { name: "Navigation" });
+  await expect(navigation).toBeVisible();
+  await expect(
+    navigation.getByRole("button", { name: "All status", exact: true }),
+  ).toHaveCount(0);
+  await expect
+    .poll(() =>
+      navigation.evaluate((element) =>
+        element.contains(globalThis.document.activeElement),
+      ),
+    )
+    .toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(navigation).toHaveCount(0);
+  await expect(toggle).toBeFocused();
+});
