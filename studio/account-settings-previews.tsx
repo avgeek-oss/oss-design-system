@@ -4,9 +4,8 @@ import { ProfileSettings } from "../src/patterns/account-settings/profile-settin
 import { PreferencesSettings } from "../src/patterns/account-settings/preferences-settings";
 import { PasskeySettings } from "../src/patterns/account-settings/passkey-settings";
 import { SessionsSettings } from "../src/patterns/account-settings/sessions-settings";
-import { ApiKeysSettings } from "../src/patterns/account-settings/api-keys-settings";
 import type { DateTimePreferences } from "../src/patterns/settings/date-time-preference-fields";
-import type { ApiKey, Passkey, Session } from "../src/patterns/settings/tables";
+import type { Passkey, Session } from "../src/patterns/settings/tables";
 import { preferenceOptions } from "./preference-options";
 
 const created = "2026-10-06T00:00:00Z";
@@ -154,24 +153,6 @@ export function SessionsSettingsPreview() {
   return (
     <div className="p-4">
       <SessionsSettings
-        items={items}
-        formatDate={formatDate}
-        onRevoke={async (id) => {
-          await request();
-          setItems((current) => current.filter((item) => item.id !== id));
-        }}
-      />
-    </div>
-  );
-}
-export function ApiKeysSettingsPreview() {
-  const [items, setItems] = useState<ApiKey[]>([
-    { id: "automation", name: "Automation", expiresAt: null },
-  ]);
-  const request = useSettingsRequest();
-  return (
-    <div className="p-4">
-      <ApiKeysSettings
         items={items}
         formatDate={formatDate}
         onRevoke={async (id) => {

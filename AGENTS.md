@@ -2,7 +2,7 @@
 
 ## Purpose and boundaries
 
-This repository owns the shared React UI for Avgeek OSS apps: HeroUI primitives, application layouts, and reusable auth, account settings, team settings, and data patterns. It reduces copied UI and makes reviewed behavior consistent across Towbar, Mill, Rootset, and other consumers.
+This repository owns the shared React UI for Avgeek OSS apps: HeroUI primitives, application layouts, and reusable auth, account settings, team settings, and data patterns. Towbar is the baseline for common features, surfaces, and UI data contracts; other applications adopt that standard. It reduces copied UI and makes reviewed behavior consistent across consumers.
 
 Apps own routing destinations, permissions, API calls, persistence, date policy, branding, WebAuthn ceremonies, and recovery-code generation. Components accept typed data and callbacks. Never move application services or authorization policy into this package, or import app packages into `src`. Next.js belongs only in `src/adapters/next.tsx`; it is an optional peer.
 

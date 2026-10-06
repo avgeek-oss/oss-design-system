@@ -38,9 +38,37 @@ Account settings live under `Patterns / Account Settings`, matching `src/pattern
 | `PreferencesSettings` | [preferences-settings.tsx](../src/patterns/account-settings/preferences-settings.tsx) | Saved preferences, format/time-zone options, optional preview formatter and save callback.                                                                   |
 | `PasskeySettings`     | [passkey-settings.tsx](../src/patterns/account-settings/passkey-settings.tsx)         | Passkeys, date formatter, add/rename/remove callbacks and recovery-code replacement/display callbacks. Default and empty are variants of the same component. |
 | `SessionsSettings`    | [sessions-settings.tsx](../src/patterns/account-settings/sessions-settings.tsx)       | Sessions, date formatter and revoke callback. The current session cannot be revoked here.                                                                    |
-| `ApiKeysSettings`     | [api-keys-settings.tsx](../src/patterns/account-settings/api-keys-settings.tsx)       | API keys, date formatter and revoke callback.                                                                                                                |
+| `ApiKeysSettings`     | [api-keys-settings.tsx](../src/patterns/account-settings/api-keys-settings.tsx)       | Credential metadata, date formatter, optional actions and revoke callback.                                                                                   |
 
 The `MembersTable` preview lives under `Patterns / Team Settings`, matching [src/patterns/team-settings/members-table.tsx](../src/patterns/team-settings/members-table.tsx). Its items and row-action slot come from the app. The `Editor role` control covers role vocabulary. `MembersTable` is also exported through `patterns/settings/tables`.
+
+The additional shared application patterns follow Towbar's common surfaces. Their typed data contracts, callback behavior, and boundaries are documented in [Shared application patterns](patterns.md). Each has its own fixture under the matching Patterns folder and is exported from the package root and the subpath below.
+
+| Components                               | Public subpath                                                       |
+| ---------------------------------------- | -------------------------------------------------------------------- |
+| `EmailChangeSettings`                    | `patterns/account-settings/email-change-settings`                    |
+| `PasswordChangeSettings`                 | `patterns/account-settings/password-change-settings`                 |
+| `ApiKeysTable`, `AuthorizedClientsTable` | `patterns/account-settings/api-keys-table`                           |
+| `CreateApiKeyDialog`                     | `patterns/account-settings/create-api-key-dialog`                    |
+| `InvitationsTable`                       | `patterns/team-settings/invitations-table`                           |
+| `InviteMemberDialog`                     | `patterns/team-settings/invite-member-dialog`                        |
+| `AddMemberDialog`                        | `patterns/team-settings/add-member-dialog`                           |
+| `MemberEditDialog`                       | `patterns/team-settings/member-edit-dialog`                          |
+| `HistoryTable`                           | `patterns/history/history-table`                                     |
+| `HistorySearch`                          | `patterns/history/history-search`                                    |
+| `HistoryFilter`                          | `patterns/history/history-filter`                                    |
+| `EventDetailsDialog`, `EventDetail`      | `patterns/history/event-details-dialog`                              |
+| `FilterDialog`                           | `patterns/filters/filter-dialog`                                     |
+| `NotificationDestinationsSettings`       | `patterns/notification-settings/notification-destinations-settings`  |
+| `AddNotificationDestinationDialog`       | `patterns/notification-settings/add-notification-destination-dialog` |
+| `IntegrationConnectionCard`              | `patterns/integrations/integration-connection-card`                  |
+| `OperationProgress`                      | `patterns/operations/operation-progress`                             |
+| `ProgressChecklistItem`                  | `patterns/operations/progress-checklist-item`                        |
+| `StatusIndicator`                        | `patterns/status-indicator`                                          |
+| `AsyncActionButton`                      | `patterns/actions/async-action-button`                               |
+| `ActionConfirmation`                     | `patterns/actions/action-confirmation`                               |
+| `QueryLoading`, `QueryError`             | `patterns/feedback/query-state`                                      |
+| `ChoiceField`                            | `patterns/choice-field`                                              |
 
 | Cosmos primitive                          | Source file                                                                           |
 | ----------------------------------------- | ------------------------------------------------------------------------------------- |

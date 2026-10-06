@@ -1,45 +1,56 @@
 "use client";
 
-import { useState, type ComponentProps } from "react";
-import { ApiKeysTable } from "../settings/tables.js";
+import { useState } from "react";
+import {
+  ApiKeysTable,
+  type ApiKey,
+  type ApiKeysTableProps,
+} from "./api-keys-table.js";
 import { Button } from "../../buttons/button.js";
-import { toast } from "../../overlays/toast.js";
-import { SettingsConfirmation } from "./settings-confirmation.js";
+import { ActionConfirmation } from "../actions/action-confirmation.js";
 
-export type ApiKeysSettingsProps = Omit<
-  ComponentProps<typeof ApiKeysTable>,
+export type ApiKeysSettingsProps<T extends ApiKey = ApiKey> = Omit<
+  ApiKeysTableProps<T>,
   "actions"
 > & {
   onRevoke: (id: string) => Promise<void>;
+  actions?: ApiKeysTableProps<T>["actions"];
 };
-
-export function ApiKeysSettings({
+export function ApiKeysSettings<T extends ApiKey>({
   items,
   formatDate,
+  emptyDescription,
   onRevoke,
-}: ApiKeysSettingsProps) {
-  const [revoking, setRevoking] = useState<string | null>(null);
+  actions,
+}: ApiKeysSettingsProps<T>) {
+  const [revoking, setRevoking] = useState<T | null>(null);
   return (
     <>
       <ApiKeysTable
         items={items}
         formatDate={formatDate}
+        emptyDescription={emptyDescription}
         actions={(item) => (
-          <Button variant="danger" onPress={() => setRevoking(item.id)}>
-            Revoke
-          </Button>
+          <>
+            {actions?.(item)}
+            <Button variant="danger" onPress={() => setRevoking(item)}>
+              Revoke
+            </Button>
+          </>
         )}
       />
-      {revoking && (
-        <SettingsConfirmation
-          title="Revoke API key?"
-          onClose={() => setRevoking(null)}
-          onConfirm={async () => {
-            await onRevoke(revoking);
-            toast.success("API key revoked");
+      {revoking ? (
+        <ActionConfirmation
+          isOpen
+          title={`Revoke ${revoking.name}?`}
+          description="Any script or app using this key will lose access immediately. Create a replacement key to reconnect."
+          confirmLabel="Revoke key"
+          onOpenChange={(open) => {
+            if (!open) setRevoking(null);
           }}
+          onConfirm={() => onRevoke(revoking.id)}
         />
-      )}
+      ) : null}
     </>
   );
 }
