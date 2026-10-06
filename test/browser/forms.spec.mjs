@@ -231,3 +231,217 @@ test("sign-in verification navigation uses the shared request and private acknow
     page.getByRole("heading", { name: "Sign in", exact: true }),
   ).toBeVisible();
 });
+
+for (const contract of [
+  {
+    variant: "Verify email",
+    title: "Verify your email",
+    action: "Confirm email",
+    success: "Email verified",
+  },
+  {
+    variant: "Change email",
+    title: "Confirm email change",
+    action: "Confirm email change",
+    success: "Email updated",
+  },
+  {
+    variant: "Retry",
+    title: "Verify your email",
+    action: "Retry confirmation",
+    success: "Email verified",
+  },
+]) {
+  test(`email ${contract.variant} awaits explicit confirmation and retries with toast-only feedback`, async ({
+    page,
+    fixtureUrl,
+    touch,
+    theme,
+  }, testInfo) => {
+    await page.goto(
+      fixtureUrl(
+        "cosmos/Patterns/Auth/EmailConfirmation.fixture.tsx",
+        contract.variant,
+      ),
+    );
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    const content = page.locator('[data-slot="identity-auth-content"]');
+    const action = page.getByRole("button", {
+      name: contract.action,
+      exact: true,
+    });
+    const back = page.getByRole("button", {
+      name: "← Back to Sign In",
+      exact: true,
+    });
+    await expect(page.locator("[data-confirm-requests]")).toHaveText(
+      "Requests: 0",
+    );
+    await action.focus();
+    await page.keyboard.press("Enter");
+    await expect(action).toBeDisabled();
+    await action.press("Enter");
+    await back.evaluate((element) => element.click());
+    await expect(page.locator("[data-confirm-requests]")).toHaveText(
+      "Requests: 1",
+    );
+    await expect(page.locator("[data-back-count]")).toHaveText("Back: 0");
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+    const complete = page.getByRole("button", {
+      name: "Complete request",
+      exact: true,
+    });
+    if (touch) await complete.tap();
+    else await complete.click();
+    const toast = page.locator('[data-slot="toast"]:not([data-exiting])');
+    await expect(toast).toHaveCount(1);
+    await expect(toast).toContainText("Confirmation failed. Try again.");
+    await expect(content).not.toContainText("Confirmation failed");
+    await expect(content.getByRole("alert")).toHaveCount(0);
+    await expect(action).toBeEnabled();
+    await expect(back).toBeEnabled();
+    await toast.locator('[data-slot="toast-close"]').click();
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+    if (touch) await action.tap();
+    else await action.click();
+    await expect(page.locator("[data-confirm-requests]")).toHaveText(
+      "Requests: 2",
+    );
+    if (touch) await complete.tap();
+    else await complete.click();
+    await expect(toast).toHaveCount(1);
+    await expect(toast).toContainText(contract.success);
+    await expect(content).toContainText("Sign in to continue.");
+    await expect(content).not.toContainText(contract.success);
+    await expect(action).toHaveCount(0);
+    await expect(back).toBeEnabled();
+    await expect(page.locator(":focus")).toContainText(contract.title);
+    await expect(toast).toBeInViewport({ ratio: 1 });
+    await page.screenshot({ path: testInfo.outputPath("preview.png") });
+  });
+}
+
+test("email link states do not mutate on mount and omit unsupported retry", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/Auth/EmailConfirmation.fixture.tsx",
+      "Missing link",
+    ),
+  );
+  const content = page.locator('[data-slot="identity-auth-content"]');
+  await expect(content.getByRole("button")).toHaveCount(1);
+  await expect(content).toContainText("Return to sign in.");
+  await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+  await expect(page.locator("[data-confirm-requests]")).toHaveText(
+    "Requests: 0",
+  );
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/Auth/EmailConfirmation.fixture.tsx",
+      "Checking",
+    ),
+  );
+  await expect(content.getByRole("status")).toContainText(
+    "Checking confirmation link…",
+  );
+  await expect(content.getByRole("button")).toBeDisabled();
+  await expect(page.locator("[data-confirm-requests]")).toHaveText(
+    "Requests: 0",
+  );
+  await page
+    .getByRole("button", { name: "Finish checking", exact: true })
+    .click();
+  await expect(
+    content.getByRole("button", { name: "Confirm email", exact: true }),
+  ).toBeEnabled();
+  await expect(page.locator("[data-confirm-requests]")).toHaveText(
+    "Requests: 0",
+  );
+});
+
+test("invitation resend awaits one request, retains name and code and honors cooldown", async ({
+  page,
+  fixtureUrl,
+  touch,
+}, testInfo) => {
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/Auth/InvitationVerification.fixture.tsx",
+      "Resend recovery",
+    ),
+  );
+  const content = page.locator('[data-slot="identity-auth-content"]');
+  const name = page.getByRole("textbox", { name: /^Your Name/ });
+  const code = page.getByRole("textbox", { name: /^Email verification code/ });
+  await name.fill("Alex");
+  await code.fill("123456");
+  const resend = page.getByRole("button", { name: "Resend code", exact: true });
+  const complete = page.getByRole("button", {
+    name: "Complete request",
+    exact: true,
+  });
+  const toast = page.locator('[data-slot="toast"]:not([data-exiting])');
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    await resend.evaluate((element) => {
+      element.click();
+      element.click();
+    });
+    await expect(resend).toBeDisabled();
+    await expect(name).toBeDisabled();
+    await content.locator("form").evaluate((form) => form.requestSubmit());
+    await expect(page.locator("[data-resends]")).toHaveText(
+      `Resends: ${attempt}`,
+    );
+    await expect(page.locator("[data-verifications]")).toHaveText(
+      "Verifications: 0",
+    );
+    await expect(toast).toHaveCount(0);
+    if (touch) await complete.tap();
+    else await complete.click();
+    await expect(toast).toHaveCount(1);
+    await expect(toast).toContainText("Resend failed. Try again.");
+    await expect(content).not.toContainText("Resend failed");
+    await expect(name).toHaveValue("Alex");
+    await expect(code).toHaveValue("123456");
+    await expect(resend).toBeEnabled();
+    await toast.locator('[data-slot="toast-close"]').click();
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+  }
+  if (touch) await resend.tap();
+  else {
+    await resend.focus();
+    await page.keyboard.press("Enter");
+  }
+  if (touch) await complete.tap();
+  else await complete.click();
+  await expect(toast).toHaveCount(1);
+  await expect(toast).toContainText("Verification code requested.");
+  await expect(content).not.toContainText("Verification code requested.");
+  const cooldown = page.getByRole("button", { name: /^Resend in \d+s$/ });
+  await expect(cooldown).toBeDisabled();
+  await cooldown.evaluate((element) => element.click());
+  await expect(page.locator("[data-resends]")).toHaveText("Resends: 3");
+  await page.screenshot({ path: testInfo.outputPath("preview.png") });
+  await toast.locator('[data-slot="toast-close"]').click();
+  await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+  await page.getByRole("button", { name: "End cooldown", exact: true }).click();
+  await expect(resend).toBeEnabled();
+  await code.press("Enter");
+  await expect(resend).toBeDisabled();
+  await resend.evaluate((element) => element.click());
+  await expect(page.locator("[data-resends]")).toHaveText("Resends: 3");
+  await expect(page.locator("[data-verifications]")).toHaveText(
+    "Verifications: 1",
+  );
+  if (touch) await complete.tap();
+  else await complete.click();
+  await expect(toast).toHaveCount(1);
+  await expect(toast).toContainText("Verification failed. Try again.");
+  await expect(content).not.toContainText("Verification failed");
+  await expect(name).toHaveValue("Alex");
+  await expect(code).toHaveValue("123456");
+  await expect(resend).toBeEnabled();
+});

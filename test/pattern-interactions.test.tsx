@@ -18,6 +18,8 @@ import { IdentityCredentialsForm } from "../src/patterns/auth/identity-credentia
 import { McpAuthorization } from "../src/patterns/auth/mcp-authorization.js";
 
 import { NameSettingsForm } from "../src/patterns/settings/name-form.js";
+import { EmailConfirmation } from "../src/patterns/auth/email-confirmation.js";
+import { InvitationVerification } from "../src/patterns/auth/invitation-verification.js";
 import { VerificationEmail } from "../src/patterns/auth/verification-email.js";
 import { SignIn } from "../src/patterns/auth/sign-in.js";
 import { InvitationPasswordSetup } from "../src/patterns/auth/invitation-password-setup.js";
@@ -1498,6 +1500,169 @@ test("sign-in omits actions whose capabilities are unavailable", async () => {
       /Forgot password|Need a new verification email|Sign in with Passkey/,
     );
     assert.match(document.body.textContent ?? "", /Sign in to your account/);
+  } finally {
+    await view.unmount();
+  }
+});
+
+for (const purpose of ["verify-email", "email-change"] as const) {
+  test(`email confirmation ${purpose} is explicit, locks pending actions and retains retry after failure`, async () => {
+    const first = deferred();
+    let requests = 0;
+    let back = 0;
+    const successes: ReactNode[] = [];
+    mock.method(toast, "success", (message: ReactNode) => {
+      successes.push(message);
+      return "confirmed";
+    });
+    const common = {
+      brand: "Example",
+      purpose,
+      onBackToSignIn: () => {
+        back++;
+      },
+    };
+    const confirm = async () => {
+      requests++;
+      if (requests === 1) {
+        await first.promise;
+        throw new Error("Confirmation failed");
+      }
+      toast.success("Confirmation completed");
+    };
+    const view = await mount(
+      <EmailConfirmation {...common} status="ready" onConfirm={confirm} />,
+    );
+    try {
+      assert.equal(requests, 0);
+      const action = button(
+        purpose === "email-change" ? "Confirm email change" : "Confirm email",
+      );
+      await act(async () => {
+        action.click();
+        action.click();
+      });
+      assert.equal(requests, 1);
+      assert.equal(action.getAttribute("aria-disabled"), "true");
+      await click(button("← Back to Sign In"));
+      assert.equal(back, 0);
+      assert.equal(dangerMessages.length, 0);
+      await act(async () => first.resolve());
+      assertFailureToast("Confirmation failed");
+      await click(action);
+      assert.equal(requests, 2);
+      assert.deepEqual(successes, ["Confirmation completed"]);
+      await view.render(<EmailConfirmation {...common} status="confirmed" />);
+      assert.match(document.body.textContent ?? "", /Sign in to continue/);
+      assert.doesNotMatch(
+        document.body.textContent ?? "",
+        /Confirmation completed|Email verified|Email updated/,
+      );
+      await view.render(<EmailConfirmation {...common} status="unavailable" />);
+      assert.equal(view.container.querySelectorAll("button").length, 1);
+      await click(button("← Back to Sign In"));
+      assert.equal(back, 1);
+      await view.render(<EmailConfirmation {...common} status="checking" />);
+      assert.equal(button("← Back to Sign In").disabled, true);
+      assert.match(
+        view.container.querySelector('[role="status"]')?.textContent ?? "",
+        /Checking/,
+      );
+      assert.equal(requests, 2);
+    } finally {
+      await view.unmount();
+    }
+  });
+}
+
+test("invitation verification shares its resend lock, retains drafts and respects server cooldown", async () => {
+  const resend = deferred();
+  const verification = deferred();
+  let resends = 0;
+  let submissions = 0;
+  const successes: ReactNode[] = [];
+  mock.method(toast, "success", (message: ReactNode) => {
+    successes.push(message);
+    return "sent";
+  });
+  const props = {
+    brand: "Example",
+    teamName: "Example",
+    onSubmit: async () => {
+      submissions++;
+      await verification.promise;
+      throw new Error("Verification failed");
+    },
+    onResendCode: async () => {
+      resends++;
+      if (resends === 1) {
+        await resend.promise;
+        throw new Error("Resend failed");
+      }
+    },
+  };
+  const view = await mount(<InvitationVerification {...props} />);
+  try {
+    await fill("name", "Alex");
+    await fill("code", "123456");
+    const name = document.querySelector<HTMLInputElement>('[name="name"]');
+    const code = document.querySelector<HTMLInputElement>('[name="code"]');
+    assert.ok(name);
+    assert.ok(code);
+    const resendButton = button("Resend code");
+    await act(async () => {
+      resendButton.click();
+      resendButton.click();
+    });
+    await submit();
+    assert.equal(resends, 1);
+    assert.equal(submissions, 0);
+    assert.equal(dangerMessages.length, 0);
+    assert.equal(name.matches(":disabled"), true);
+    await act(async () => resend.resolve());
+    assertFailureToast("Resend failed");
+    assert.equal(name.value, "Alex");
+    assert.equal(code.value, "123456");
+    await click(resendButton);
+    assert.equal(resends, 2);
+    assert.deepEqual(successes, ["Verification code requested."]);
+    await view.render(
+      <InvitationVerification
+        {...props}
+        resendAvailableAt={Date.now() + 60000}
+      />,
+    );
+    const cooldown = [...view.container.querySelectorAll("button")].find(
+      (item) => item.textContent?.startsWith("Resend in"),
+    );
+    assert.ok(cooldown);
+    assert.equal(cooldown.disabled, true);
+    await click(cooldown);
+    assert.equal(resends, 2);
+    await view.render(
+      <InvitationVerification {...props} resendAvailableAt={0} />,
+    );
+    await submit();
+    await click(button("Resend code"));
+    assert.equal(submissions, 1);
+    assert.equal(resends, 2);
+    await act(async () => verification.resolve());
+    assert.deepEqual(dangerMessages, ["Resend failed", "Verification failed"]);
+    assert.equal(name.value, "Alex");
+    assert.equal(code.value, "123456");
+    assert.doesNotMatch(
+      document.body.textContent ?? "",
+      /Resend failed|Verification failed|Verification code requested/,
+    );
+    await view.render(
+      <InvitationVerification {...props} onResendCode={undefined} />,
+    );
+    assert.equal(
+      [...view.container.querySelectorAll("button")].some((item) =>
+        item.textContent?.includes("Resend"),
+      ),
+      false,
+    );
   } finally {
     await view.unmount();
   }
