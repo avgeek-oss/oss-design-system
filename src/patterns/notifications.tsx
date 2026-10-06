@@ -88,7 +88,7 @@ export function NotificationMenu({
                     isDisabled={!unreadCount || markingRead}
                     onPress={onMarkAllRead}
                   >
-                    {markingRead ? "Marking read…" : "Mark all read"}
+                    {markingRead ? "Marking read…" : "Mark all as read"}
                   </Widget.Action>
                 ) : null)
               }

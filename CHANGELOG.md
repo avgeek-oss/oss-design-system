@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Standardize incoming notifications on explicit Mark all as read, durable per-user receipts, complete unread pagination and 24-hour read retention.
+
 ## 1.1.0 — 2026-10-06
 
 - Restore full-width section dividers in the sidebar account menu while retaining padded labels and actions.
