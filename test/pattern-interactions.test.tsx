@@ -217,6 +217,7 @@ test("API key creation retains the name on failure and removes the revealed secr
         expiryOptions={[{ id: "90", label: "90 days" }]}
         onCreate={async (values) => {
           calls++;
+          assert.equal(values.permission.toUpperCase(), "READ");
           assert.deepEqual(values, {
             name: "Automation",
             permission: "read",
@@ -575,7 +576,7 @@ test("external sign-in pending blocks all submit paths and preserves the credent
     await fill("password", "preview password");
     await view.render(<SignIn {...props} isPending />);
     for (const label of [
-      "Sign in",
+      "Signing in…",
       "Forgot password?",
       "Sign in with Passkey",
     ]) {
