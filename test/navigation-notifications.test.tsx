@@ -11,7 +11,10 @@ import {
   SecondaryItems,
   SecondarySidebarLayout,
 } from "../src/navigation/secondary-sidebar.js";
-import { MobileNavigationContext } from "../src/hooks/app-navigation.js";
+import {
+  MobileNavigationContext,
+  useMobileNavigation,
+} from "../src/hooks/app-navigation.js";
 import { RouteProvider } from "../src/hooks/route-context.js";
 import { ApplicationSidebar } from "../src/layouts/app-shell.js";
 import { toast } from "../src/overlays/toast.js";
@@ -65,6 +68,36 @@ const item: NotificationItem = {
   time: "now",
   unread: true,
 };
+
+test("mobile navigation restoration defaults stay compatible with existing context providers", async () => {
+  function Status() {
+    const { isRestoringFocus } = useMobileNavigation();
+    return <output>{String(isRestoringFocus)}</output>;
+  }
+  const view = await mount(<Status />);
+  assert.equal(document.querySelector("output")?.textContent, "false");
+  const value = {
+    host: null,
+    isMobile: true,
+    close: () => {},
+    registerSecondaryNavigation: () => () => {},
+  };
+  await view.render(
+    <MobileNavigationContext.Provider value={value}>
+      <Status />
+    </MobileNavigationContext.Provider>,
+  );
+  assert.equal(document.querySelector("output")?.textContent, "false");
+  await view.render(
+    <MobileNavigationContext.Provider
+      value={{ ...value, isRestoringFocus: true }}
+    >
+      <Status />
+    </MobileNavigationContext.Provider>,
+  );
+  assert.equal(document.querySelector("output")?.textContent, "true");
+  await view.unmount();
+});
 
 test("secondary links retain router and modified-click behavior; actions and disabled items stay buttons", async () => {
   const host = document.createElement("nav");

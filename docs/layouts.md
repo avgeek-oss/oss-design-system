@@ -65,7 +65,7 @@ Use `BreadcrumbTrail` for links and current-page labels. Place `BreadcrumbDropdo
 
 For an entity selector, use `BreadcrumbSelect.Trigger`, `BreadcrumbSelect.Value`, and `BreadcrumbSelect.Popover` with `ListBox`; compose `Autocomplete.Filter` and `SearchField` when search is needed. Applications own the options, loading state and navigation.
 
-Mobile drawers retain the outgoing sidebar through dismissal. After exit, native focus restoration runs first. If focus remains on the document body because navigation replaced the original opener, AppLayout restores focus to the current `.navigation-toggle` button. It preserves deliberate destination focus, skips disabled or inert controls, and cancels the fallback if the drawer reopens. Apps do not need a post-exit callback or a focus timer; `onSidebarOpenChange` continues to report state changes at dismissal start. Test transitions between pages with and without secondary navigation, Escape dismissal, focus return, and reopening. Controls use HeroUI’s native interaction feedback.
+Mobile drawers retain the outgoing sidebar through dismissal. After exit, native focus restoration runs first. If focus remains on the document body because navigation replaced the original opener, AppLayout restores focus to the current `.navigation-toggle` button. It preserves deliberate destination focus, skips disabled or inert controls, and cancels the fallback if the drawer reopens. `useMobileNavigation().isRestoringFocus` is true during mobile dismissal and until the native restoration frame completes. Defer app-owned destination autofocus while it is true, then move focus only if the document is active and focus is still on its body. This prevents a newly mounted heading from competing with native restoration; it does not authorize replacing deliberate destination focus. The signal defaults to false outside `AppLayout`, stays false on desktop, and resets if navigation reopens. Apps do not need a focus timer; `onSidebarOpenChange` continues to report state changes at dismissal start. Test transitions between pages with and without secondary navigation, Escape dismissal, focus return, and reopening. Controls use HeroUI’s native interaction feedback.
 
 ## Modals
 
@@ -97,3 +97,28 @@ Use `Widget.Action` for inline underlined actions in widget headers and footers.
 Use `Widget` for related form content and metrics. Right-aligned actions require a right-aligned column header. Mark a meaningful row header with `isRowHeader` if it is not the first column. Empty-state content belongs inside the content area. Table footers use `text-xs` muted metadata; the native table empty-state cell uses the same inner surface and padding as populated cells.
 
 Use `InlineExternalLink` for external text links. It has one style, with a dashed underline offset of 2px and a new-tab marker. It opens in a new tab by default; setting another target omits the marker.
+
+## Suspending retained overlays
+
+Wrap a retained application subtree in `OverlaySuspensionScope` when the app temporarily presents another surface, such as sign-in after session expiry. Set `isSuspended` from the application’s state. Put the replacement surface outside the scope. The scope does not hide the application itself, establish authentication, cancel requests, or change logical open state.
+
+```tsx
+<>
+  {expired && <SignIn brand={brand} onSubmit={signIn} />}
+  <OverlaySuspensionScope isSuspended={expired}>
+    <div hidden={expired} inert={expired}>
+      <PasskeySettings {...passkeySettings} />
+    </div>
+  </OverlaySuspensionScope>
+</>
+```
+
+Shared `Modal.Backdrop`, `AlertDialog.Backdrop`, `Dropdown.Popover`, `Popover.Content` and `Select.Popover` unmount their native portals during suspension. This releases native focus, inert and scroll locks without firing `onOpenChange`; logical open state retained by the native Root or the caller resumes when suspension ends. A standalone portal using only `defaultOpen` remounts its own local state. Native HeroUI props, refs, dismissal and interaction behavior remain available. A nested scope inherits its parent’s suspension.
+
+Passkey add/rename, API-key creation, member forms and notification-destination dialogs keep non-secret field drafts above their backdrop. Controlled custom fields and children must keep their own draft state above the native portal. Password fields inside a dismissed portal are intentionally not retained. Preferences date-format, time-format and time-zone selectors use the supported native Select portal. Other primitives that own a portal, including calendar/combobox popovers and drawers, are not controlled by this scope; applications must close those through their native controlled APIs or conditionally compose their portal with `useOverlaySuspension().isSuspended`.
+
+After a resumed Modal, AlertDialog, Dropdown or Popover root, or a Select, closes, the wrapper waits for the native exit to detach and restores its native trigger through React Aria's public contexts. Passkey add/rename and recovery-code completion retain their management opener explicitly. Restoration skips suspended, unmounted, hidden, inert or disabled targets and preserves focus deliberately moved to another live control. Standalone controlled dialogs without a native trigger context keep the caller's focus-return responsibility.
+
+The application must abort or settle a suspended WebAuthn/request attempt and reject uncertain server acknowledgments. Shared async actions ignore a suspended or unmounted attempt’s late result and feedback, even after the same owner resumes. They retain pending state until the callback settles and permit a fresh request afterward. Unmount or key the retained application subtree when the authenticated owner changes so another account never inherits its drafts.
+
+For a custom async overlay, call `const isCurrent = capture()` from `useOverlaySuspension()` before awaiting the app callback, then check `isCurrent()` before showing feedback, closing the dialog or storing its result. The predicate becomes false after suspension or owner unmount and stays false after resumption. This only guards UI continuation; the app still owns cancellation, request identity and committed server data.

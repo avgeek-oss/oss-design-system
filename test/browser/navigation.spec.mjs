@@ -222,10 +222,57 @@ test("notification activation waits, retries and preserves native modified click
   await expect(task).toBeVisible();
 });
 
+for (const variant of ["Ignored activation", "Ignored async activation"]) {
+  test(`notification ${variant} stays open without feedback and permits later navigation`, async ({
+    page,
+    fixtureUrl,
+    touch,
+  }) => {
+    await page.goto(
+      fixtureUrl("cosmos/Patterns/NotificationMenu.fixture.tsx", variant),
+    );
+    const trigger = page.getByRole("button", { name: /^Notifications/ });
+    await press(trigger, touch);
+    const task = page.getByRole("link", { name: /Deployment completed/ });
+    await task.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("[data-ignored-attempts]")).toHaveText(
+      "Attempts: 1",
+    );
+    await expect(task).toHaveAttribute("aria-busy", "false");
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(task).toBeFocused();
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+    await expect(page.locator("[data-navigation]")).toHaveText("Not navigated");
+    await press(task, touch);
+    await expect(page.locator("[data-ignored-attempts]")).toHaveText(
+      "Attempts: 2",
+    );
+    await expect(task).toHaveAttribute("aria-busy", "false");
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+    await press(
+      page.getByRole("button", { name: "Allow activation", exact: true }),
+      touch,
+    );
+    await press(task, touch);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await expect(page.locator("[data-ignored-attempts]")).toHaveText(
+      "Attempts: 3",
+    );
+    await expect(page.locator("[data-navigation]")).toHaveText(
+      "Navigated to #deployment",
+    );
+    await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+  });
+}
+
 for (const variant of [
   "Stable navbar",
   "Replaced navbar",
   "Destination focus",
+  "Destination heading",
 ]) {
   test(`browser Back restores navigation focus with ${variant}`, async ({
     page,
@@ -233,11 +280,37 @@ for (const variant of [
     touch,
     reducedMotion,
   }) => {
-    test.skip(!touch, "This regression concerns the mobile drawer");
+    test.skip(
+      !touch && variant !== "Destination heading",
+      "This regression concerns the mobile drawer",
+    );
     await page.goto(
       fixtureUrl("cosmos/Layouts/NavigationFocus.fixture.tsx", variant),
     );
     await page.bringToFront();
+    if (!touch) {
+      const heading = page.getByRole("heading", { name: "Task", exact: true });
+      const toggle = page.getByRole("button", {
+        name: "Toggle navigation",
+        exact: true,
+      });
+      await expect(heading).toHaveAttribute(
+        "data-navigation-restoring",
+        "false",
+      );
+      await toggle.click();
+      await expect(heading).toHaveAttribute(
+        "data-navigation-restoring",
+        "false",
+      );
+      await page.keyboard.press("Space");
+      await expect(heading).toHaveAttribute(
+        "data-navigation-restoring",
+        "false",
+      );
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      return;
+    }
     await page.addStyleTag({
       content:
         ".drawer__dialog {--drawer-exit-duration: 600ms !important;} .drawer__backdrop[data-exiting] {transition-duration:600ms !important;}",
@@ -273,6 +346,9 @@ for (const variant of [
         await expect(
           page.getByRole("dialog", { name: "Navigation" }),
         ).toHaveText(outgoing);
+        await expect(
+          page.getByRole("heading", { name: "Board", exact: true }),
+        ).toHaveAttribute("data-navigation-restoring", "true");
       }
       await expect(
         page.getByRole("dialog", { name: "Navigation" }),
@@ -284,6 +360,9 @@ for (const variant of [
       await expect(
         page.getByRole("button", { name: expected, exact: true }),
       ).toBeFocused();
+      await expect(
+        page.getByRole("heading", { name: "Task", exact: true }),
+      ).toHaveAttribute("data-navigation-restoring", "false");
     }
   });
 }
@@ -320,6 +399,9 @@ test("a drawer reopened as the destination mounts keeps focus inside navigation"
     page.getByRole("heading", { name: "Task", exact: true }),
   ).toBeAttached();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    page.getByRole("heading", { name: "Task", exact: true }),
+  ).toHaveAttribute("data-navigation-restoring", "false");
   const navigation = page.getByRole("dialog", { name: "Navigation" });
   await expect(navigation).toBeVisible();
   await expect(

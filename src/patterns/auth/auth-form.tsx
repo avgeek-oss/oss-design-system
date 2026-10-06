@@ -14,6 +14,7 @@ import { Label } from "../../forms/label.js";
 import { PasswordInput } from "../../forms/password-input.js";
 import { cn } from "../../lib/utils.js";
 import { toast } from "../../overlays/toast.js";
+import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 
 export type AuthField = Omit<
   ComponentProps<typeof Input>,
@@ -35,6 +36,7 @@ export function AuthForm({
   onCancel,
   cancelLabel = "Cancel",
   submitButtonClassName,
+  isPending = false,
 }: {
   fields: AuthField[];
   onSubmit: (values: Record<string, string>) => Promise<void>;
@@ -45,11 +47,14 @@ export function AuthForm({
   onCancel?: () => void;
   cancelLabel?: string;
   submitButtonClassName?: string;
+  isPending?: boolean;
 }) {
   const id = useId();
-  const [busy, setBusy] = useState(false);
+  const [isSubmitting, setBusy] = useState(false);
+  const busy = isSubmitting || isPending;
   const pending = useRef(false);
   const [invalid, setInvalid] = useState<string[]>([]);
+  const suspension = useOverlaySuspension();
   return (
     <form
       className="content-grid"
@@ -58,7 +63,8 @@ export function AuthForm({
       aria-busy={busy}
       onSubmit={async (event) => {
         event.preventDefault();
-        if (pending.current) return;
+        if (pending.current || isPending || suspension.isSuspended) return;
+        const isCurrent = suspension.capture();
         const form = event.currentTarget;
         const inputs = Array.from(form.elements).filter(
           (item): item is HTMLInputElement =>
@@ -90,11 +96,12 @@ export function AuthForm({
             ),
           );
         } catch (cause) {
-          toast.danger(
-            cause instanceof Error
-              ? cause.message
-              : "Unable to continue. Try again.",
-          );
+          if (isCurrent())
+            toast.danger(
+              cause instanceof Error
+                ? cause.message
+                : "Unable to continue. Try again.",
+            );
         } finally {
           pending.current = false;
           setBusy(false);

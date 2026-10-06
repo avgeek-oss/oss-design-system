@@ -1,6 +1,6 @@
 {
   "name": "@avgeek-oss/design-system",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Shared React components, application layouts and UI patterns for Avgeek OSS apps.",
   "type": "module",
   "license": "Apache-2.0",
@@ -672,6 +672,14 @@
     "./patterns/auth/verification-email": {
       "types": "./dist/patterns/auth/verification-email.d.ts",
       "import": "./dist/patterns/auth/verification-email.js"
+    },
+    "./patterns/auth/email-confirmation": {
+      "types": "./dist/patterns/auth/email-confirmation.d.ts",
+      "import": "./dist/patterns/auth/email-confirmation.js"
+    },
+    "./overlays/overlay-suspension": {
+      "types": "./dist/overlays/overlay-suspension.d.ts",
+      "import": "./dist/overlays/overlay-suspension.js"
     }
   }
 }
