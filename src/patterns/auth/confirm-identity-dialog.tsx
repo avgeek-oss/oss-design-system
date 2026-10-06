@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { FingerPrintIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "../../buttons/button.js";
@@ -18,38 +18,50 @@ export type ConfirmIdentityDialogProps = {
       onConfirm: (values: { password: string }) => Promise<void>;
     }
   | { method: "passkey"; onConfirm: () => Promise<void> }
+  | {
+      method: "custom";
+      children: ReactNode;
+      isPending?: boolean;
+      isDismissDisabled?: boolean;
+    }
 );
 
 export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
   async function confirm(password?: string) {
-    if (pending.current) return;
+    if (pending.current || props.method === "custom") return;
     pending.current = true;
     setBusy(true);
     try {
       if (props.method === "passkey") await props.onConfirm();
-      else await props.onConfirm({ password: password! });
+      else await props.onConfirm({ password: password ?? "" });
     } finally {
       pending.current = false;
       setBusy(false);
     }
   }
+  const dismissDisabled =
+    props.method === "custom"
+      ? (props.isDismissDisabled ?? props.isPending ?? false)
+      : busy;
   return (
     <Modal.Backdrop
       isOpen={props.isOpen}
       onOpenChange={(open) => {
-        if (!pending.current) props.onOpenChange(open);
+        if (!dismissDisabled && !pending.current) props.onOpenChange(open);
       }}
     >
       <Modal.Container size="sm">
         <Modal.Dialog>
           <Modal.Header>
             <Modal.Heading>Confirm it’s you</Modal.Heading>
-            <Modal.CloseTrigger isDisabled={busy} />
+            <Modal.CloseTrigger isDisabled={dismissDisabled} />
           </Modal.Header>
           <Modal.Body>
-            {props.method === "passkey" ? (
+            {props.method === "custom" ? (
+              props.children
+            ) : props.method === "passkey" ? (
               <Button
                 className="w-full"
                 isDisabled={busy}
@@ -81,7 +93,7 @@ export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
           <Modal.Footer>
             <Button
               variant="secondary"
-              isDisabled={busy}
+              isDisabled={dismissDisabled}
               onPress={() => props.onOpenChange(false)}
             >
               Cancel

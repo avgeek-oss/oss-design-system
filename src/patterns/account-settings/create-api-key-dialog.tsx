@@ -12,14 +12,14 @@ import { useAsyncAction } from "../use-async-action.js";
 
 export type CreateApiKeyValues = {
   name: string;
-  permission: string;
+  permission?: string;
   expiry: string;
 };
 export type CreatedApiKey = { token: string | null };
 export type CreateApiKeyDialogProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  permissionOptions: readonly ChoiceOption[];
+  permissionOptions?: readonly ChoiceOption[];
   expiryOptions: readonly ChoiceOption[];
   defaultPermission?: string;
   defaultExpiry?: string;
@@ -43,7 +43,7 @@ function CreateContent({
 }: Omit<CreateApiKeyDialogProps, "isOpen">) {
   const nameId = useId();
   const [permission, setPermission] = useState(
-    defaultPermission ?? permissionOptions[0]?.id ?? "",
+    defaultPermission ?? permissionOptions?.[0]?.id ?? "",
   );
   const [expiry, setExpiry] = useState(
     defaultExpiry ?? expiryOptions[0]?.id ?? "",
@@ -55,7 +55,8 @@ function CreateContent({
   }, [created]);
   const action = useAsyncAction("Could not create key");
   const canCreate =
-    permissionOptions.some((option) => option.id === permission) &&
+    (permissionOptions === undefined ||
+      permissionOptions.some((option) => option.id === permission)) &&
     expiryOptions.some((option) => option.id === expiry);
   return (
     <Modal.Backdrop
@@ -109,7 +110,11 @@ function CreateContent({
                   ).trim();
                   if (!name) return;
                   const result = await action.run(() =>
-                    onCreate({ name, permission, expiry }),
+                    onCreate({
+                      name,
+                      ...(permissionOptions ? { permission } : {}),
+                      expiry,
+                    }),
                   );
                   if (result.ok) setCreated(result.value);
                 }}
@@ -128,14 +133,16 @@ function CreateContent({
                     disabled={action.isPending}
                   />
                 </Field>
-                <ChoiceField
-                  label="Permissions"
-                  value={permission}
-                  options={permissionOptions}
-                  onChange={setPermission}
-                  isRequired
-                  isDisabled={action.isPending}
-                />
+                {permissionOptions && (
+                  <ChoiceField
+                    label="Permissions"
+                    value={permission}
+                    options={permissionOptions}
+                    onChange={setPermission}
+                    isRequired
+                    isDisabled={action.isPending}
+                  />
+                )}
                 <ChoiceField
                   label="Expires after"
                   value={expiry}

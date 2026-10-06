@@ -10,31 +10,49 @@ export type MemberEditDialogProps = {
   onOpenChange: (isOpen: boolean) => void;
   member: Member;
   roles: readonly ChoiceOption[];
-  onSave: (values: MemberEditValues) => Promise<void>;
-};
-export function MemberEditDialog({
-  member,
-  onSave,
-  ...props
-}: MemberEditDialogProps) {
+} & (
+  | {
+      mode?: "identity-and-role";
+      onSave: (values: MemberEditValues) => Promise<void>;
+    }
+  | {
+      mode: "role-only";
+      onSave: (values: Pick<MemberEditValues, "role">) => Promise<void>;
+    }
+);
+
+export function MemberEditDialog(props: MemberEditDialogProps) {
+  const { member, mode } = props;
   return (
     <MemberFormDialog
       key={member.id}
       {...props}
       defaultRole={member.role}
-      title={`Edit ${member.name}`}
+      title={
+        mode === "role-only"
+          ? `Edit role for ${member.name}`
+          : `Edit ${member.name}`
+      }
       submitLabel="Update"
-      fields={[
-        {
-          name: "name",
-          label: "Name",
-          defaultValue: member.name,
-          required: true,
-          maxLength: 120,
-          autoComplete: "off",
-        },
-      ]}
-      onSubmit={(values, role) => onSave({ name: values.name ?? "", role })}
+      fields={
+        mode === "role-only"
+          ? []
+          : [
+              {
+                name: "name",
+                label: "Name",
+                defaultValue: member.name,
+                required: true,
+                maxLength: 120,
+                autoComplete: "off",
+              },
+            ]
+      }
+      onSubmit={(values, role) =>
+        props.mode === "role-only"
+          ? props.onSave({ role })
+          : props.onSave({ name: values.name ?? "", role })
+      }
     />
   );
 }

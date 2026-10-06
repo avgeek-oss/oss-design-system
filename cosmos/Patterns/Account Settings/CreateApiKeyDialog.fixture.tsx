@@ -1,3 +1,5 @@
 import { CreateApiKeyPreview } from "../../../studio/pattern-previews";
-
-export default CreateApiKeyPreview;
+export default {
+  Permissions: () => <CreateApiKeyPreview />,
+  NameAndExpiry: () => <CreateApiKeyPreview permissions={false} />,
+};

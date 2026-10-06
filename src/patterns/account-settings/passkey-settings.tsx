@@ -18,12 +18,12 @@ export type PasskeySettingsProps = Omit<
 > & {
   maxNameLength?: number;
   onAdd: (name: string) => Promise<void>;
-  onRename: (id: string, name: string) => Promise<void>;
+  onRename?: (id: string, name: string) => Promise<void>;
   onRemove: (id: string) => Promise<void>;
-  onReplaceRecoveryCodes: () => Promise<void>;
+  onReplaceRecoveryCodes?: () => Promise<void>;
   recoveryCodes?: readonly string[];
   recoveryCodesFilename?: string;
-  onDismissRecoveryCodes: () => void;
+  onDismissRecoveryCodes?: () => void;
 };
 
 type Action =
@@ -61,7 +61,7 @@ export function PasskeySettings({
           <Button onPress={() => setAction({ type: "add" })}>
             Add passkey
           </Button>
-          {items.length > 0 && (
+          {items.length > 0 && onReplaceRecoveryCodes && (
             <Dropdown>
               <Button variant="secondary" isIconOnly aria-label="More actions">
                 <HugeiconsIcon
@@ -86,12 +86,14 @@ export function PasskeySettings({
         formatDate={formatDate}
         actions={(item) => (
           <>
-            <Button
-              variant="secondary"
-              onPress={() => setAction({ type: "rename", id: item.id })}
-            >
-              Rename
-            </Button>
+            {onRename && (
+              <Button
+                variant="secondary"
+                onPress={() => setAction({ type: "rename", id: item.id })}
+              >
+                Rename
+              </Button>
+            )}
             <Button
               variant="danger"
               onPress={() => setAction({ type: "remove", id: item.id })}
@@ -138,7 +140,8 @@ export function PasskeySettings({
                     setBusy(true);
                     try {
                       if (action.type === "add") await onAdd(values.name!);
-                      else await onRename(action.id, values.name!);
+                      else if (onRename)
+                        await onRename(action.id, values.name!);
                       setAction(null);
                       toast.success(
                         action.type === "add"
@@ -165,14 +168,14 @@ export function PasskeySettings({
             }
             onClose={() => setAction(null)}
             onConfirm={async () => {
-              if (action.type === "replace") await onReplaceRecoveryCodes();
+              if (action.type === "replace") await onReplaceRecoveryCodes?.();
               else await onRemove(action.id);
               toast.success("Passkeys updated");
             }}
           />
         )
       )}
-      {recoveryCodes.length > 0 && (
+      {recoveryCodes.length > 0 && onDismissRecoveryCodes && (
         <Modal.Backdrop
           isOpen
           onOpenChange={(open) => {

@@ -96,6 +96,7 @@ export function IdentityCredentialsForm({
 
   const submit = handleSubmit(
     async (credentials) => {
+      if (disabled) return;
       if (
         identifierType === "email" &&
         !z.email().safeParse(credentials.identifier).success

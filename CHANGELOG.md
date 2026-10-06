@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Allow applications to omit unsupported API-key permissions, passkey management actions, email-change controls, and sign-in fallback methods.
+- Support externally pending sign-in, app-owned identity-verification content, and disabled one-time authorization decisions.
+- Add role-only member editing, truthful invitation-result guidance, invitation avatars, and current-user identity labels.
+- Report clipboard success and failure through toasts with a stable copy action, and explain session revocation consequences.
+
 ## 1.1.0 — 2026-10-06
 
 - Restore full-width section dividers in the sidebar account menu while retaining padded labels and actions.

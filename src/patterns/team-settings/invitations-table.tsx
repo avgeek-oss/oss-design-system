@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { UserAvatar } from "../user-avatar.js";
 import { ResourceTable } from "../resource-table.js";
 import { StatusIndicator, type StatusDescriptor } from "../status-indicator.js";
 import { actionColumn } from "../settings/table-actions.js";
@@ -10,6 +11,7 @@ import { AsyncActionButton } from "../actions/async-action-button.js";
 export type Invitation = {
   id: string;
   email: string;
+  name?: string;
   role: string;
   expiresAt: string;
   status?: StatusDescriptor;
@@ -44,9 +46,13 @@ export function InvitationsTable<T extends Invitation>({
           key: "email",
           header: "Email",
           cell: (item) => (
-            <div className="grid gap-1">
-              <span>{item.email}</span>
-              {item.status ? <StatusIndicator {...item.status} /> : null}
+            <div className="flex items-center gap-3">
+              <UserAvatar email={item.email} name={item.name} size="sm" />
+              <div className="min-w-0 grid gap-1">
+                {item.name ? <span>{item.name}</span> : null}
+                <span className="break-words">{item.email}</span>
+                {item.status ? <StatusIndicator {...item.status} /> : null}
+              </div>
             </div>
           ),
         },
