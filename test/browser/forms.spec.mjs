@@ -649,6 +649,12 @@ for (const scenario of [
           await page.keyboard.press("Enter");
         }
       }
+    } else if (["Dropdown", "Popover"].includes(scenario.variant)) {
+      await page.keyboard.press("Escape");
+    }
+    if (
+      ["Modal", "AlertDialog", "Dropdown", "Popover"].includes(scenario.variant)
+    ) {
       await expect(page.getByRole(scenario.role)).toHaveCount(0);
       await expect(
         page.getByRole("button", { name: scenario.opener, exact: true }),
