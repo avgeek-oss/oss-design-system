@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 — Unreleased
+## 1.0.0 — 2026-10-06
 
 Initial shared React design system for Avgeek OSS applications.
 
