@@ -7,6 +7,7 @@ import { Field } from "../../forms/field.js";
 import { Input } from "../../forms/input.js";
 import { Label } from "../../forms/label.js";
 import { CodeBlock } from "../../typography/code-block.js";
+import { toast } from "../../overlays/toast.js";
 import { ChoiceField, type ChoiceOption } from "../choice-field.js";
 import { useAsyncAction } from "../use-async-action.js";
 
@@ -77,6 +78,7 @@ function CreateContent({
   );
   const [created, setCreated] = useState<CreatedApiKey>();
   const doneRef = useRef<HTMLButtonElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (created) doneRef.current?.focus();
   }, [created]);
@@ -135,7 +137,11 @@ function CreateContent({
                   const name = String(
                     new FormData(event.currentTarget).get("name") ?? "",
                   ).trim();
-                  if (!name) return;
+                  if (!name) {
+                    toast.danger("Enter a name for this API key.");
+                    nameRef.current?.focus();
+                    return;
+                  }
                   const result = await action.run(() =>
                     onCreate({ name, permission, expiry }),
                   );
@@ -148,6 +154,7 @@ function CreateContent({
                   </Label>
                   <Input
                     id={nameId}
+                    ref={nameRef}
                     name="name"
                     required
                     maxLength={120}

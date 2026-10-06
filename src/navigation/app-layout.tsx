@@ -63,6 +63,7 @@ export function AppLayout({
   const root = useRef<HTMLDivElement>(null);
   const hasSidebar = Boolean(sidebar);
   const [drawerMounted, setDrawerMounted] = useState(false);
+  const wasDrawerMounted = useRef(false);
   const previousSidebarOpen = useRef(sidebarOpen);
   const [presented, setPresented] = useState({
     pathname,
@@ -116,6 +117,30 @@ export function AppLayout({
         ?.focus({ preventScroll: true });
     }
   }, [isDesktop, sidebarOpen]);
+
+  useLayoutEffect(() => {
+    const exited = wasDrawerMounted.current && !drawerMounted;
+    wasDrawerMounted.current = drawerMounted;
+    if (!exited || isDesktop || sidebarOpen) return;
+
+    // The outgoing navbar can disappear before React Aria restores its opener.
+    const frame = requestAnimationFrame(() => {
+      const element = root.current;
+      const document = element?.ownerDocument;
+      if (document?.hasFocus() && document.activeElement === document.body) {
+        const toggle =
+          element?.querySelector<HTMLButtonElement>(".navigation-toggle");
+        if (
+          toggle?.isConnected &&
+          !toggle.disabled &&
+          !toggle.closest("[inert]")
+        ) {
+          toggle.focus({ preventScroll: true });
+        }
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [drawerMounted, isDesktop, sidebarOpen]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setMotionReady(true));

@@ -5,10 +5,17 @@ import { TooltipText } from "../overlays/tooltip.js";
 import {
   createContext,
   useContext,
+  useEffect,
+  useRef,
   type ComponentProps,
   type MouseEvent,
 } from "react";
-import { composeRenderProps } from "react-aria-components";
+import {
+  composeRenderProps,
+  OverlayTriggerStateContext,
+} from "react-aria-components";
+import { useFocusManager } from "react-aria";
+import { useObjectRef } from "@react-aria/utils";
 import { Dropdown } from "../overlays/dropdown.js";
 import { Select } from "../forms/select.js";
 
@@ -77,11 +84,97 @@ function BreadcrumbSelectTrigger({
   );
 }
 
+function ReopenedPopoverFocus({
+  isOpen,
+  popover,
+}: {
+  isOpen: boolean;
+  popover: { current: HTMLElement | null };
+}) {
+  const focusManager = useFocusManager();
+  const previousOpen = useRef(isOpen);
+  useEffect(() => {
+    const reopened = isOpen && !previousOpen.current;
+    previousOpen.current = isOpen;
+    if (!reopened) return;
+    // A retained native FocusScope does not repeat its mount autofocus after an interrupted exit.
+    const frame = requestAnimationFrame(() => {
+      const node = popover.current;
+      if (!node?.isConnected) return;
+      const document = node.ownerDocument;
+      const active = document.activeElement;
+      const controls = active?.getAttribute("aria-controls")?.split(/\s+/);
+      const linkedTrigger = controls?.some((id) =>
+        node.contains(document.getElementById(id)),
+      );
+      if (document.hasFocus() && (active === document.body || linkedTrigger))
+        focusManager?.focusFirst();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [isOpen, popover, focusManager]);
+  return null;
+}
+
+function BreadcrumbDropdownPopover({
+  className,
+  ref,
+  children,
+  ...props
+}: ComponentProps<typeof Dropdown.Popover>) {
+  const state = useContext(OverlayTriggerStateContext);
+  const popover = useObjectRef<HTMLElement>(ref);
+  return (
+    <Dropdown.Popover
+      {...props}
+      ref={popover}
+      className={composeRenderProps(className, (className) =>
+        cn("breadcrumb-popover", className),
+      )}
+    >
+      <ReopenedPopoverFocus
+        isOpen={props.isOpen ?? state?.isOpen ?? false}
+        popover={popover}
+      />
+      {children}
+    </Dropdown.Popover>
+  );
+}
+
+function BreadcrumbSelectPopover({
+  className,
+  ref,
+  children,
+  ...props
+}: ComponentProps<typeof Select.Popover>) {
+  const state = useContext(OverlayTriggerStateContext);
+  const popover = useObjectRef<HTMLElement>(ref);
+  return (
+    <Select.Popover
+      {...props}
+      ref={popover}
+      className={composeRenderProps(className, (className) =>
+        cn("breadcrumb-popover", className),
+      )}
+    >
+      <ReopenedPopoverFocus
+        isOpen={props.isOpen ?? state?.isOpen ?? false}
+        popover={popover}
+      />
+      {children}
+    </Select.Popover>
+  );
+}
+
 export const BreadcrumbDropdown = {
   ...Dropdown,
   Trigger: BreadcrumbDropdownTrigger,
+  Popover: BreadcrumbDropdownPopover,
 };
-export const BreadcrumbSelect = { ...Select, Trigger: BreadcrumbSelectTrigger };
+export const BreadcrumbSelect = {
+  ...Select,
+  Trigger: BreadcrumbSelectTrigger,
+  Popover: BreadcrumbSelectPopover,
+};
 
 export function BreadcrumbTrail({
   className,

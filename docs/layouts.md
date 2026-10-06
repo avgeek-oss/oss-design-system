@@ -18,6 +18,8 @@ Below 640px, the shared auth frame starts at the top with 32px vertical and 16px
 
 Do not put a `pt-4` wrapper around `NameSettingsForm` in this example.
 
+Page headings wrap by default. Set `titleOverflow="truncate"` on `ApplicationPage`, `ContentPage`, or `StatusPage` when the title and actions must remain on one row. The title area shrinks while actions retain their width; plain titles use `TooltipText` to reveal clipped text on hover, focus, or press. A custom `titleContent` keeps its own icon and text composition: give its text `min-w-0 truncate` and use `TooltipText` for the full title. Keep action groups compact enough to fit the narrowest supported screen; this option does not hide actions.
+
 Set a navigation item's `activePath` when its destination is one child of a section, for example `href="/settings/profile"` with `activePath="/settings"`. Matching respects path boundaries. The default matches the destination and its descendants.
 
 Matching internal primary links expose `aria-current="page"` using the same rule as their visual selection. Account and Team descendants retain their owning section; similar prefixes such as `/settings-archive` and `/teams` do not match. `preserveSubroute` keeps the current child route when its owning primary link is activated. External links do not expose a current-page state.
@@ -30,7 +32,7 @@ The account menu uses labeled Account, product, and Session sections with divide
 
 ### Breadcrumbs
 
-Use `BreadcrumbTrail` for links and current-page labels. Place `BreadcrumbDropdown.Root` or `BreadcrumbSelect.Root` in an item's `content` for navigation menus or searchable entity selectors. Both retain HeroUI's compound parts and keyboard behavior; their compact triggers inherit the current item's emphasis and show a chevron. Menus render in a portal outside the breadcrumb's truncation area.
+Use `BreadcrumbTrail` for links and current-page labels. Place `BreadcrumbDropdown.Root` or `BreadcrumbSelect.Root` in an item's `content` for navigation menus or searchable entity selectors. Both retain HeroUI's compound parts and keyboard behavior; their compact triggers inherit the current item's emphasis and show a chevron. Menus render in a portal outside the breadcrumb's truncation area. Breadcrumb popovers use an opacity-only 120ms opening fade and 80ms closing fade, keeping their geometry and pressed rows steady. Reduced motion disables the fade. Their native compound parts, refs, controlled state, keyboard navigation, and focus return remain available; reopening a retained closing popover restores focus inside its active scope without remounting it. Ordinary `Dropdown` and `Select` keep native motion.
 
 ```tsx
 <BreadcrumbTrail
@@ -63,7 +65,7 @@ Use `BreadcrumbTrail` for links and current-page labels. Place `BreadcrumbDropdo
 
 For an entity selector, use `BreadcrumbSelect.Trigger`, `BreadcrumbSelect.Value`, and `BreadcrumbSelect.Popover` with `ListBox`; compose `Autocomplete.Filter` and `SearchField` when search is needed. Applications own the options, loading state and navigation.
 
-Mobile drawers retain the outgoing sidebar through dismissal. Test transitions between pages with and without secondary navigation, Escape dismissal, focus return, and reopening. Controls use HeroUI’s native interaction feedback.
+Mobile drawers retain the outgoing sidebar through dismissal. After exit, native focus restoration runs first. If focus remains on the document body because navigation replaced the original opener, AppLayout restores focus to the current `.navigation-toggle` button. It preserves deliberate destination focus, skips disabled or inert controls, and cancels the fallback if the drawer reopens. Apps do not need a post-exit callback or a focus timer; `onSidebarOpenChange` continues to report state changes at dismissal start. Test transitions between pages with and without secondary navigation, Escape dismissal, focus return, and reopening. Controls use HeroUI’s native interaction feedback.
 
 ## Modals
 

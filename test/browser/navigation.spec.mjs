@@ -221,3 +221,348 @@ test("notification activation waits, retries and preserves native modified click
   );
   await expect(task).toBeVisible();
 });
+
+for (const variant of [
+  "Stable navbar",
+  "Replaced navbar",
+  "Destination focus",
+]) {
+  test(`browser Back restores navigation focus with ${variant}`, async ({
+    page,
+    fixtureUrl,
+    touch,
+    reducedMotion,
+  }) => {
+    test.skip(!touch, "This regression concerns the mobile drawer");
+    await page.goto(
+      fixtureUrl("cosmos/Layouts/NavigationFocus.fixture.tsx", variant),
+    );
+    await page.bringToFront();
+    await page.addStyleTag({
+      content:
+        ".drawer__dialog {--drawer-exit-duration: 600ms !important;} .drawer__backdrop[data-exiting] {transition-duration:600ms !important;}",
+    });
+    for (let repeat = 0; repeat < 6; repeat++) {
+      await page
+        .getByRole("button", { name: "Back to board", exact: true })
+        .tap();
+      await expect(
+        page.getByRole("heading", { name: "Board", exact: true }),
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Toggle navigation", exact: true })
+        .tap();
+      await expect(
+        page.getByRole("dialog", { name: "Navigation" }),
+      ).toBeVisible();
+      await page.evaluate(async () => {
+        await Promise.all(
+          globalThis.document
+            .getAnimations()
+            .map((animation) => animation.finished),
+        );
+      });
+      const outgoing = await page
+        .getByRole("dialog", { name: "Navigation" })
+        .textContent();
+      await page.goBack();
+      if (reducedMotion !== "reduce") {
+        await expect(
+          page.locator(".drawer__backdrop[data-exiting=true]"),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("dialog", { name: "Navigation" }),
+        ).toHaveText(outgoing);
+      }
+      await expect(
+        page.getByRole("dialog", { name: "Navigation" }),
+      ).toHaveCount(0);
+      const expected =
+        variant === "Destination focus"
+          ? "Destination action"
+          : "Toggle navigation";
+      await expect(
+        page.getByRole("button", { name: expected, exact: true }),
+      ).toBeFocused();
+    }
+  });
+}
+
+test("a drawer reopened as the destination mounts keeps focus inside navigation", async ({
+  page,
+  fixtureUrl,
+  touch,
+}) => {
+  test.skip(!touch, "This regression concerns the mobile drawer");
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Layouts/NavigationFocus.fixture.tsx",
+      "Reopen on arrival",
+    ),
+  );
+  await page.bringToFront();
+  await page.getByRole("button", { name: "Back to board", exact: true }).tap();
+  const toggle = page.getByRole("button", {
+    name: "Toggle navigation",
+    exact: true,
+  });
+  await toggle.tap();
+  await expect(page.getByRole("dialog", { name: "Navigation" })).toBeVisible();
+  await page.evaluate(async () => {
+    await Promise.all(
+      globalThis.document
+        .getAnimations()
+        .map((animation) => animation.finished),
+    );
+  });
+  await page.goBack();
+  await expect(
+    page.getByRole("heading", { name: "Task", exact: true }),
+  ).toBeAttached();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const navigation = page.getByRole("dialog", { name: "Navigation" });
+  await expect(navigation).toBeVisible();
+  await expect(
+    navigation.getByRole("button", { name: "All status", exact: true }),
+  ).toHaveCount(0);
+  await expect
+    .poll(() =>
+      navigation.evaluate((element) =>
+        element.contains(globalThis.document.activeElement),
+      ),
+    )
+    .toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(navigation).toHaveCount(0);
+  await expect(toggle).toBeFocused();
+});
+
+async function sampleFrames(popover) {
+  const frames = await popover.evaluate(async (element) => {
+    const frames = [];
+    for (let index = 0; index < 12; index++) {
+      const bounds = element.getBoundingClientRect();
+      const style = globalThis.getComputedStyle(element);
+      frames.push({
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+        identity: new globalThis.DOMMatrixReadOnly(style.transform).isIdentity,
+        opacity: Number(style.opacity),
+      });
+      await new Promise(globalThis.requestAnimationFrame);
+    }
+    return frames;
+  });
+  for (const [index, frame] of frames.entries()) {
+    assert.equal(
+      frame.identity,
+      true,
+      "Breadcrumb popover must not scale or slide",
+    );
+    for (const property of ["x", "y", "width", "height"])
+      assert.ok(
+        Math.abs(frame[property] - frames[0][property]) < 0.2,
+        "Breadcrumb geometry must remain steady",
+      );
+    if (index > 0)
+      assert.ok(
+        frame.opacity + 0.001 >= frames[index - 1].opacity,
+        "Opening opacity must progress without flickering",
+      );
+  }
+  assert.equal(frames.at(-1).opacity, 1);
+}
+
+for (const kind of ["dropdown", "select"]) {
+  test(`breadcrumb ${kind} preserves geometry, selection and focus through interrupted motion`, async ({
+    page,
+    fixtureUrl,
+    touch,
+    theme,
+    reducedMotion,
+  }, testInfo) => {
+    await page.goto(
+      fixtureUrl("cosmos/Primitives/Navigation/Breadcrumbs.fixture.tsx"),
+    );
+    await page.bringToFront();
+    await page.evaluate(() => globalThis.document.fonts.ready);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    const trigger = page.getByRole("button", {
+      name: kind === "dropdown" ? "Switch section" : /Switch item/,
+      exact: kind === "dropdown",
+    });
+    const popover = page.locator(
+      kind === "dropdown"
+        ? '[data-slot="dropdown-popover"]'
+        : '[data-slot="select-popover"]',
+    );
+    await press(trigger, touch);
+    await sampleFrames(popover);
+    if (reducedMotion === "reduce")
+      assert.equal(
+        await popover.evaluate(
+          (element) =>
+            element
+              .getAnimations()
+              .filter((animation) => animation.playState === "running").length,
+        ),
+        0,
+      );
+    await page.keyboard.press("Escape");
+    await expect(popover).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await trigger.focus();
+      await page.keyboard.press("Enter");
+      await expect(popover).toHaveCount(1);
+      await page.keyboard.press("Escape");
+      const bounds = await trigger.boundingBox();
+      assert.ok(bounds);
+      if (touch)
+        await page.touchscreen.tap(
+          bounds.x + bounds.width / 2,
+          bounds.y + bounds.height / 2,
+        );
+      else
+        await page.mouse.click(
+          bounds.x + bounds.width / 2,
+          bounds.y + bounds.height / 2,
+        );
+      await expect(popover).toHaveCount(1);
+      await expect(popover).not.toHaveAttribute("data-exiting", "true");
+      await expect(trigger).toHaveAttribute("aria-expanded", "true");
+      await expect
+        .poll(() =>
+          popover.evaluate((element) =>
+            element.contains(globalThis.document.activeElement),
+          ),
+        )
+        .toBe(true);
+      await page.keyboard.press("Escape");
+      await expect(popover).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    }
+    if (reducedMotion === "no-preference") {
+      const slowExit = await page.addStyleTag({
+        content:
+          ".breadcrumb-popover[data-exiting=true] { transition-duration: 10s !important; }",
+      });
+      await press(trigger, touch);
+      await sampleFrames(popover);
+      await page.keyboard.press("Escape");
+      assert.equal(
+        await popover.evaluate((element) => {
+          const animation = element
+            .getAnimations()
+            .find((animation) => animation.playState === "running");
+          if (!animation) return false;
+          element.dataset.reopenMarker = "same-popover";
+          animation.pause();
+          return true;
+        }),
+        true,
+        "Paused exit fixture must retain the mounted popover",
+      );
+      const bounds = await trigger.boundingBox();
+      assert.ok(bounds);
+      if (touch)
+        await page.touchscreen.tap(
+          bounds.x + bounds.width / 2,
+          bounds.y + bounds.height / 2,
+        );
+      else
+        await page.mouse.click(
+          bounds.x + bounds.width / 2,
+          bounds.y + bounds.height / 2,
+        );
+      await expect(popover).not.toHaveAttribute("data-exiting", "true");
+      await expect(popover).toHaveAttribute(
+        "data-reopen-marker",
+        "same-popover",
+      );
+      await expect
+        .poll(() =>
+          popover.evaluate((element) =>
+            element.contains(globalThis.document.activeElement),
+          ),
+        )
+        .toBe(true);
+      await slowExit.evaluate((element) => element.remove());
+      await page.keyboard.press("Escape");
+      await expect(popover).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    }
+    const slowEntry =
+      reducedMotion === "no-preference"
+        ? await page.addStyleTag({
+            content:
+              ".breadcrumb-popover:not([data-exiting=true]) { transition-duration: 10s !important; }",
+          })
+        : null;
+    await press(trigger, touch);
+    if (slowEntry)
+      assert.equal(
+        await popover.evaluate((element) => {
+          const animation = element
+            .getAnimations()
+            .find((animation) => animation.playState === "running");
+          if (!animation) return false;
+          animation.pause();
+          return true;
+        }),
+        true,
+        "Opening fade must be active for the interrupted selection test",
+      );
+    if (kind === "select") {
+      const search = page.getByRole("searchbox", {
+        name: "Search items",
+      });
+      await search.fill("Second");
+      await expect(
+        page.getByRole("option", { name: "First item", exact: true }),
+      ).toHaveCount(0);
+    }
+    const item = page.getByRole(
+      kind === "dropdown" ? "menuitemradio" : "option",
+      {
+        name: kind === "dropdown" ? "Second section" : "Second item",
+        exact: true,
+      },
+    );
+    if (!touch) {
+      const bounds = await item.boundingBox();
+      assert.ok(bounds);
+      await page.mouse.move(
+        bounds.x + bounds.width / 2,
+        bounds.y + bounds.height / 2,
+      );
+      await page.mouse.down();
+      assert.equal(
+        await item.evaluate(
+          (element) =>
+            new globalThis.DOMMatrixReadOnly(
+              globalThis.getComputedStyle(element).transform,
+            ).isIdentity,
+        ),
+        true,
+        "Pressed breadcrumb items must not scale",
+      );
+      await page.mouse.up();
+    } else await item.tap();
+    await expect(popover).toHaveCount(0);
+    if (slowEntry) await slowEntry.evaluate((element) => element.remove());
+    await expect(trigger).toContainText(
+      kind === "dropdown" ? "Second section" : "Second item",
+    );
+    await press(trigger, touch);
+    await sampleFrames(popover);
+    await page.screenshot({
+      path: testInfo.outputPath("preview.png"),
+    });
+    await page.keyboard.press("Escape");
+    await expect(popover).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+  });
+}

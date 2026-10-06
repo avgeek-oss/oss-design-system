@@ -74,3 +74,5 @@ Auth screens are exported from their own files, rather than implemented inside C
 `CodeBlock.CopyButton` retains the visible Copy label and accessible Copy code name. Clipboard writes lock repeat presses immediately, expose native pending state, and unlock for retry after completion. Each completed attempt produces one success or danger toast; an unavailable or denied clipboard keeps the code visible for manual selection. A custom `aria-label` remains stable through success and failure. Copy status is not duplicated inline.
 
 `ActionConfirmation` accepts `confirmLabel` and `cancelLabel` for concrete consequence actions. `SessionsSettings` uses Revoke session and Keep session and explains that the other browser loses access immediately. The current session remains protected from revocation through this settings surface.
+
+`CreateApiKeyDialog` trims the key name before creation. A whitespace-only name produces one danger toast per submission and returns focus to Name, retaining the draft without calling `onCreate`. A corrected name is trimmed and passes through the existing pending guard.
