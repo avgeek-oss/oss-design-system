@@ -966,3 +966,54 @@ test("name settings lock simultaneous submissions and retain the draft for retry
     await view.unmount();
   }
 });
+
+test("API key names reject whitespace with toast and focus, retain the draft, and allow a trimmed retry once", async () => {
+  let calls = 0;
+  const pending = deferred();
+  const view = await mount(
+    <CreateApiKeyDialog
+      isOpen
+      onOpenChange={() => {}}
+      expiryOptions={[{ id: "90", label: "90 days" }]}
+      onCreate={async (values) => {
+        calls++;
+        assert.deepEqual(values, { name: "Automation", expiry: "90" });
+        await pending.promise;
+        return { token: "preview-key" };
+      }}
+    />,
+  );
+  try {
+    await fill("name", "   ");
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await submit();
+      assert.equal(calls, 0);
+      assert.equal(dangerMessages.length, attempt + 1);
+      assert.equal(dangerMessages.at(-1), "Enter a name for this API key.");
+      const name =
+        document.querySelector<HTMLInputElement>('input[name="name"]');
+      assert.equal(document.activeElement, name);
+      assert.equal(name?.value, "   ");
+      assert.doesNotMatch(
+        document.body.textContent ?? "",
+        /Enter a name for this API key/,
+      );
+    }
+    await fill("name", " Automation ");
+    const form = document.querySelector("form");
+    assert.ok(form);
+    await act(async () => {
+      form.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+      form.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+    });
+    assert.equal(calls, 1);
+    await act(async () => pending.resolve());
+    assert.match(document.body.textContent ?? "", /preview-key/);
+  } finally {
+    await view.unmount();
+  }
+});

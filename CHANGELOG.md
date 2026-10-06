@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Reject whitespace-only API-key names with toast feedback and input focus, retaining the draft for correction without creating a key.
+
 ## 1.2.0 — 2026-10-06
 
 - Support real secondary navigation links alongside action buttons, preserving native menu density, router integration, modified clicks, and mobile dismissal.
