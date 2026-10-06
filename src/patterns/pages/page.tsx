@@ -2,6 +2,8 @@ import type { ComponentProps, ReactElement, ReactNode } from "react";
 import { AppShellBreadcrumb } from "../../layouts/app-shell-breadcrumb.js";
 import type { AppShellBreadcrumbItems } from "../../layouts/application-shell-types.js";
 import { Page, PageSection } from "../../layouts/page.js";
+import { cn } from "../../lib/utils.js";
+import { TooltipText } from "../../overlays/tooltip.js";
 import {
   TypographyHeading,
   TypographyParagraph,
@@ -22,6 +24,7 @@ export interface ApplicationPageProps extends Shared {
   title: string;
   titleContent?: ReactNode;
   titleDensity?: string;
+  titleOverflow?: "wrap" | "truncate";
 }
 function TitledPage({
   actions,
@@ -35,6 +38,7 @@ function TitledPage({
   title,
   titleContent,
   titleDensity: _titleDensity,
+  titleOverflow = "wrap",
   ...props
 }: ApplicationPageProps) {
   return (
@@ -42,18 +46,46 @@ function TitledPage({
       {...props}
       lead={
         <PageSection className="py-5" xPadding="none" yPadding="none">
-          <header className="flex min-h-8 flex-wrap items-center justify-between gap-5">
-            <div className="flex min-w-0 flex-wrap items-center gap-3 pl-1 sm:pl-0">
+          <header
+            className={cn(
+              "flex min-h-8 items-center justify-between gap-5",
+              titleOverflow === "wrap" && "flex-wrap",
+            )}
+          >
+            <div
+              className={cn(
+                "flex min-w-0 items-center gap-3 pl-1 sm:pl-0",
+                titleOverflow === "truncate" ? "flex-1" : "flex-wrap",
+              )}
+            >
               <TypographyHeading
-                className="flex min-w-0 items-center text-lg leading-7 font-medium"
+                className={cn(
+                  "flex min-w-0 items-center text-lg leading-7 font-medium",
+                  titleOverflow === "truncate" && "flex-1 overflow-hidden",
+                )}
                 elementType="h1"
                 level={3}
               >
-                {titleContent ?? title}
+                {titleContent ??
+                  (titleOverflow === "truncate" ? (
+                    <TooltipText
+                      className="min-w-0 truncate"
+                      tooltip={title}
+                      openOnPress
+                    >
+                      {title}
+                    </TooltipText>
+                  ) : (
+                    title
+                  ))}
               </TypographyHeading>
               {badge}
             </div>
-            {actions}
+            {titleOverflow === "truncate" && actions ? (
+              <div className="flex shrink-0 items-center gap-2">{actions}</div>
+            ) : (
+              actions
+            )}
           </header>
           {description ? (
             <TypographyParagraph className="mt-2" color="muted">

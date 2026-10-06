@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add optional `titleOverflow="truncate"` to page patterns for a shrinking title and fixed-width actions on one row, retaining the wrapping default.
+
 - Keep ordinary query loading announcements visually hidden while retaining accessible status and explicit visible progress.
 - Prevent repeated code-copy presses while a clipboard write is pending, with toast feedback and retry after failure.
 - Discover browser regressions through one shared suite and reuse fixture serving, browser setup, and cleanup.

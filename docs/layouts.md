@@ -18,6 +18,8 @@ Below 640px, the shared auth frame starts at the top with 32px vertical and 16px
 
 Do not put a `pt-4` wrapper around `NameSettingsForm` in this example.
 
+Page headings wrap by default. Set `titleOverflow="truncate"` on `ApplicationPage`, `ContentPage`, or `StatusPage` when the title and actions must remain on one row. The title area shrinks while actions retain their width; plain titles use `TooltipText` to reveal clipped text on hover, focus, or press. A custom `titleContent` keeps its own icon and text composition: give its text `min-w-0 truncate` and use `TooltipText` for the full title. Keep action groups compact enough to fit the narrowest supported screen; this option does not hide actions.
+
 Set a navigation item's `activePath` when its destination is one child of a section, for example `href="/settings/profile"` with `activePath="/settings"`. Matching respects path boundaries. The default matches the destination and its descendants.
 
 Matching internal primary links expose `aria-current="page"` using the same rule as their visual selection. Account and Team descendants retain their owning section; similar prefixes such as `/settings-archive` and `/teams` do not match. `preserveSubroute` keeps the current child route when its owning primary link is activated. External links do not expose a current-page state.
