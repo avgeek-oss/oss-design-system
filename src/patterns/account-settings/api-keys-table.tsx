@@ -32,6 +32,7 @@ function credentialColumns<T extends ApiKey>(
   return [
     {
       key: "permissions",
+      mobileFullWidth: true,
       header: "Permissions",
       cell: (item) => item.permissions ?? "—",
     },
@@ -63,6 +64,7 @@ export function ApiKeysTable<T extends ApiKey>({
   return (
     <ResourceTable
       ariaLabel="API keys"
+      mobileLayout="stacked"
       items={items}
       getRowKey={(item) => item.id}
       emptyTitle="No API keys"
@@ -70,6 +72,7 @@ export function ApiKeysTable<T extends ApiKey>({
       columns={[
         {
           key: "name",
+          isRowHeader: true,
           header: "Name",
           cell: (item) => (
             <div className="grid gap-1">

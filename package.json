@@ -1,6 +1,6 @@
 {
   "name": "@avgeek-oss/design-system",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Shared React components, application layouts and UI patterns for Avgeek OSS apps.",
   "type": "module",
   "license": "Apache-2.0",
@@ -644,6 +644,30 @@
     "./patterns/choice-field": {
       "types": "./dist/patterns/choice-field.d.ts",
       "import": "./dist/patterns/choice-field.js"
+    },
+    "./patterns/account-settings/profile-image-settings": {
+      "types": "./dist/patterns/account-settings/profile-image-settings.d.ts",
+      "import": "./dist/patterns/account-settings/profile-image-settings.js"
+    },
+    "./patterns/auth/invitation-password-setup": {
+      "types": "./dist/patterns/auth/invitation-password-setup.d.ts",
+      "import": "./dist/patterns/auth/invitation-password-setup.js"
+    },
+    "./patterns/auth/passkey-recovery-verification": {
+      "types": "./dist/patterns/auth/passkey-recovery-verification.d.ts",
+      "import": "./dist/patterns/auth/passkey-recovery-verification.js"
+    },
+    "./patterns/team-settings/remove-member-dialog": {
+      "types": "./dist/patterns/team-settings/remove-member-dialog.d.ts",
+      "import": "./dist/patterns/team-settings/remove-member-dialog.js"
+    },
+    "./patterns/team-settings/revoke-invitation-dialog": {
+      "types": "./dist/patterns/team-settings/revoke-invitation-dialog.d.ts",
+      "import": "./dist/patterns/team-settings/revoke-invitation-dialog.js"
+    },
+    "./patterns/team-settings/team-general-settings": {
+      "types": "./dist/patterns/team-settings/team-general-settings.d.ts",
+      "import": "./dist/patterns/team-settings/team-general-settings.js"
     }
   }
 }

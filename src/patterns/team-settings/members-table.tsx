@@ -35,11 +35,11 @@ export function MembersTable<T extends Member>({
   currentUserId,
   emptyDescription = "Add a team member to get started.",
 }: MembersTableProps<T>) {
-  const security = items.some((item) => item.securityStatus !== undefined);
   const columns: ResourceTableColumn<T>[] = [
     {
       key: "member",
       header: "Member",
+      className: "min-w-48",
       cell: (item) => (
         <div className="flex min-w-0 items-center gap-2">
           <UserAvatar email={item.email} name={item.name} />
@@ -83,7 +83,7 @@ export function MembersTable<T extends Member>({
     },
     {
       key: "security",
-      header: security ? "2FA" : "Passkeys",
+      header: "Passkeys",
       cell: (item) =>
         item.securityStatus ? (
           <StatusIndicator {...item.securityStatus} />

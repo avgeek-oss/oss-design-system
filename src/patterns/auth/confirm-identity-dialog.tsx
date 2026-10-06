@@ -17,7 +17,11 @@ export type ConfirmIdentityDialogProps = {
       method?: "password";
       onConfirm: (values: { password: string }) => Promise<void>;
     }
-  | { method: "passkey"; onConfirm: () => Promise<void> }
+  | {
+      method: "passkey";
+      onConfirm: () => Promise<void>;
+      onCancelRequest?: () => void;
+    }
   | {
       method: "custom";
       children: ReactNode;
@@ -93,8 +97,15 @@ export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
           <Modal.Footer>
             <Button
               variant="secondary"
-              isDisabled={dismissDisabled}
-              onPress={() => props.onOpenChange(false)}
+              isDisabled={
+                dismissDisabled &&
+                !(props.method === "passkey" && props.onCancelRequest)
+              }
+              onPress={() => {
+                if (props.method === "passkey" && busy)
+                  props.onCancelRequest?.();
+                props.onOpenChange(false);
+              }}
             >
               Cancel
             </Button>

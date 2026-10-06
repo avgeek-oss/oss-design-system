@@ -66,3 +66,34 @@ for (const variant of ["Name validation", "Permission name validation"]) {
     ).toBeFocused();
   });
 }
+
+test("invitation entry focuses email and moves focus to the returned link action", async ({
+  page,
+  fixtureUrl,
+  theme,
+}, testInfo) => {
+  await page.bringToFront();
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/Team Settings/InviteMemberDialog.fixture.tsx"),
+  );
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+  const opener = page.getByRole("button", {
+    name: "Create invitation",
+    exact: true,
+  });
+  await opener.click();
+  const dialog = page.getByRole("dialog");
+  const email = dialog.getByRole("textbox", { name: /^Email/ });
+  await expect(email).toBeFocused();
+  await email.fill("alex@example.test");
+  await dialog
+    .getByRole("button", { name: "Create invitation", exact: true })
+    .click();
+  const done = dialog.getByRole("button", { name: "Done", exact: true });
+  await expect(done).toBeFocused();
+  await expect(dialog).toContainText("https://example.test/invite/demo");
+  await page.screenshot({ path: testInfo.outputPath("invitation-link.png") });
+  await done.click();
+  await expect(dialog).toHaveCount(0);
+  await expect(opener).toBeFocused();
+});

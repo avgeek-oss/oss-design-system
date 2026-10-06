@@ -30,6 +30,7 @@ export function InviteMemberDialog({
           required: true,
           maxLength: 320,
           autoComplete: "off",
+          autoFocus: true,
         },
       ]}
       onSubmit={(values, role) => onInvite({ email: values.email ?? "", role })}

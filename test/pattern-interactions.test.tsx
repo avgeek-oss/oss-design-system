@@ -19,14 +19,18 @@ import { McpAuthorization } from "../src/patterns/auth/mcp-authorization.js";
 
 import { NameSettingsForm } from "../src/patterns/settings/name-form.js";
 import { SignIn } from "../src/patterns/auth/sign-in.js";
+import { InvitationPasswordSetup } from "../src/patterns/auth/invitation-password-setup.js";
+import { PasskeyRecoveryVerification } from "../src/patterns/auth/passkey-recovery-verification.js";
 import { PasskeyVerification } from "../src/patterns/auth/passkey-verification.js";
 import { ConfirmIdentityDialog } from "../src/patterns/auth/confirm-identity-dialog.js";
 import { PasskeySettings } from "../src/patterns/account-settings/passkey-settings.js";
 import { MemberEditDialog } from "../src/patterns/team-settings/member-edit-dialog.js";
+import { TeamGeneralSettings } from "../src/patterns/team-settings/team-general-settings.js";
 import { MembersTable } from "../src/patterns/team-settings/members-table.js";
 import { InvitationsTable } from "../src/patterns/team-settings/invitations-table.js";
 import { CodeBlock } from "../src/typography/code-block.js";
 
+import { ResourceTable } from "../src/patterns/resource-table.js";
 import { QueryLoading } from "../src/patterns/feedback/query-state.js";
 
 let dangerMessages: ReactNode[] = [];
@@ -658,7 +662,7 @@ test("custom identity verification supports app-owned ceremonies and explicit ab
   };
   const view = await mount(
     <ConfirmIdentityDialog {...props} method="custom" isPending>
-      <p>Waiting for authenticator verification</p>
+      <p>Waiting for identity verification</p>
     </ConfirmIdentityDialog>,
   );
   try {
@@ -1082,6 +1086,251 @@ test("API key names reject whitespace with toast and focus, retain the draft, an
     assert.equal(calls, 1);
     await act(async () => pending.resolve());
     assert.match(document.body.textContent ?? "", /preview-key/);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("passkey identity cancellation aborts before dismissal and retains the single pending attempt", async () => {
+  const events: string[] = [];
+  let finish!: () => void;
+  let attempts = 0;
+  const view = await mount(
+    <ConfirmIdentityDialog
+      isOpen
+      method="passkey"
+      onOpenChange={(open) => {
+        if (!open) events.push("close");
+      }}
+      onCancelRequest={() => {
+        events.push("abort");
+      }}
+      onConfirm={async () => {
+        attempts++;
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      }}
+    />,
+  );
+  try {
+    await click(button("Try passkey again"));
+    assert.equal(button("Cancel").disabled, false);
+    await click(button("Try passkey again"));
+    assert.equal(attempts, 1);
+    await click(button("Cancel"));
+    assert.deepEqual(events, ["abort", "close"]);
+    await act(async () => finish());
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("invitation password setup validates confirmation and preserves the draft after rejection", async () => {
+  let attempts = 0;
+  const view = await mount(
+    <InvitationPasswordSetup
+      brand="Example"
+      teamName="Example team"
+      email="alex@example.test"
+      role="Member"
+      onBackToSignIn={() => {}}
+      onSubmit={async (values) => {
+        attempts++;
+        assert.deepEqual(values, {
+          name: "Alex",
+          password: "long preview passphrase",
+        });
+        throw new Error("Invitation is unavailable");
+      }}
+    />,
+  );
+  try {
+    await fill("name", "Alex");
+    await fill("password", "long preview passphrase");
+    await fill("confirmPassword", "another preview passphrase");
+    await submit();
+    assert.equal(attempts, 0);
+    assertFailureToast("Passwords do not match");
+    dangerMessages = [];
+    await fill("confirmPassword", "long preview passphrase");
+    await submit();
+    assert.equal(attempts, 1);
+    assertFailureToast("Invitation is unavailable");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="name"]')?.value,
+      "Alex",
+    );
+    assert.equal(button("Create account and join").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("passkey recovery completes an existing sign-in without collecting credentials again", async () => {
+  let attempts = 0;
+  const view = await mount(
+    <PasskeyRecoveryVerification
+      brand="Example"
+      onPasskeyVerification={() => {}}
+      onBackToSignIn={() => {}}
+      onSubmit={async ({ code }) => {
+        assert.equal(code, "preview-once-code");
+        attempts++;
+        throw new Error("Recovery code has already been used");
+      }}
+    />,
+  );
+  try {
+    assert.equal(document.querySelector('input[type="password"]'), null);
+    assert.equal(document.querySelector('input[type="email"]'), null);
+    await fill("code", "preview-once-code");
+    await submit();
+    assert.equal(attempts, 1);
+    assertFailureToast("Recovery code has already been used");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="code"]')?.value,
+      "preview-once-code",
+    );
+    assert.equal(button("Sign in").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("team details retain both drafts after a failed save and lock description while pending", async () => {
+  let rejectSave: (error: Error) => void = () => {};
+  let attempts = 0;
+  const view = await mount(
+    <TeamGeneralSettings
+      mode="details"
+      value={{ name: "Example", description: "Original" }}
+      onSave={async (values) => {
+        attempts++;
+        assert.deepEqual(values, {
+          name: "Updated team",
+          description: "Original",
+        });
+        await new Promise<void>((_, reject) => {
+          rejectSave = reject;
+        });
+      }}
+    />,
+  );
+  try {
+    await fill("name", "  Updated team  ");
+    await submit();
+    assert.equal(attempts, 1);
+    assert.equal(
+      document.querySelector<HTMLTextAreaElement>("textarea")?.disabled,
+      true,
+    );
+    await act(async () => rejectSave(new Error("Team update failed")));
+    assertFailureToast("Team update failed");
+    assert.equal(
+      document.querySelector<HTMLTextAreaElement>("textarea")?.disabled,
+      false,
+    );
+    assert.equal(
+      document.querySelector<HTMLTextAreaElement>("textarea")?.value,
+      "Original",
+    );
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="name"]')?.value,
+      "  Updated team  ",
+    );
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("stacked resource tables keep one native row, every field and one action per record", async () => {
+  const items = [{ id: "one", name: "Automation", permission: "Read only" }];
+  let activations = 0;
+  const columns = [
+    {
+      key: "name",
+      header: "Name",
+      isRowHeader: true,
+      cell: (item: (typeof items)[number]) => item.name,
+    },
+    {
+      key: "permissions",
+      header: "Permissions",
+      mobileFullWidth: true,
+      cell: (item: (typeof items)[number]) => item.permission,
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      mobileFullWidth: true,
+      cell: () => <button onClick={() => activations++}>Inspect</button>,
+    },
+  ];
+  const view = await mount(
+    <ResourceTable
+      ariaLabel="Credentials"
+      items={items}
+      columns={columns}
+      getRowKey={(item) => item.id}
+      emptyTitle="No keys"
+      emptyDescription="Create a key"
+      mobileLayout="stacked"
+    />,
+  );
+  try {
+    assert.equal(document.querySelectorAll('[role="rowheader"]').length, 1);
+    assert.equal(document.querySelectorAll('[role="gridcell"]').length, 2);
+    assert.deepEqual(
+      [...document.querySelectorAll('[role="columnheader"]')].map(
+        (element) => element.textContent,
+      ),
+      ["Name", "Permissions", "Actions"],
+    );
+    assert.equal(document.querySelectorAll("button").length, 1);
+    await click(button("Inspect"));
+    assert.equal(activations, 1);
+    assert.match(
+      document.querySelector('[role="rowheader"]')?.textContent ?? "",
+      /Automation/,
+    );
+    assert.match(
+      document.querySelector('[role="gridcell"]')?.textContent ?? "",
+      /Read only/,
+    );
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("passkey verification permits cancellation only while an abort callback is available", async () => {
+  const view = await mount(
+    <PasskeyVerification
+      brand="Example"
+      isPending
+      onRetry={() => {}}
+      onBackToSignIn={() => {}}
+    />,
+  );
+  try {
+    assert.equal(
+      [...document.querySelectorAll("button")].some(
+        (item) => item.textContent === "Cancel passkey request",
+      ),
+      false,
+    );
+    assert.equal(button("← Back to Sign In").disabled, true);
+    await view.render(
+      <PasskeyVerification
+        brand="Example"
+        isPending
+        onRetry={() => {}}
+        onBackToSignIn={() => {}}
+        onCancelRequest={() => {}}
+      />,
+    );
+    assert.equal(button("Cancel passkey request").disabled, false);
+    assert.equal(button("← Back to Sign In").disabled, false);
   } finally {
     await view.unmount();
   }

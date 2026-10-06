@@ -4,6 +4,7 @@ export type Actions<T> = { actions: (item: T) => ReactNode };
 export function actionColumn<T>(actions: (item: T) => ReactNode) {
   return {
     key: "actions",
+    mobileFullWidth: true,
     header: "Actions",
     headerClassName: "text-right",
     className: "text-right",
