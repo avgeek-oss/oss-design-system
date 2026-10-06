@@ -53,7 +53,9 @@ Submission failures use one danger toast, including inside modals. Keep the draf
 
 `IdentityCredentialsForm` defaults to toast feedback. Its `errorPresentation` option controls field validation only; rejected submissions always use a toast. Field validation can mark/focus the invalid control without duplicating a submission failure.
 
-Mount one `Toast.Provider` for the application, including public auth routes. Use `placement="bottom"` for bottom-center toasts; this is the native HeroUI default and the explicit placement used by AppShell and Cosmos. Toast styling, announcements, and close controls follow HeroUI defaults.
+Mount one `Toast.Provider` for the application, including public auth routes. Use `placement="bottom"` for bottom-center toasts; this is the native HeroUI default and the explicit placement used by AppShell and Cosmos. Toast announcements, timers, stacking, motion, and placement retain HeroUI behavior. The close control is a documented accessibility exception: its 32px target is visible without hover on the front toast, expanded stack rows, and a focused toast. Hidden/exiting rows remain unreachable; collapsed background close controls do not intercept clicks.
+
+The shared provider retains HeroUI's props and native rendering. It restores the connected control that preceded toast focus when the final toast exits and native focus was stranded on the document body. It does not move focus away from a control the user has since chosen, into an inert surface, or into a background browser tab. This keeps an initiating modal usable after pointer or keyboard toast dismissal.
 
 Role vocabulary belongs to the app. Use `createInvitationSchema(["admin", "editor", "viewer"])` for Rootset and the existing Admin/Member/Viewer schema for Towbar or Mill. Do not broaden server permissions because the shared table supports another role label.
 

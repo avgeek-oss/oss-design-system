@@ -49,6 +49,26 @@ body {
 }
 
 @layer components {
+  .toast__close-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .toast:not([data-exiting="true"]):not([data-hidden="true"]):is(
+      [data-frontmost="true"],
+      [data-expanded="true"],
+      :focus-within
+    )
+    .toast__close-button {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .toast:is([data-exiting="true"], [data-hidden="true"]) .toast__close-button {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   /* Picker popovers override native row padding; keep content clear of the tick. */
   .list-box-item[data-slot="list-box-item"]:has(> .list-box-item__indicator) {
     padding-inline-end: calc(var(--spacing) * 8);
