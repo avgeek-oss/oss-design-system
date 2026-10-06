@@ -53,6 +53,7 @@ export function AuthForm({
   return (
     <form
       className="content-grid"
+      method="post"
       noValidate
       aria-busy={busy}
       onSubmit={async (event) => {

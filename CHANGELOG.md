@@ -2,6 +2,8 @@
 
 ## 1.2.2 — 2026-10-07
 
+- Keep auth form values out of URLs by using POST for native submissions before JavaScript handles the form.
+
 - Lock recovery-code copying during clipboard writes, with one toast outcome and retry after failure.
 
 - Add the public VerificationEmail flow and optional sign-in verification-email action, with neutral account copy, supported recovery actions, pending navigation guards and password clearing after completed sign-in attempts.

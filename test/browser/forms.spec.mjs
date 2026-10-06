@@ -1,4 +1,61 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { AuthForm } from "../../dist/patterns/auth/auth-form.js";
 import { test, expect } from "./fixtures.mjs";
+
+test("auth form native submission keeps credentials out of the URL before JavaScript handles events", async ({
+  page,
+  fixtureOrigin,
+}) => {
+  const destination = `${fixtureOrigin}/native-form`;
+  const markup = renderToStaticMarkup(
+    createElement(AuthForm, {
+      fields: [
+        { name: "email", label: "Email", type: "email", required: true },
+        {
+          name: "password",
+          label: "Password",
+          type: "password",
+          required: true,
+        },
+      ],
+      submitLabel: "Continue",
+      onSubmit: async () => {
+        throw new Error("The static form has no JavaScript handlers");
+      },
+    }),
+  );
+  const submissions = [];
+  await page.route(destination, async (route) => {
+    const request = route.request();
+    if (request.method() === "POST") {
+      submissions.push({
+        url: request.url(),
+        body: request.postData(),
+      });
+      await route.fulfill({
+        contentType: "text/html",
+        body: "<h1>Request received</h1>",
+      });
+    } else {
+      await route.fulfill({ contentType: "text/html", body: markup });
+    }
+  });
+  await page.goto(destination);
+  await page
+    .getByRole("textbox", { name: "Email", exact: true })
+    .fill("alex@example.test");
+  await page.getByLabel("Password", { exact: true }).fill("private passphrase");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Request received" }),
+  ).toBeVisible();
+  expect(submissions).toHaveLength(1);
+  expect(submissions[0].url).toBe(destination);
+  const body = new URLSearchParams(submissions[0].body);
+  expect(body.get("email")).toBe("alex@example.test");
+  expect(body.get("password")).toBe("private passphrase");
+});
 
 test("sign-in clears completed passwords and cached-page credentials while retaining email", async ({
   page,
