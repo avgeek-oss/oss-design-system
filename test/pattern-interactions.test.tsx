@@ -18,6 +18,7 @@ import { IdentityCredentialsForm } from "../src/patterns/auth/identity-credentia
 import { McpAuthorization } from "../src/patterns/auth/mcp-authorization.js";
 
 import { NameSettingsForm } from "../src/patterns/settings/name-form.js";
+import { VerificationEmail } from "../src/patterns/auth/verification-email.js";
 import { SignIn } from "../src/patterns/auth/sign-in.js";
 import { InvitationPasswordSetup } from "../src/patterns/auth/invitation-password-setup.js";
 import { PasskeyRecoveryVerification } from "../src/patterns/auth/passkey-recovery-verification.js";
@@ -575,6 +576,9 @@ test("external sign-in pending blocks all submit paths and preserves the credent
     onPasskeySignIn: () => {
       calls++;
     },
+    onResendVerification: () => {
+      calls++;
+    },
   };
   const view = await mount(<SignIn {...props} />);
   try {
@@ -585,6 +589,7 @@ test("external sign-in pending blocks all submit paths and preserves the credent
       "Signing in…",
       "Forgot password?",
       "Sign in with Passkey",
+      "Need a new verification email?",
     ]) {
       assert.equal(button(label).disabled, true);
       await click(button(label));
@@ -1331,6 +1336,108 @@ test("passkey verification permits cancellation only while an abort callback is 
     );
     assert.equal(button("Cancel passkey request").disabled, false);
     assert.equal(button("← Back to Sign In").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("verification requests lock navigation, retain failed drafts and acknowledge without account disclosure", async () => {
+  const pending = deferred();
+  let calls = 0;
+  let back = 0;
+  const view = await mount(
+    <VerificationEmail
+      brand="Example"
+      onBackToSignIn={() => {
+        back++;
+      }}
+      onSubmit={async ({ email }) => {
+        assert.equal(email, "alex@example.test");
+        calls++;
+        if (calls === 1) {
+          await pending.promise;
+          throw new Error("Verification request failed");
+        }
+      }}
+    />,
+  );
+  try {
+    await fill("email", "alex@example.test");
+    await submit();
+    await submit();
+    assert.equal(calls, 1);
+    assert.equal(button("Sending…").disabled, true);
+    assert.equal(button("← Back to Sign In").disabled, true);
+    await click(button("← Back to Sign In"));
+    assert.equal(back, 0);
+    await act(async () => pending.resolve());
+    assertFailureToast("Verification request failed");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="email"]')?.value,
+      "alex@example.test",
+    );
+    assert.equal(button("← Back to Sign In").disabled, false);
+    await submit();
+    assert.equal(calls, 2);
+    assert.equal(document.querySelector("form"), null);
+    assert.match(
+      document.body.textContent ?? "",
+      /If an account needs email verification/,
+    );
+    assert.equal(
+      document.activeElement?.textContent?.includes("Verify your email"),
+      true,
+    );
+    await click(button("Request another link"));
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="email"]')?.value,
+      "alex@example.test",
+    );
+    await click(button("← Back to Sign In"));
+    assert.equal(back, 1);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("sign-in blocks verification navigation during its own request and allows retry after failure", async () => {
+  const pending = deferred();
+  let navigations = 0;
+  const view = await mount(
+    <SignIn
+      brand="Example"
+      onForgotPassword={() => {
+        navigations++;
+      }}
+      onResendVerification={() => {
+        navigations++;
+      }}
+      onPasskeySignIn={() => {
+        navigations++;
+      }}
+      onSubmit={async () => {
+        await pending.promise;
+        throw new Error("Sign-in failed");
+      }}
+    />,
+  );
+  try {
+    await fill("identifier", "alex@example.test");
+    await fill("password", "preview password");
+    await submit();
+    for (const label of [
+      "Forgot password?",
+      "Need a new verification email?",
+      "Sign in with Passkey",
+    ]) {
+      assert.equal(button(label).disabled, true);
+      await click(button(label));
+    }
+    assert.equal(navigations, 0);
+    await act(async () => pending.resolve());
+    assertFailureToast("Sign-in failed");
+    await click(button("Need a new verification email?"));
+    assert.equal(navigations, 1);
   } finally {
     await view.unmount();
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps, ReactNode } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import { Login01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "../../buttons/button.js";
@@ -15,39 +15,55 @@ export type SignInProps = {
   isPending?: boolean;
   onSubmit: ComponentProps<typeof IdentityCredentialsForm>["onSubmit"];
   onForgotPassword: () => void;
+  onResendVerification?: () => void;
   onPasskeySignIn?: () => void;
 };
 
 export function SignIn({
   brand,
-  description = "Sign in to your team’s instance.",
+  description = "Sign in to your account.",
   defaultEmail,
   isPending = false,
   onSubmit,
   onForgotPassword,
+  onResendVerification,
   onPasskeySignIn,
 }: SignInProps) {
+  const [submitting, setSubmitting] = useState(false);
+  const pending = isPending || submitting;
   return (
     <AuthScreen brand={brand} title="Sign in" description={description}>
       <IdentityCredentialsForm
-        disabled={isPending}
-        aria-busy={isPending}
-        submitLabel={isPending ? "Signing in…" : "Sign in"}
+        disabled={pending}
+        aria-busy={pending}
+        submitLabel={pending ? "Signing in…" : "Sign in"}
         identifierLabel="Email"
         identifierType="email"
         identifierAutoComplete="email"
         defaultIdentifier={defaultEmail}
         submitIcon={<HugeiconsIcon aria-hidden icon={Login01Icon} size={16} />}
         passwordAction={
-          <AuthAction disabled={isPending} onClick={onForgotPassword}>
+          <AuthAction disabled={pending} onClick={onForgotPassword}>
             Forgot password?
           </AuthAction>
         }
-        onSubmit={onSubmit}
+        onSubmit={async (credentials) => {
+          setSubmitting(true);
+          try {
+            await onSubmit(credentials);
+          } finally {
+            setSubmitting(false);
+          }
+        }}
       />
+      {onResendVerification && (
+        <AuthAction disabled={pending} onClick={onResendVerification}>
+          Need a new verification email?
+        </AuthAction>
+      )}
       {onPasskeySignIn && (
         <Button
-          isDisabled={isPending}
+          isDisabled={pending}
           className="w-full"
           variant="secondary"
           onPress={onPasskeySignIn}

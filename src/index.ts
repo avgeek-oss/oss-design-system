@@ -54,6 +54,10 @@ export { SidebarAccountMenu } from "./patterns/sidebar-account-menu.js";
 
 export { SignIn, type SignInProps } from "./patterns/auth/sign-in.js";
 export {
+  VerificationEmail,
+  type VerificationEmailProps,
+} from "./patterns/auth/verification-email.js";
+export {
   ForgotPassword,
   type ForgotPasswordProps,
 } from "./patterns/auth/forgot-password.js";

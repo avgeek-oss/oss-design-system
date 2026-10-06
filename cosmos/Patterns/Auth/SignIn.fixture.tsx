@@ -9,6 +9,7 @@ export default {
       isPending
       onSubmit={async () => {}}
       onForgotPassword={() => {}}
+      onResendVerification={() => {}}
       onPasskeySignIn={() => {}}
     />
   ),

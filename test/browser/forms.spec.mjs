@@ -97,3 +97,59 @@ test("invitation entry focuses email and moves focus to the returned link action
   await expect(dialog).toHaveCount(0);
   await expect(opener).toBeFocused();
 });
+
+test("sign-in verification navigation uses the shared request and private acknowledgment", async ({
+  page,
+  fixtureUrl,
+  touch,
+  theme,
+}, testInfo) => {
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", "Default"),
+  );
+  await page.bringToFront();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+  const verification = page.getByRole("button", {
+    name: "Need a new verification email?",
+    exact: true,
+  });
+  if (touch) await verification.tap();
+  else {
+    await verification.focus();
+    await page.keyboard.press("Enter");
+  }
+  await expect(
+    page.getByRole("heading", { name: "Verify your email", exact: true }),
+  ).toBeVisible();
+  const email = page.getByRole("textbox", { name: /^Email/ });
+  await expect(email).not.toBeFocused();
+  await email.fill("alex@example.test");
+  await page.screenshot({
+    path: testInfo.outputPath("verification-email.png"),
+  });
+  if (touch)
+    await page
+      .getByRole("button", { name: "Send verification link", exact: true })
+      .tap();
+  else await email.press("Enter");
+  await expect(page.locator("form")).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "If an account needs email verification, we’ll send a link. Check your inbox and spam folder.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(page.locator(":focus")).toContainText("Verify your email");
+  await page
+    .getByRole("button", { name: "Request another link", exact: true })
+    .click();
+  await expect(page.getByRole("textbox", { name: /^Email/ })).toHaveValue(
+    "alex@example.test",
+  );
+  await page
+    .getByRole("button", { name: "← Back to Sign In", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Sign in", exact: true }),
+  ).toBeVisible();
+});

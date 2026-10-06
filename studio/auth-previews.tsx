@@ -6,6 +6,7 @@ import { AvgeekLogo } from "./avgeek-brand";
 import { Button } from "../src/buttons/button";
 import { toast } from "../src/overlays/toast";
 import { SignIn } from "../src/patterns/auth/sign-in";
+import { VerificationEmail } from "../src/patterns/auth/verification-email";
 import { ForgotPassword } from "../src/patterns/auth/forgot-password";
 import { ResetLinkSent } from "../src/patterns/auth/reset-link-sent";
 import { PasswordSetup } from "../src/patterns/auth/password-setup";
@@ -29,6 +30,7 @@ const codes = Array.from(
 );
 export type AuthPreviewScreen =
   | "SignIn"
+  | "VerificationEmail"
   | "ForgotPassword"
   | "ResetLinkSent"
   | "PasswordSetup"
@@ -80,6 +82,7 @@ export function AuthPreview({ initial }: { initial: AuthPreviewScreen }) {
       <SignIn
         brand={brand}
         onForgotPassword={() => setScreen("ForgotPassword")}
+        onResendVerification={() => setScreen("VerificationEmail")}
         onPasskeySignIn={() => setScreen("PasskeyVerification")}
         onSubmit={async () => {
           await submit();
@@ -87,6 +90,7 @@ export function AuthPreview({ initial }: { initial: AuthPreviewScreen }) {
         }}
       />
     ),
+    VerificationEmail: <VerificationEmail {...common} onSubmit={submit} />,
     ForgotPassword: (
       <ForgotPassword
         {...common}

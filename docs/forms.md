@@ -76,3 +76,9 @@ Auth screens are exported from their own files, rather than implemented inside C
 `ActionConfirmation` accepts `confirmLabel` and `cancelLabel` for concrete consequence actions. `SessionsSettings` uses Revoke session and Keep session and explains that the other browser loses access immediately. The current session remains protected from revocation through this settings surface.
 
 `CreateApiKeyDialog` trims the key name before creation. A whitespace-only name produces one danger toast per submission and returns focus to Name, retaining the draft without calling `onCreate`. A corrected name is trimmed and passes through the existing pending guard.
+
+## Verification email
+
+`SignIn` offers the fixed **Need a new verification email?** action when `onResendVerification` is supplied. Navigate to `VerificationEmail`, pass branding and optional `defaultEmail`, and connect its awaited `onSubmit({ email })` callback to the public verification endpoint. The shared sign-in description is account-based and applies to team and personal apps. All sign-in navigation actions are disabled during either internal submission or externally controlled pending state.
+
+`VerificationEmail` retains the draft on failure, shows one toast, blocks duplicate submission and back navigation while sending, and moves focus to its neutral acknowledgment after success. **Request another link** returns to the form with the previous email. Acknowledgment means the server accepted the request, not that an account exists or mail was delivered. Servers must return the same acknowledgment for unknown, already verified and eligible accounts, enforce request throttling and token expiry/one-use rules, and validate callback destinations. Email verification proves address ownership; it is separate from passkey verification and recovery. Apps supply routing and backend policy; do not recreate this screen or replace its fixed copy.
