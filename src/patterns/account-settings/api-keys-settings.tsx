@@ -30,10 +30,15 @@ export function ApiKeysSettings<T extends ApiKey>({
     const target = opener.current;
     // A grid may restore its row after the modal returns focus to its action.
     let frame = 0;
+    let cancelled = false;
     const restore = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        if (!document.hasFocus() || !target.isConnected) return;
+        if (cancelled) return;
+        if (!document.hasFocus() || !target.isConnected) {
+          stop();
+          return;
+        }
         const active = document.activeElement;
         if (
           active === document.body ||
@@ -44,8 +49,9 @@ export function ApiKeysSettings<T extends ApiKey>({
       });
     };
     const stop = () => {
+      cancelled = true;
       cancelAnimationFrame(frame);
-      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("focusin", onFocus, true);
       document.removeEventListener("pointerdown", stop, true);
       document.removeEventListener("keydown", stop, true);
       window.removeEventListener("blur", stop);
@@ -61,7 +67,7 @@ export function ApiKeysSettings<T extends ApiKey>({
         restore();
       else stop();
     };
-    document.addEventListener("focusin", onFocus);
+    document.addEventListener("focusin", onFocus, true);
     document.addEventListener("pointerdown", stop, true);
     document.addEventListener("keydown", stop, true);
     window.addEventListener("blur", stop);
