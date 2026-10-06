@@ -40,6 +40,7 @@ test("clipboard writes lock repeated presses and allow retry after failure", asy
   await page.evaluate(() => globalThis.failCopy(new Error("Clipboard denied")));
   const danger = page.locator('[data-slot="toast"]:not([data-exiting])');
   await expect(danger).toHaveCount(1);
+  await expect(danger).toBeInViewport({ ratio: 1 });
   await expect(danger).toContainText(
     "Could not copy to the clipboard. Select and copy the text instead.",
   );
@@ -64,7 +65,7 @@ test("clipboard writes lock repeated presses and allow retry after failure", asy
   await expect(success).toContainText("Copied to clipboard.");
   await expect(copy).toHaveText("Copy");
   await expect(copy).toHaveAttribute("aria-label", "Copy code");
-  await expect(success).not.toHaveAttribute("data-entering", "true");
+  await expect(success).toBeInViewport({ ratio: 1 });
   await page.screenshot({
     path: testInfo.outputPath("preview.png"),
   });
