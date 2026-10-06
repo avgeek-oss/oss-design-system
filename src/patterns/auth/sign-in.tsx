@@ -31,6 +31,8 @@ export function SignIn({
     <AuthScreen brand={brand} title="Sign in" description={description}>
       <IdentityCredentialsForm
         disabled={isPending}
+        aria-busy={isPending}
+        submitLabel={isPending ? "Signing in…" : "Sign in"}
         identifierLabel="Email"
         identifierType="email"
         identifierAutoComplete="email"

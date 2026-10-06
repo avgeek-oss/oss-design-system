@@ -269,9 +269,9 @@ export function CreateApiKeyPreview({
       <CreateApiKeyDialog
         isOpen={isOpen}
         onOpenChange={setOpen}
-        permissionOptions={
-          permissions
-            ? [
+        {...(permissions
+          ? {
+              permissionOptions: [
                 {
                   id: "read",
                   label: "Read-only",
@@ -283,9 +283,9 @@ export function CreateApiKeyPreview({
                   description:
                     "Manage deployments and infrastructure within your role.",
                 },
-              ]
-            : undefined
-        }
+              ],
+            }
+          : {})}
         expiryOptions={[
           { id: "30", label: "30 days" },
           { id: "90", label: "90 days" },
