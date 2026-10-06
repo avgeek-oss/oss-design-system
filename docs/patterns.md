@@ -36,7 +36,7 @@ Use `HistoryTable` when a resource list needs history pagination and loading/err
 
 ## Incoming notifications
 
-`NotificationMenu` presents the notification trigger, badge, popover and rows. Use the explicit **Mark all as read** action. Opening the menu only refreshes it; it does not acknowledge or delete events. Notification read state belongs to the server, not local storage.
+`NotificationMenu` presents the notification trigger, badge, popover and rows. Use the explicit **Mark all as read** action. Opening the menu only refreshes it; it does not acknowledge or delete events. Notification read state belongs to the server, not local storage. The notification trigger keeps its geometry during pointer, touch and keyboard presses; this pattern-specific exception preserves native opening, focus, hover and background feedback without changing other buttons.
 
 Applications follow this shared contract:
 

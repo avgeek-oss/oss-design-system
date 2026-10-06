@@ -49,6 +49,17 @@ body {
 }
 
 @layer components {
+  .button.notification-trigger {
+    transform: none;
+    transition-property: background-color, box-shadow;
+
+    &:active,
+    &[data-pressed="true"] {
+      transform: none;
+      will-change: auto;
+    }
+  }
+
   :is(.dropdown__popover, .select__popover).breadcrumb-popover {
     animation: none;
     transform: none;

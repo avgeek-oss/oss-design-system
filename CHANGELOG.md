@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Keep notification trigger geometry steady during pointer, touch and keyboard presses while retaining native popover interaction and other button behavior.
+
 - Expose the native notification dialog ref for app-owned refresh and pagination focus recovery without changing popover focus behavior.
 
 ## 1.2.1 — 2026-10-07
