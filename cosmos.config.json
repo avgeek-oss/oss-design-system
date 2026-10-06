@@ -1,0 +1,9 @@
+{
+  "plugins": ["react-cosmos-plugin-vite"],
+  "fixturesDir": "cosmos",
+  "port": 5012,
+  "vite": {
+    "port": 5062
+  },
+  "exportPath": "cosmos-export"
+}

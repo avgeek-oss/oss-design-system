@@ -1,0 +1,278 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/geist-mono/wght.css";
+@import "../patterns/auth/styles.css";
+@import "../patterns/pages/styles.css";
+
+@theme {
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+  --text-md: 1rem;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source "../";
+
+:root {
+  --workspace-page-content-width: 80rem;
+  --chart-requested: oklch(0.627 0.138 254.2);
+  --chart-succeeded: oklch(0.639 0.109 151.7);
+  --chart-failed: oklch(0.622 0.148 24.9);
+}
+
+.dark {
+  --chart-requested: oklch(0.591 0.142 253.8);
+  --chart-succeeded: oklch(0.673 0.141 150.8);
+  --chart-failed: oklch(0.572 0.143 24.6);
+}
+
+html {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: inherit;
+  font-family: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+@layer components {
+  /* Picker popovers override native row padding; keep content clear of the tick. */
+  .list-box-item[data-slot="list-box-item"]:has(> .list-box-item__indicator) {
+    padding-inline-end: calc(var(--spacing) * 8);
+  }
+
+  .sidebar-identity {
+    background: transparent;
+    transform: none !important;
+    transition-property: background-color, box-shadow;
+    --sidebar-identity-gradient: linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--color-yellow-300) 16%, transparent) 0%,
+      color-mix(in oklch, var(--color-yellow-300) 8%, transparent) 50%,
+      color-mix(in oklch, var(--color-yellow-300) 2%, transparent) 100%
+    );
+  }
+
+  .dark .sidebar-identity {
+    --sidebar-identity-gradient: linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--color-yellow-900) 16%, transparent) 0%,
+      color-mix(in oklch, var(--color-yellow-900) 8%, transparent) 50%,
+      color-mix(in oklch, var(--color-yellow-900) 2%, transparent) 100%
+    );
+  }
+
+  @media (min-width: 64rem) {
+    .sidebar-identity[aria-expanded="true"] {
+      background: var(--sidebar-identity-gradient);
+    }
+  }
+
+  @media (min-width: 64rem) and (hover: hover) {
+    .sidebar-identity:hover {
+      background: var(--sidebar-identity-gradient);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .sidebar-identity:is(:hover, [aria-expanded="true"]) {
+      background: var(--surface);
+    }
+  }
+
+  /* Keep sibling cards, sections, and form fields 16px apart on both axes. */
+  .content-grid {
+    @apply grid gap-4;
+  }
+
+  .table__footer {
+    @apply text-xs text-muted;
+  }
+
+  .table__body[data-empty="true"] > tr > td {
+    @apply bg-surface px-4 py-3 text-sm text-muted;
+  }
+
+  .disclosure__heading {
+    @apply flex;
+  }
+
+  .disclosure__trigger {
+    @apply flex w-full items-center justify-between gap-2 text-start;
+  }
+
+  .disclosure__body {
+    @apply ps-0 text-muted;
+  }
+
+  .alert {
+    @apply gap-2;
+  }
+
+  .modal__dialog,
+  .alert-dialog__dialog,
+  .drawer__dialog {
+    @apply p-5;
+  }
+
+  .modal__header,
+  .alert-dialog__header,
+  .drawer__header {
+    @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3;
+  }
+
+  .modal__header > :not(.modal__close-trigger),
+  .alert-dialog__header > :not(.alert-dialog__close-trigger),
+  .drawer__header > :not(.drawer__close-trigger) {
+    @apply col-start-1;
+  }
+
+  .modal__header > .modal__close-trigger,
+  .alert-dialog__header > .alert-dialog__close-trigger,
+  .drawer__header > .drawer__close-trigger {
+    @apply static col-start-2 row-start-1 self-start justify-self-end;
+  }
+
+  .modal__header:has(> .modal__icon) > .modal__close-trigger,
+  .alert-dialog__header:has(> .alert-dialog__icon)
+    > .alert-dialog__close-trigger {
+    @apply row-start-2;
+  }
+
+  .modal__header + .modal__body,
+  .alert-dialog__header + .alert-dialog__body,
+  .drawer__header + .drawer__body,
+  .modal__header + .modal__footer,
+  .alert-dialog__header + .alert-dialog__footer,
+  .drawer__header + .drawer__footer,
+  .modal__body + .modal__footer,
+  .alert-dialog__body + .alert-dialog__footer,
+  .drawer__body + .drawer__footer {
+    @apply mt-4;
+  }
+
+  .widget {
+    @apply bg-surface-secondary flex flex-col overflow-hidden rounded-2xl;
+  }
+
+  .widget__header {
+    @apply mt-0.5 flex min-h-8 items-center justify-between gap-3 px-4;
+  }
+
+  .widget__title {
+    @apply text-muted text-sm font-semibold;
+  }
+
+  .widget__content {
+    @apply bg-surface mx-1.5 mb-1.5 flex-1 overflow-hidden rounded-xl p-4;
+    box-shadow:
+      0 0 0 1px oklch(0 0 0 / 0.03),
+      0 1px 2px oklch(0 0 0 / 0.04);
+  }
+
+  .widget__content:first-child {
+    @apply mt-1.5;
+  }
+
+  .widget:has(> .widget__footer) > .widget__content {
+    margin-bottom: calc(var(--spacing) * 0.5);
+  }
+
+  .widget__footer {
+    @apply flex min-h-7 flex-wrap items-center gap-3 px-[17px] pt-1 pb-[7px];
+  }
+
+  .widget__action,
+  .widget__header .button,
+  .widget__footer .button {
+    @apply relative inline-flex h-auto min-h-6 w-auto min-w-0 items-center gap-1 rounded-sm p-0 text-xs font-normal text-muted no-underline;
+    --button-bg: transparent;
+    --button-bg-hover: transparent;
+    --button-bg-pressed: transparent;
+    --button-fg: var(--muted);
+    background: transparent;
+    transform: none;
+  }
+
+  .inline-external-link__label {
+    position: relative;
+    text-decoration: none;
+    --inline-underline-offset: 0px;
+  }
+
+  .inline-external-link__label::after,
+  .widget__action::after,
+  .widget__header .button::after,
+  .widget__footer .button::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: calc(50% + 0.5em + var(--inline-underline-offset, 2px));
+    border-top: 1px dashed currentColor;
+    pointer-events: none;
+  }
+
+  .widget__action {
+    @apply cursor-pointer outline-none;
+  }
+
+  .widget__action:focus-visible,
+  .widget__action[data-focus-visible="true"] {
+    @apply outline-2 outline-solid outline-offset-4 outline-focus;
+  }
+
+  .widget__action:disabled,
+  .widget__action[data-disabled="true"] {
+    @apply pointer-events-none opacity-50;
+  }
+
+  @media (hover: hover) {
+    .widget__action:hover,
+    .widget__header .button:hover,
+    .widget__footer .button:hover {
+      @apply text-foreground;
+      --button-fg: var(--foreground);
+    }
+  }
+
+  .widget__legend {
+    @apply flex items-center gap-3;
+  }
+
+  .widget__legend-item {
+    @apply flex items-center gap-1.5;
+  }
+
+  .widget__legend-item-dot {
+    @apply size-2.5 shrink-0 rounded-full;
+  }
+
+  .widget__legend-item-label {
+    @apply text-muted text-xs;
+  }
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+.theme-changing,
+.theme-changing *,
+.theme-changing *::before,
+.theme-changing *::after {
+  transition: none !important;
+}

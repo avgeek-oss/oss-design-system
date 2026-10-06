@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", "cosmos", "studio", "vite.config.ts"]
+}

@@ -1,0 +1,96 @@
+# Component catalog
+
+Cosmos follows three layers:
+
+- **Primitives:** one fixture per component file, showing its variants, states and compound parts with neutral content. Fixtures import the component directly from `src`; they do not reimplement its styling or contain application workflows.
+- **Patterns:** published authentication, account settings, team settings and data components. Fixtures supply sample data and simulate app callbacks; composed examples without a matching library export are omitted.
+- **Layouts:** shell, sidebars, page headings and navigation.
+
+Cosmos mirrors the component folders: `src/forms/checkbox.tsx` appears at `Primitives / Forms / Checkbox`, and `src/data-display/chip.tsx` at `Primitives / DataDisplay / Chip`. HeroUI-backed primitives follow native styling and variant APIs; composed helpers retain their behavior without restyling the base component. `UserAvatar` belongs to Patterns, where it supplies initials and Gravatar lookup. `ResourceTable` appears under Patterns and composes the Table primitive with record links, actions and an empty state. Its source is [src/patterns/resource-table.tsx](../src/patterns/resource-table.tsx). Source-file mapping is listed below. Applications use that component export directly; fixture wrappers are only for the studio and are not published.
+
+`TeamSetup` is the two-step onboarding pattern in [src/patterns/auth/team-setup.tsx](../src/patterns/auth/team-setup.tsx), previewed under `Patterns / Auth / TeamSetup`. Import it from the package root or `@avgeek-oss/design-system/patterns/auth/team-setup` and supply one setup mutation.
+
+`McpAuthorization` is the connection approval pattern in [src/patterns/auth/mcp-authorization.tsx](../src/patterns/auth/mcp-authorization.tsx), previewed under `Patterns / Auth / McpAuthorization`. Import it from the package root or `@avgeek-oss/design-system/patterns/auth/mcp-authorization`. It accepts the client identity and trust, account and team, permission and access descriptions, expiry and revocation guidance, return URL and restrictions. Cosmos controls cover read/edit permissions, unverified clients, Viewer restrictions, local apps, pending requests and failures.
+
+Authentication screens are published components. Cosmos uses a separate fixture file for each under `Patterns / Auth`, matching `src/patterns/auth`. Screens accept a brand and app callbacks; fixtures only simulate requests and navigation. Import a screen from the package root or its `patterns/auth/<file>` subpath.
+
+| Component                | Source                                                                                            | App callbacks and data                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `SignIn`                 | [src/patterns/auth/sign-in.tsx](../src/patterns/auth/sign-in.tsx)                                 | Credential submission, forgot-password navigation and optional passkey sign-in.                                                  |
+| `ForgotPassword`         | [src/patterns/auth/forgot-password.tsx](../src/patterns/auth/forgot-password.tsx)                 | Email submission and back navigation.                                                                                            |
+| `ResetLinkSent`          | [src/patterns/auth/reset-link-sent.tsx](../src/patterns/auth/reset-link-sent.tsx)                 | Back navigation; neutral confirmation copy protects account privacy.                                                             |
+| `PasswordSetup`          | [src/patterns/auth/password-setup.tsx](../src/patterns/auth/password-setup.tsx)                   | Reset/first-password variants, app password policy and submission. Matching passwords are checked before the callback.           |
+| `AcceptInvitation`       | [src/patterns/auth/accept-invitation.tsx](../src/patterns/auth/accept-invitation.tsx)             | Team name, role, verification action and pending state.                                                                          |
+| `InvitationVerification` | [src/patterns/auth/invitation-verification.tsx](../src/patterns/auth/invitation-verification.tsx) | Team name, name length limit and verification submission.                                                                        |
+| `InvitationUnavailable`  | [src/patterns/auth/invitation-unavailable.tsx](../src/patterns/auth/invitation-unavailable.tsx)   | Back navigation and optional reason copy.                                                                                        |
+| `PasskeyVerification`    | [src/patterns/auth/passkey-verification.tsx](../src/patterns/auth/passkey-verification.tsx)       | Pending state, retry, cancellation, recovery and back actions. The app owns the WebAuthn ceremony.                               |
+| `RecoverySignIn`         | [src/patterns/auth/recovery-sign-in.tsx](../src/patterns/auth/recovery-sign-in.tsx)               | Email, password and recovery-code submission.                                                                                    |
+| `RecoveryCodesScreen`    | [src/patterns/auth/recovery-codes-screen.tsx](../src/patterns/auth/recovery-codes-screen.tsx)     | Newly generated codes, download filename and continue action. `RecoveryCodes` remains the content component for settings modals. |
+| `ConfirmIdentityDialog`  | [src/patterns/auth/confirm-identity-dialog.tsx](../src/patterns/auth/confirm-identity-dialog.tsx) | Controlled open state and a password/passkey confirmation callback. The app closes it on success.                                |
+
+Account settings live under `Patterns / Account Settings`, matching `src/patterns/account-settings`. Import them from the package root or `patterns/account-settings/<file>`. Apps own saved data, API calls and WebAuthn; the components supply forms, dialogs and pending/error feedback.
+
+| Component             | Source                                                                                | App callbacks and data                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ProfileSettings`     | [profile-settings.tsx](../src/patterns/account-settings/profile-settings.tsx)         | Name, label, length limit and save callback.                                                                                                                 |
+| `PreferencesSettings` | [preferences-settings.tsx](../src/patterns/account-settings/preferences-settings.tsx) | Saved preferences, format/time-zone options, optional preview formatter and save callback.                                                                   |
+| `PasskeySettings`     | [passkey-settings.tsx](../src/patterns/account-settings/passkey-settings.tsx)         | Passkeys, date formatter, add/rename/remove callbacks and recovery-code replacement/display callbacks. Default and empty are variants of the same component. |
+| `SessionsSettings`    | [sessions-settings.tsx](../src/patterns/account-settings/sessions-settings.tsx)       | Sessions, date formatter and revoke callback. The current session cannot be revoked here.                                                                    |
+| `ApiKeysSettings`     | [api-keys-settings.tsx](../src/patterns/account-settings/api-keys-settings.tsx)       | API keys, date formatter and revoke callback.                                                                                                                |
+
+The `MembersTable` preview lives under `Patterns / Team Settings`, matching [src/patterns/team-settings/members-table.tsx](../src/patterns/team-settings/members-table.tsx). Its items and row-action slot come from the app. The `Editor role` control covers role vocabulary. `MembersTable` is also exported through `patterns/settings/tables`.
+
+| Cosmos primitive                          | Source file                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| Accordion                                 | [src/data-display/accordion.tsx](../src/data-display/accordion.tsx)                   |
+| Alert                                     | [src/feedback/alert.tsx](../src/feedback/alert.tsx)                                   |
+| AlertDialog                               | [src/overlays/alert-dialog.tsx](../src/overlays/alert-dialog.tsx)                     |
+| Attributes                                | [src/data-display/attributes.tsx](../src/data-display/attributes.tsx)                 |
+| Autocomplete                              | [src/pickers/autocomplete.tsx](../src/pickers/autocomplete.tsx)                       |
+| Avatar                                    | [src/data-display/avatar.tsx](../src/data-display/avatar.tsx)                         |
+| BrandLockup                               | [src/media/brand-lockup.tsx](../src/media/brand-lockup.tsx)                           |
+| Breadcrumbs                               | [src/navigation/breadcrumbs.tsx](../src/navigation/breadcrumbs.tsx)                   |
+| Button                                    | [src/buttons/button.tsx](../src/buttons/button.tsx)                                   |
+| Primitives / Charts / ChartRangeSelection | [src/charts/chart-range-selection.tsx](../src/charts/chart-range-selection.tsx)       |
+| Calendar                                  | [src/pickers/calendar.tsx](../src/pickers/calendar.tsx)                               |
+| DateField                                 | [src/forms/date-field.tsx](../src/forms/date-field.tsx)                               |
+| DatePicker                                | [src/pickers/date-picker.tsx](../src/pickers/date-picker.tsx)                         |
+| Checkbox                                  | [src/forms/checkbox.tsx](../src/forms/checkbox.tsx)                                   |
+| Chip                                      | [src/data-display/chip.tsx](../src/data-display/chip.tsx)                             |
+| CodeBlock                                 | [src/typography/code-block.tsx](../src/typography/code-block.tsx)                     |
+| ComboBox                                  | [src/pickers/combo-box.tsx](../src/pickers/combo-box.tsx)                             |
+| Description                               | [src/forms/description.tsx](../src/forms/description.tsx)                             |
+| Disclosure                                | [src/navigation/disclosure.tsx](../src/navigation/disclosure.tsx)                     |
+| Drawer                                    | [src/overlays/drawer.tsx](../src/overlays/drawer.tsx)                                 |
+| Dropdown                                  | [src/overlays/dropdown.tsx](../src/overlays/dropdown.tsx)                             |
+| EmptyState                                | [src/data-display/empty-state.tsx](../src/data-display/empty-state.tsx)               |
+| Field                                     | [src/forms/field.tsx](../src/forms/field.tsx)                                         |
+| HeadingHelp                               | [src/overlays/heading-help.tsx](../src/overlays/heading-help.tsx)                     |
+| InlineExternalLink                        | [src/navigation/inline-external-link.tsx](../src/navigation/inline-external-link.tsx) |
+| Input                                     | [src/forms/input.tsx](../src/forms/input.tsx)                                         |
+| InputGroup                                | [src/forms/input-group.tsx](../src/forms/input-group.tsx)                             |
+| Label                                     | [src/forms/label.tsx](../src/forms/label.tsx)                                         |
+| LineChart                                 | [src/charts/line-chart.tsx](../src/charts/line-chart.tsx)                             |
+| ListBox                                   | [src/collections/list-box.tsx](../src/collections/list-box.tsx)                       |
+| ListView                                  | [src/data-display/list-view.tsx](../src/data-display/list-view.tsx)                   |
+| Modal                                     | [src/overlays/modal.tsx](../src/overlays/modal.tsx)                                   |
+| Pagination                                | [src/navigation/pagination.tsx](../src/navigation/pagination.tsx)                     |
+| PasswordInput                             | [src/forms/password-input.tsx](../src/forms/password-input.tsx)                       |
+| Popover                                   | [src/overlays/popover.tsx](../src/overlays/popover.tsx)                               |
+| ProgressCircle                            | [src/feedback/progress-circle.tsx](../src/feedback/progress-circle.tsx)               |
+| RouteLink                                 | [src/navigation/route-link.tsx](../src/navigation/route-link.tsx)                     |
+| ScrollShadow                              | [src/utilities/scroll-shadow.tsx](../src/utilities/scroll-shadow.tsx)                 |
+| Select                                    | [src/forms/select.tsx](../src/forms/select.tsx)                                       |
+| Skeleton                                  | [src/feedback/skeleton.tsx](../src/feedback/skeleton.tsx)                             |
+| Spinner                                   | [src/feedback/spinner.tsx](../src/feedback/spinner.tsx)                               |
+| Switch                                    | [src/forms/switch.tsx](../src/forms/switch.tsx)                                       |
+| Table                                     | [src/data-display/table.tsx](../src/data-display/table.tsx)                           |
+| TableCellText                             | [src/data-display/table-cell-text.tsx](../src/data-display/table-cell-text.tsx)       |
+| Tabs                                      | [src/navigation/tabs.tsx](../src/navigation/tabs.tsx)                                 |
+| Textarea                                  | [src/forms/textarea.tsx](../src/forms/textarea.tsx)                                   |
+| ThemeSwitcher                             | [src/controls/theme-switcher.tsx](../src/controls/theme-switcher.tsx)                 |
+| Toast                                     | [src/overlays/toast.tsx](../src/overlays/toast.tsx)                                   |
+| ToggleButton                              | [src/buttons/toggle-button.tsx](../src/buttons/toggle-button.tsx)                     |
+| Tooltip                                   | [src/overlays/tooltip.tsx](../src/overlays/tooltip.tsx)                               |
+| Typography                                | [src/typography/typography.tsx](../src/typography/typography.tsx)                     |
+| Widget                                    | [src/data-display/widget.tsx](../src/data-display/widget.tsx)                         |
