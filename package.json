@@ -1,0 +1,551 @@
+{
+  "name": "@avgeek-oss/design-system",
+  "version": "1.0.0",
+  "description": "Shared React components, application layouts and UI patterns for Avgeek OSS apps.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avgeek-oss/oss-design-system.git"
+  },
+  "files": [
+    "dist",
+    "src",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "DESIGN.md",
+    "docs",
+    "CHANGELOG.md",
+    "AGENTS.md"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.cosmos.json --noEmit",
+    "test": "tsx --test test/*.test.tsx && node --test scripts/*.test.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "cosmos": "cosmos",
+    "cosmos:export": "cosmos-export",
+    "prepack": "pnpm build",
+    "verify": "pnpm format:check && pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm cosmos:export && pnpm verify:package",
+    "lint": "eslint src cosmos studio test scripts *.mjs vite.config.ts --max-warnings 0 && pnpm lint:styles",
+    "lint:styles": "stylelint \"src/**/*.css\"",
+    "verify:package": "node scripts/verify-package.mjs",
+    "prepublishOnly": "pnpm verify",
+    "check:docs": "node scripts/check-docs.mjs",
+    "test:published": "node scripts/verify-package.mjs --published"
+  },
+  "peerDependencies": {
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@heroui/react": "3.2.6",
+    "@heroui/styles": "3.2.6",
+    "@hookform/resolvers": "^5.2.2",
+    "@hugeicons/core-free-icons": "4.3.5",
+    "@hugeicons/react": "^1.1.10",
+    "@internationalized/date": "3.12.4",
+    "@react-aria/ssr": "^3.10.1",
+    "@react-aria/utils": "^3.34.1",
+    "clsx": "^2.1.1",
+    "prism-react-renderer": "^2.4.1",
+    "react-aria": "^3.52.1",
+    "react-aria-components": "^1.21.1",
+    "react-hook-form": "^7.88.0",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "4.3.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "globals": "^17.0.0",
+    "next": "^16.3.8",
+    "prettier": "3.9.9",
+    "react": "19.3.0",
+    "react-cosmos": "7.4.1",
+    "react-cosmos-plugin-vite": "7.4.0",
+    "react-dom": "19.3.0",
+    "stylelint": "^17.16.0",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.0.0",
+    "vite": "8.3.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles/globals.css",
+    "./auth/styles.css": "./dist/patterns/auth/styles.css",
+    "./pages/styles.css": "./dist/patterns/pages/styles.css",
+    "./forms/input-group": {
+      "types": "./dist/forms/input-group.d.ts",
+      "import": "./dist/forms/input-group.js"
+    },
+    "./forms/field": {
+      "types": "./dist/forms/field.d.ts",
+      "import": "./dist/forms/field.js"
+    },
+    "./forms/label": {
+      "types": "./dist/forms/label.d.ts",
+      "import": "./dist/forms/label.js"
+    },
+    "./forms/switch": {
+      "types": "./dist/forms/switch.d.ts",
+      "import": "./dist/forms/switch.js"
+    },
+    "./forms/description": {
+      "types": "./dist/forms/description.d.ts",
+      "import": "./dist/forms/description.js"
+    },
+    "./forms/password-input": {
+      "types": "./dist/forms/password-input.d.ts",
+      "import": "./dist/forms/password-input.js"
+    },
+    "./forms/checkbox": {
+      "types": "./dist/forms/checkbox.d.ts",
+      "import": "./dist/forms/checkbox.js"
+    },
+    "./forms/select": {
+      "types": "./dist/forms/select.d.ts",
+      "import": "./dist/forms/select.js"
+    },
+    "./forms/textarea": {
+      "types": "./dist/forms/textarea.d.ts",
+      "import": "./dist/forms/textarea.js"
+    },
+    "./forms/input": {
+      "types": "./dist/forms/input.d.ts",
+      "import": "./dist/forms/input.js"
+    },
+    "./buttons/toggle-button": {
+      "types": "./dist/buttons/toggle-button.d.ts",
+      "import": "./dist/buttons/toggle-button.js"
+    },
+    "./buttons/button": {
+      "types": "./dist/buttons/button.d.ts",
+      "import": "./dist/buttons/button.js"
+    },
+    "./overlays/alert-dialog": {
+      "types": "./dist/overlays/alert-dialog.d.ts",
+      "import": "./dist/overlays/alert-dialog.js"
+    },
+    "./overlays/popover": {
+      "types": "./dist/overlays/popover.d.ts",
+      "import": "./dist/overlays/popover.js"
+    },
+    "./overlays/heading-help": {
+      "types": "./dist/overlays/heading-help.d.ts",
+      "import": "./dist/overlays/heading-help.js"
+    },
+    "./overlays/drawer": {
+      "types": "./dist/overlays/drawer.d.ts",
+      "import": "./dist/overlays/drawer.js"
+    },
+    "./overlays/tooltip": {
+      "types": "./dist/overlays/tooltip.d.ts",
+      "import": "./dist/overlays/tooltip.js"
+    },
+    "./overlays/dropdown": {
+      "types": "./dist/overlays/dropdown.d.ts",
+      "import": "./dist/overlays/dropdown.js"
+    },
+    "./overlays/modal": {
+      "types": "./dist/overlays/modal.d.ts",
+      "import": "./dist/overlays/modal.js"
+    },
+    "./overlays/toast": {
+      "types": "./dist/overlays/toast.d.ts",
+      "import": "./dist/overlays/toast.js"
+    },
+    "./navigation/pagination": {
+      "types": "./dist/navigation/pagination.d.ts",
+      "import": "./dist/navigation/pagination.js"
+    },
+    "./navigation/tabs": {
+      "types": "./dist/navigation/tabs.d.ts",
+      "import": "./dist/navigation/tabs.js"
+    },
+    "./navigation/disclosure": {
+      "types": "./dist/navigation/disclosure.d.ts",
+      "import": "./dist/navigation/disclosure.js"
+    },
+    "./navigation/breadcrumbs": {
+      "types": "./dist/navigation/breadcrumbs.d.ts",
+      "import": "./dist/navigation/breadcrumbs.js"
+    },
+    "./navigation/inline-external-link": {
+      "types": "./dist/navigation/inline-external-link.d.ts",
+      "import": "./dist/navigation/inline-external-link.js"
+    },
+    "./navigation/app-layout": {
+      "types": "./dist/navigation/app-layout.d.ts",
+      "import": "./dist/navigation/app-layout.js"
+    },
+    "./charts/line-chart": {
+      "types": "./dist/charts/line-chart.d.ts",
+      "import": "./dist/charts/line-chart.js"
+    },
+    "./charts/chart-range-selection": {
+      "types": "./dist/charts/chart-range-selection.d.ts",
+      "import": "./dist/charts/chart-range-selection.js"
+    },
+    "./feedback/alert": {
+      "types": "./dist/feedback/alert.d.ts",
+      "import": "./dist/feedback/alert.js"
+    },
+    "./feedback/progress-circle": {
+      "types": "./dist/feedback/progress-circle.d.ts",
+      "import": "./dist/feedback/progress-circle.js"
+    },
+    "./feedback/spinner": {
+      "types": "./dist/feedback/spinner.d.ts",
+      "import": "./dist/feedback/spinner.js"
+    },
+    "./feedback/skeleton": {
+      "types": "./dist/feedback/skeleton.d.ts",
+      "import": "./dist/feedback/skeleton.js"
+    },
+    "./controls/theme-switcher": {
+      "types": "./dist/controls/theme-switcher.d.ts",
+      "import": "./dist/controls/theme-switcher.js"
+    },
+    "./utilities/scroll-shadow": {
+      "types": "./dist/utilities/scroll-shadow.d.ts",
+      "import": "./dist/utilities/scroll-shadow.js"
+    },
+    "./utilities/providers": {
+      "types": "./dist/utilities/providers.d.ts",
+      "import": "./dist/utilities/providers.js"
+    },
+    "./layouts/app-shell-breadcrumb": {
+      "types": "./dist/layouts/app-shell-breadcrumb.d.ts",
+      "import": "./dist/layouts/app-shell-breadcrumb.js"
+    },
+    "./layouts/application-shell-types": {
+      "types": "./dist/layouts/application-shell-types.d.ts",
+      "import": "./dist/layouts/application-shell-types.js"
+    },
+    "./layouts/workspace-document": {
+      "types": "./dist/layouts/workspace-document.d.ts",
+      "import": "./dist/layouts/workspace-document.js"
+    },
+    "./layouts/sidebar-icons": {
+      "types": "./dist/layouts/sidebar-icons.d.ts",
+      "import": "./dist/layouts/sidebar-icons.js"
+    },
+    "./layouts/app-shell-boundary": {
+      "types": "./dist/layouts/app-shell-boundary.d.ts",
+      "import": "./dist/layouts/app-shell-boundary.js"
+    },
+    "./layouts/page": {
+      "types": "./dist/layouts/page.d.ts",
+      "import": "./dist/layouts/page.js"
+    },
+    "./layouts/app-shell": {
+      "types": "./dist/layouts/app-shell.d.ts",
+      "import": "./dist/layouts/app-shell.js"
+    },
+    "./data-display/attributes": {
+      "types": "./dist/data-display/attributes.d.ts",
+      "import": "./dist/data-display/attributes.js"
+    },
+    "./data-display/table-cell-text": {
+      "types": "./dist/data-display/table-cell-text.d.ts",
+      "import": "./dist/data-display/table-cell-text.js"
+    },
+    "./data-display/empty-state": {
+      "types": "./dist/data-display/empty-state.d.ts",
+      "import": "./dist/data-display/empty-state.js"
+    },
+    "./data-display/accordion": {
+      "types": "./dist/data-display/accordion.d.ts",
+      "import": "./dist/data-display/accordion.js"
+    },
+    "./data-display/chip": {
+      "types": "./dist/data-display/chip.d.ts",
+      "import": "./dist/data-display/chip.js"
+    },
+    "./data-display/widget-context": {
+      "types": "./dist/data-display/widget-context.d.ts",
+      "import": "./dist/data-display/widget-context.js"
+    },
+    "./data-display/avatar": {
+      "types": "./dist/data-display/avatar.d.ts",
+      "import": "./dist/data-display/avatar.js"
+    },
+    "./data-display/table": {
+      "types": "./dist/data-display/table.d.ts",
+      "import": "./dist/data-display/table.js"
+    },
+    "./data-display/list-view": {
+      "types": "./dist/data-display/list-view.d.ts",
+      "import": "./dist/data-display/list-view.js"
+    },
+    "./data-display/widget": {
+      "types": "./dist/data-display/widget.d.ts",
+      "import": "./dist/data-display/widget.js"
+    },
+    "./hooks/use-page-visibility-interval": {
+      "types": "./dist/hooks/use-page-visibility-interval.d.ts",
+      "import": "./dist/hooks/use-page-visibility-interval.js"
+    },
+    "./hooks/app-navigation": {
+      "types": "./dist/hooks/app-navigation.d.ts",
+      "import": "./dist/hooks/app-navigation.js"
+    },
+    "./hooks/use-table-pagination": {
+      "types": "./dist/hooks/use-table-pagination.d.ts",
+      "import": "./dist/hooks/use-table-pagination.js"
+    },
+    "./typography/typography": {
+      "types": "./dist/typography/typography.d.ts",
+      "import": "./dist/typography/typography.js"
+    },
+    "./typography/code-block": {
+      "types": "./dist/typography/code-block.d.ts",
+      "import": "./dist/typography/code-block.js"
+    },
+    "./lib/sidebar-swipe": {
+      "types": "./dist/lib/sidebar-swipe.d.ts",
+      "import": "./dist/lib/sidebar-swipe.js"
+    },
+    "./lib/has-visible-text-content": {
+      "types": "./dist/lib/has-visible-text-content.d.ts",
+      "import": "./dist/lib/has-visible-text-content.js"
+    },
+    "./lib/utils": {
+      "types": "./dist/lib/utils.d.ts",
+      "import": "./dist/lib/utils.js"
+    },
+    "./lib/design-theme": {
+      "types": "./dist/lib/design-theme.d.ts",
+      "import": "./dist/lib/design-theme.js"
+    },
+    "./lib/component-root-props": {
+      "types": "./dist/lib/component-root-props.d.ts",
+      "import": "./dist/lib/component-root-props.js"
+    },
+    "./lib/bounded-list": {
+      "types": "./dist/lib/bounded-list.d.ts",
+      "import": "./dist/lib/bounded-list.js"
+    },
+    "./lib/theme": {
+      "types": "./dist/lib/theme.d.ts",
+      "import": "./dist/lib/theme.js"
+    },
+    "./pickers/combo-box": {
+      "types": "./dist/pickers/combo-box.d.ts",
+      "import": "./dist/pickers/combo-box.js"
+    },
+    "./pickers/autocomplete": {
+      "types": "./dist/pickers/autocomplete.d.ts",
+      "import": "./dist/pickers/autocomplete.js"
+    },
+    "./collections/list-box": {
+      "types": "./dist/collections/list-box.d.ts",
+      "import": "./dist/collections/list-box.js"
+    },
+    "./media/brand-lockup": {
+      "types": "./dist/media/brand-lockup.d.ts",
+      "import": "./dist/media/brand-lockup.js"
+    },
+    "./patterns/auth/identity-auth-frame": {
+      "types": "./dist/patterns/auth/identity-auth-frame.d.ts",
+      "import": "./dist/patterns/auth/identity-auth-frame.js"
+    },
+    "./patterns/auth/identity-credentials-form": {
+      "types": "./dist/patterns/auth/identity-credentials-form.d.ts",
+      "import": "./dist/patterns/auth/identity-credentials-form.js"
+    },
+    "./patterns/pages/page": {
+      "types": "./dist/patterns/pages/page.d.ts",
+      "import": "./dist/patterns/pages/page.js"
+    },
+    "./index": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./navigation/secondary-sidebar": {
+      "types": "./dist/navigation/secondary-sidebar.d.ts",
+      "import": "./dist/navigation/secondary-sidebar.js"
+    },
+    "./navigation/route-link": {
+      "types": "./dist/navigation/route-link.d.ts",
+      "import": "./dist/navigation/route-link.js"
+    },
+    "./adapters/next": {
+      "types": "./dist/adapters/next.d.ts",
+      "import": "./dist/adapters/next.js"
+    },
+    "./hooks/route-context": {
+      "types": "./dist/hooks/route-context.d.ts",
+      "import": "./dist/hooks/route-context.js"
+    },
+    "./patterns/settings/schemas": {
+      "types": "./dist/patterns/settings/schemas.d.ts",
+      "import": "./dist/patterns/settings/schemas.js"
+    },
+    "./patterns/settings/name-form": {
+      "types": "./dist/patterns/settings/name-form.d.ts",
+      "import": "./dist/patterns/settings/name-form.js"
+    },
+    "./patterns/settings/tables": {
+      "types": "./dist/patterns/settings/tables.d.ts",
+      "import": "./dist/patterns/settings/tables.js"
+    },
+    "./patterns/auth/auth-screen": {
+      "types": "./dist/patterns/auth/auth-screen.d.ts",
+      "import": "./dist/patterns/auth/auth-screen.js"
+    },
+    "./patterns/auth/auth-form": {
+      "types": "./dist/patterns/auth/auth-form.d.ts",
+      "import": "./dist/patterns/auth/auth-form.js"
+    },
+    "./patterns/auth/recovery-codes": {
+      "types": "./dist/patterns/auth/recovery-codes.d.ts",
+      "import": "./dist/patterns/auth/recovery-codes.js"
+    },
+    "./patterns/notifications": {
+      "types": "./dist/patterns/notifications.d.ts",
+      "import": "./dist/patterns/notifications.js"
+    },
+    "./patterns/sidebar-account-menu": {
+      "types": "./dist/patterns/sidebar-account-menu.d.ts",
+      "import": "./dist/patterns/sidebar-account-menu.js"
+    },
+    "./patterns/settings/date-time-preference-fields": {
+      "types": "./dist/patterns/settings/date-time-preference-fields.d.ts",
+      "import": "./dist/patterns/settings/date-time-preference-fields.js"
+    },
+    "./lib/time-zone-offset": {
+      "types": "./dist/lib/time-zone-offset.d.ts",
+      "import": "./dist/lib/time-zone-offset.js"
+    },
+    "./patterns/user-avatar": {
+      "types": "./dist/patterns/user-avatar.d.ts",
+      "import": "./dist/patterns/user-avatar.js"
+    },
+    "./forms/date-field": {
+      "types": "./dist/forms/date-field.d.ts",
+      "import": "./dist/forms/date-field.js"
+    },
+    "./pickers/date-picker": {
+      "types": "./dist/pickers/date-picker.d.ts",
+      "import": "./dist/pickers/date-picker.js"
+    },
+    "./pickers/calendar": {
+      "types": "./dist/pickers/calendar.d.ts",
+      "import": "./dist/pickers/calendar.js"
+    },
+    "./patterns/resource-table": {
+      "types": "./dist/patterns/resource-table.d.ts",
+      "import": "./dist/patterns/resource-table.js"
+    },
+    "./patterns/auth/mcp-authorization": {
+      "types": "./dist/patterns/auth/mcp-authorization.d.ts",
+      "import": "./dist/patterns/auth/mcp-authorization.js"
+    },
+    "./patterns/auth/team-setup": {
+      "types": "./dist/patterns/auth/team-setup.d.ts",
+      "import": "./dist/patterns/auth/team-setup.js"
+    },
+    "./patterns/auth/sign-in": {
+      "types": "./dist/patterns/auth/sign-in.d.ts",
+      "import": "./dist/patterns/auth/sign-in.js"
+    },
+    "./patterns/auth/forgot-password": {
+      "types": "./dist/patterns/auth/forgot-password.d.ts",
+      "import": "./dist/patterns/auth/forgot-password.js"
+    },
+    "./patterns/auth/reset-link-sent": {
+      "types": "./dist/patterns/auth/reset-link-sent.d.ts",
+      "import": "./dist/patterns/auth/reset-link-sent.js"
+    },
+    "./patterns/auth/password-setup": {
+      "types": "./dist/patterns/auth/password-setup.d.ts",
+      "import": "./dist/patterns/auth/password-setup.js"
+    },
+    "./patterns/auth/accept-invitation": {
+      "types": "./dist/patterns/auth/accept-invitation.d.ts",
+      "import": "./dist/patterns/auth/accept-invitation.js"
+    },
+    "./patterns/auth/invitation-verification": {
+      "types": "./dist/patterns/auth/invitation-verification.d.ts",
+      "import": "./dist/patterns/auth/invitation-verification.js"
+    },
+    "./patterns/auth/invitation-unavailable": {
+      "types": "./dist/patterns/auth/invitation-unavailable.d.ts",
+      "import": "./dist/patterns/auth/invitation-unavailable.js"
+    },
+    "./patterns/auth/passkey-verification": {
+      "types": "./dist/patterns/auth/passkey-verification.d.ts",
+      "import": "./dist/patterns/auth/passkey-verification.js"
+    },
+    "./patterns/auth/recovery-sign-in": {
+      "types": "./dist/patterns/auth/recovery-sign-in.d.ts",
+      "import": "./dist/patterns/auth/recovery-sign-in.js"
+    },
+    "./patterns/auth/recovery-codes-screen": {
+      "types": "./dist/patterns/auth/recovery-codes-screen.d.ts",
+      "import": "./dist/patterns/auth/recovery-codes-screen.js"
+    },
+    "./patterns/auth/confirm-identity-dialog": {
+      "types": "./dist/patterns/auth/confirm-identity-dialog.d.ts",
+      "import": "./dist/patterns/auth/confirm-identity-dialog.js"
+    },
+    "./patterns/account-settings/profile-settings": {
+      "types": "./dist/patterns/account-settings/profile-settings.d.ts",
+      "import": "./dist/patterns/account-settings/profile-settings.js"
+    },
+    "./patterns/account-settings/preferences-settings": {
+      "types": "./dist/patterns/account-settings/preferences-settings.d.ts",
+      "import": "./dist/patterns/account-settings/preferences-settings.js"
+    },
+    "./patterns/account-settings/passkey-settings": {
+      "types": "./dist/patterns/account-settings/passkey-settings.d.ts",
+      "import": "./dist/patterns/account-settings/passkey-settings.js"
+    },
+    "./patterns/account-settings/sessions-settings": {
+      "types": "./dist/patterns/account-settings/sessions-settings.d.ts",
+      "import": "./dist/patterns/account-settings/sessions-settings.js"
+    },
+    "./patterns/account-settings/api-keys-settings": {
+      "types": "./dist/patterns/account-settings/api-keys-settings.d.ts",
+      "import": "./dist/patterns/account-settings/api-keys-settings.js"
+    },
+    "./patterns/team-settings/members-table": {
+      "types": "./dist/patterns/team-settings/members-table.d.ts",
+      "import": "./dist/patterns/team-settings/members-table.js"
+    }
+  }
+}

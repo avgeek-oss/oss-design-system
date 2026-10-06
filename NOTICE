@@ -1,0 +1,8 @@
+Avgeek OSS Design System
+Copyright Avgeek, Inc.
+
+UI primitives, layouts and recipes adapted from Towbar,
+https://github.com/avgeek-oss/towbar, under the Apache License 2.0.
+
+Built with the open-source HeroUI React components and styles.
+Third-party dependencies retain their own licenses.

@@ -1,0 +1,53 @@
+# Avgeek OSS Design System
+
+## Purpose and boundaries
+
+This repository owns the shared React UI for Avgeek OSS apps: HeroUI primitives, application layouts, and reusable auth, account settings, team settings, and data patterns. It reduces copied UI and makes reviewed behavior consistent across Towbar, Mill, Rootset, and other consumers.
+
+Apps own routing destinations, permissions, API calls, persistence, date policy, branding, WebAuthn ceremonies, and recovery-code generation. Components accept typed data and callbacks. Never move application services or authorization policy into this package, or import app packages into `src`. Next.js belongs only in `src/adapters/next.tsx`; it is an optional peer.
+
+Read [DESIGN.md](DESIGN.md) and the relevant file in [docs](docs) before changing UI. Read [docs/components.md](docs/components.md) before adding an export. The installed HeroUI types and existing source are the authority for available APIs and variants.
+
+## Using components
+
+- Consumers import the package root or a public subpath listed in `package.json`. Do not import `src`, `dist`, studio helpers, or Cosmos fixtures from an app.
+- Import `@avgeek-oss/design-system/styles.css` once through the app's Tailwind 4 build. Keep app source scanning enabled. The stylesheet registers the library's own classes and includes fonts, HeroUI, auth, and page styles.
+- Use `Providers` for theme context. Use `RouteProvider` for app navigation, or the explicit Next adapter. Use `AppShell` with `ApplicationPage` for product pages and `AuthScreen` for public auth.
+- Prefer a matching exported pattern before assembling another app-specific copy. Use `ResourceTable` for an items/columns record list and `Table` for direct compound table composition. Use `DatePicker` for calendar entry and `DateField` for segmented entry alone.
+- Base/auth inputs use the native `primary` surface; widget, modal, and drawer inputs use `secondary`. Cancel and auxiliary buttons use `secondary`; destructive actions use `danger` or `danger-soft`.
+
+## Adding or changing a pattern
+
+1. Search `src`, the catalog, and existing fixtures for the same responsibility. Extend its owner when appropriate; do not add parallel implementations or speculative variants.
+2. Put reusable workflows in a named file under `src/patterns/<domain>`. Keep primitives, routing adapters, and layout responsibilities in their existing folders. Account Settings and Team Settings are separate domains.
+3. Define a named props type and export the component and consumer-facing types. Use callbacks for app actions, children/slots for variable content, and discriminated unions for mutually exclusive modes. Follow the underlying HeroUI prop names; do not invent synonym props.
+4. Keep controlled app data separate from editable drafts. Await mutations, prevent repeat submission, retain drafts on failure, and close dialogs only after success. Do not silently replace failed requests with mock data or an empty success state.
+5. Add the root export when it is an intended root API and a typed ESM subpath in `package.json`. Do not expose internal helpers merely because they have a file. Never import the root barrel from within `src`.
+6. Add a Cosmos fixture that renders the actual export. Group it under Primitives, Patterns, or Layouts. Use separate files for separate published components; use variants/controls for states of one component. Sample data, simulated API calls, and navigation belong in `studio` or `cosmos` only.
+7. Update the catalog and applicable usage docs. Explain when to use the component versus its closest alternative. A new dependency needs an existing API gap and must be declared in the appropriate dependency/peer section.
+
+## Code and style rules
+
+- Use strict TypeScript and honor `noUncheckedIndexedAccess`. Keep public contracts explicit, generic where needed, and free of `any`, double casts, ignored type errors, or non-null assertions that hide an unproven invariant.
+- Use type-only imports for types and `.js` extensions for relative imports in `src`; the package ships ESM. Keep client directives on components/hooks requiring client state or browser access. Do not read browser globals during server rendering.
+- Forward refs and DOM attributes when wrapping a DOM element. Preserve native labels, keyboard interaction, focus management, disabled state, and accessible names. Icons accompanying text are decorative; icon-only controls need an accessible label.
+- React Hooks rules, exhaustive dependencies, unused symbols, console/debugger checks, promise handling, and type-only imports are enforced by ESLint. Studio and fixtures are linted too. JSX async handlers must catch failures at the UI boundary; `void` is only for an intentional operation with an understood rejection contract.
+- Handle errors once at the boundary that can display or recover from them. Do not add empty catches, hidden fallbacks, or log-and-rethrow scaffolding. Comments explain constraints and tradeoffs, rather than narrating the code or its edit history.
+- Use `cn` for merged classes and semantic color tokens (`foreground`, `muted`, `surface`, `accent`, `danger`, `separator`). Raw palette values belong in named theme tokens, not consumer markup. Keep shared exceptions scoped and documented.
+- Preserve native HeroUI variants and interaction behavior. Global overrides require a demonstrated shared problem and rendered verification; do not recreate a primitive to adjust preview layout. Reuse the documented modal, field, table, and auth spacing contracts.
+- CSS is checked by Stylelint for invalid syntax, unknown properties, duplicate rules/properties, and shorthand conflicts. Tailwind directives are explicitly supported. Prettier owns formatting; do not maintain a second formatting convention.
+- Keep each component focused on one responsibility. Extract repeated behavior with a concrete second use; avoid giant configuration objects, speculative APIs, unrelated refactors, debug logs, dead helpers, and commented-out code.
+
+## Validation and release
+
+Run `pnpm verify` before declaring a change ready. It checks formatting, public documentation links, code/CSS lint, source and studio types, contract tests, a clean build, Cosmos export, and a packed-package consumer outside this checkout. The consumer covers Vite without Next.js and a Next.js production build with the explicit adapter. `pnpm verify:package` can repeat these checks independently. Do not weaken checks or tests to obtain a passing result.
+
+Add behavioral tests for public contracts, regression risks, async transitions, or security-sensitive UI decisions. Assert observable outcomes independently of the implementation. Visual spacing corrections need rendered evidence, rather than tests mirroring CSS strings.
+
+Review changed UI in Cosmos at desktop and mobile widths, in light and dark themes. Exercise keyboard interaction, long content, empty/pending/failure states, focus return, and overflow where relevant. Fixture simulation proves a UI contract, not backend security or app compatibility.
+
+Keep public documentation focused on installation, component contracts, design rules, contributor instructions, and release notes. Do not commit review diaries, verification transcripts, business plans, app migration schedules, empty placeholder Markdown files, or generated logs. Generated package candidates and reports belong in the ignored `artifacts/` directory.
+
+Preserve unrelated work. Publishing or deployment requires explicit authorization and is never a side effect of a UI change. Distinguish local verification, CI, and registry publication when reporting results.
+
+GitHub Packages releases use stable `v<package.json version>` tags on `main`. The publish job must depend on full verification, publish the verified tarball, and check registry integrity plus fresh consumer builds. Keep `packages: write` scoped to the publish job and use `GITHUB_TOKEN`; never commit registry credentials or publish from a pull request.

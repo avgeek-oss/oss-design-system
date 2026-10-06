@@ -1,0 +1,10 @@
+node_modules/
+dist/
+artifacts/
+cosmos-export/
+cosmos.imports.*
+*.tgz
+*.tsbuildinfo
+*.log
+.DS_Store
+.env*

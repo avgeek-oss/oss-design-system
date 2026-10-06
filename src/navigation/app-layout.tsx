@@ -1,0 +1,251 @@
+"use client";
+
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { RouteProvider, useRoutePathname } from "../hooks/route-context.js";
+import { cn } from "../lib/utils.js";
+import { Drawer } from "../overlays/drawer.js";
+import { bindSidebarSwipe } from "../lib/sidebar-swipe.js";
+import styles from "./app-layout.module.css";
+import {
+  MobileNavigationContext,
+  NavigationContext,
+  useAppNavigate,
+} from "../hooks/app-navigation.js";
+
+export {
+  useAppNavigate,
+  useMobileNavigation,
+} from "../hooks/app-navigation.js";
+
+const desktopQuery = "(min-width: 64rem)";
+const subscribeToViewport = (callback: () => void) => {
+  const query = window.matchMedia(desktopQuery);
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+};
+const isDesktopViewport = () => window.matchMedia(desktopQuery).matches;
+const serverViewport = () => false;
+
+export function AppLayout({
+  children,
+  className,
+  footer,
+  navbar,
+  navigate,
+  onSidebarOpenChange,
+  sidebar,
+  sidebarOpen = true,
+  toggleShortcut = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  footer?: ReactNode;
+  navbar?: ReactNode;
+  navigate?: (href: string) => void;
+  onSidebarOpenChange?: (open: boolean) => void;
+  scrollMode?: string;
+  sidebar?: ReactNode;
+  sidebarCollapsible?: string;
+  sidebarOpen?: boolean;
+  toggleShortcut?: boolean;
+}) {
+  const pathname = useRoutePathname();
+  const inheritedNavigate = useAppNavigate();
+  const previousPathname = useRef(pathname);
+  const root = useRef<HTMLDivElement>(null);
+  const hasSidebar = Boolean(sidebar);
+  const [drawerMounted, setDrawerMounted] = useState(false);
+  const previousSidebarOpen = useRef(sidebarOpen);
+  const [presented, setPresented] = useState({
+    pathname,
+    sidebar,
+    navbar,
+    children,
+  });
+  const [mobileHost, setMobileHost] = useState<HTMLElement | null>(null);
+  const [secondaryMenuCount, setSecondaryMenuCount] = useState(0);
+  const [motionReady, setMotionReady] = useState(false);
+  const registerSecondaryNavigation = useCallback(() => {
+    setSecondaryMenuCount((count) => count + 1);
+    return () => setSecondaryMenuCount((count) => count - 1);
+  }, []);
+  const isDesktop = useSyncExternalStore(
+    subscribeToViewport,
+    isDesktopViewport,
+    serverViewport,
+  );
+
+  const holdNavigation =
+    !isDesktop && drawerMounted && presented.pathname !== pathname;
+  const visible = holdNavigation
+    ? presented
+    : { pathname, sidebar, navbar, children };
+  const trackDrawer = useCallback((element: HTMLDivElement | null) => {
+    setDrawerMounted(Boolean(element));
+  }, []);
+  useLayoutEffect(() => {
+    const reopened = sidebarOpen && !previousSidebarOpen.current;
+    previousSidebarOpen.current = sidebarOpen;
+    if (holdNavigation && !reopened) return;
+    setPresented((previous) =>
+      previous.pathname === pathname &&
+      previous.sidebar === sidebar &&
+      previous.navbar === navbar &&
+      previous.children === children
+        ? previous
+        : { pathname, sidebar, navbar, children },
+    );
+  }, [children, holdNavigation, navbar, pathname, sidebar, sidebarOpen]);
+
+  useLayoutEffect(() => {
+    if (
+      isDesktop &&
+      !sidebarOpen &&
+      root.current?.querySelector("aside")?.contains(document.activeElement)
+    ) {
+      root.current
+        .querySelector<HTMLButtonElement>(".navigation-toggle")
+        ?.focus({ preventScroll: true });
+    }
+  }, [isDesktop, sidebarOpen]);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMotionReady(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (
+      isDesktop ||
+      sidebarOpen ||
+      !hasSidebar ||
+      !onSidebarOpenChange ||
+      !root.current
+    )
+      return;
+    return bindSidebarSwipe(root.current, () => onSidebarOpenChange(true));
+  }, [hasSidebar, isDesktop, onSidebarOpenChange, sidebarOpen]);
+
+  useEffect(() => {
+    const routeChanged = previousPathname.current !== pathname;
+    previousPathname.current = pathname;
+    if (
+      routeChanged &&
+      onSidebarOpenChange &&
+      !window.matchMedia("(min-width: 64rem)").matches
+    ) {
+      onSidebarOpenChange(false);
+    }
+  }, [onSidebarOpenChange, pathname]);
+
+  useEffect(() => {
+    if (!toggleShortcut) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === "b" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        onSidebarOpenChange?.(!sidebarOpen);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onSidebarOpenChange, sidebarOpen, toggleShortcut]);
+
+  return (
+    <RouteProvider
+      pathname={visible.pathname}
+      navigate={navigate ?? inheritedNavigate}
+    >
+      <NavigationContext.Provider value={navigate ?? inheritedNavigate}>
+        <MobileNavigationContext.Provider
+          value={{
+            host: mobileHost,
+            isMobile: !isDesktop,
+            registerSecondaryNavigation,
+            close: () => {
+              if (!isDesktop) onSidebarOpenChange?.(false);
+            },
+          }}
+        >
+          <div
+            ref={root}
+            data-sidebar-open={sidebarOpen}
+            data-has-sidebar={hasSidebar && isDesktop}
+            data-motion-ready={motionReady}
+            className={cn("min-h-dvh", styles.layout, className)}
+          >
+            {sidebar && isDesktop ? (
+              <aside
+                id="application-navigation"
+                aria-hidden={!sidebarOpen}
+                inert={!sidebarOpen}
+                className={styles.desktopSidebar}
+              >
+                <div className={styles.sidebarPanel}>{visible.sidebar}</div>
+              </aside>
+            ) : null}
+            <div className="grid min-h-dvh min-w-0 grid-cols-1 grid-rows-[auto_1fr_auto]">
+              {visible.navbar}
+              <main className="min-w-0">{visible.children}</main>
+              {footer}
+            </div>
+          </div>
+          {sidebar ? (
+            <Drawer.Backdrop
+              className={styles.drawerBackdrop}
+              isOpen={sidebarOpen && !isDesktop}
+              onOpenChange={onSidebarOpenChange}
+            >
+              <Drawer.Content placement="left">
+                <Drawer.Dialog
+                  id="application-navigation"
+                  aria-label="Navigation"
+                  data-secondary-navigation={secondaryMenuCount > 0}
+                  className={cn(
+                    "group/navigation grid max-w-[calc(100vw-1rem)] overflow-hidden bg-background p-0",
+                    styles.drawerDialog,
+                  )}
+                >
+                  <div
+                    ref={trackDrawer}
+                    className="relative min-h-0 min-w-0"
+                    data-slot="drawer-body"
+                  >
+                    {visible.sidebar}
+                    <Drawer.CloseTrigger
+                      aria-label="Close navigation"
+                      className="end-3 top-2.5 size-11 bg-transparent hover:bg-transparent data-[hovered=true]:bg-transparent group-data-[secondary-navigation=true]/navigation:hidden"
+                    />
+                  </div>
+                  <div
+                    className="hidden min-h-0 min-w-0 flex-col border-s border-separator group-data-[secondary-navigation=true]/navigation:flex"
+                    data-slot="drawer-body"
+                  >
+                    <div className="flex min-h-16 shrink-0 items-center justify-end border-b border-separator px-3">
+                      <Drawer.CloseTrigger
+                        aria-label="Close navigation"
+                        className="static size-11 bg-transparent hover:bg-transparent data-[hovered=true]:bg-transparent"
+                      />
+                    </div>
+                    <nav
+                      aria-label="Page navigation"
+                      ref={setMobileHost}
+                      className="grid min-h-0 flex-1 content-start gap-3 overflow-y-auto overscroll-contain px-3 py-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
+                    />
+                  </div>
+                </Drawer.Dialog>
+              </Drawer.Content>
+            </Drawer.Backdrop>
+          ) : null}
+        </MobileNavigationContext.Provider>
+      </NavigationContext.Provider>
+    </RouteProvider>
+  );
+}

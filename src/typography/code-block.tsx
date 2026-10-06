@@ -1,0 +1,166 @@
+"use client";
+
+import {
+  forwardRef,
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentPropsWithRef,
+  type ReactNode,
+} from "react";
+import { Highlight, type PrismTheme } from "prism-react-renderer";
+import { SourceCodeIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Widget, type WidgetActionProps } from "../data-display/widget.js";
+import { cn } from "../lib/utils.js";
+
+const htmlTheme: PrismTheme = {
+  plain: { color: "var(--foreground)" },
+  styles: [
+    { types: ["tag"], style: { color: "var(--accent)" } },
+    {
+      types: ["attr-name"],
+      style: { color: "var(--warning-soft-foreground)" },
+    },
+    {
+      types: ["attr-value", "string"],
+      style: { color: "var(--success-soft-foreground)" },
+    },
+    { types: ["punctuation"], style: { color: "var(--muted)" } },
+  ],
+};
+
+const Root = forwardRef<HTMLDivElement, ComponentPropsWithRef<"div">>(
+  ({ className, ...props }, ref) => (
+    <Widget
+      ref={ref}
+      className={cn("min-w-0", className)}
+      data-slot="code-block"
+      {...props}
+    />
+  ),
+);
+
+const Header = forwardRef<HTMLDivElement, ComponentPropsWithRef<"div">>(
+  ({ children, className, ...props }, ref) => (
+    <Widget.Header
+      ref={ref}
+      className={className}
+      data-slot="code-block-header"
+      {...props}
+    >
+      {children}
+    </Widget.Header>
+  ),
+);
+
+const Filename = forwardRef<HTMLSpanElement, ComponentPropsWithRef<"span">>(
+  ({ className, ...props }, ref) => (
+    <Widget.Title
+      ref={ref}
+      icon={<HugeiconsIcon icon={SourceCodeIcon} />}
+      className={cn("min-w-0 truncate text-muted", className)}
+      data-slot="code-block-filename"
+      {...props}
+    />
+  ),
+);
+
+const Code = forwardRef<
+  HTMLPreElement,
+  Omit<ComponentPropsWithRef<"pre">, "children"> & {
+    code: string;
+    language?: string;
+  }
+>(({ className, code, language, ...props }, ref) => (
+  <Widget.Content className="p-0">
+    <pre
+      ref={ref}
+      className={cn("m-0 overflow-x-auto p-4 text-sm", className)}
+      data-language={language}
+      data-slot="code-block-code"
+      {...props}
+    >
+      {language === "html" ? (
+        <Highlight code={code} language="markup" theme={htmlTheme}>
+          {({ tokens, getTokenProps }) => (
+            <code>
+              {tokens.map((line, lineIndex) => (
+                <Fragment key={lineIndex}>
+                  {lineIndex > 0 ? "\n" : null}
+                  {line.map((token, tokenIndex) => (
+                    <span
+                      key={tokenIndex}
+                      style={getTokenProps({ token }).style}
+                    >
+                      {token.content}
+                    </span>
+                  ))}
+                </Fragment>
+              ))}
+            </code>
+          )}
+        </Highlight>
+      ) : (
+        <code>{code}</code>
+      )}
+    </pre>
+  </Widget.Content>
+));
+
+type CopyButtonProps = Omit<WidgetActionProps, "children" | "onPress"> & {
+  code: string;
+};
+
+const CopyButton = forwardRef<HTMLButtonElement, CopyButtonProps>(
+  ({ code, ...props }, ref) => {
+    const [copied, setCopied] = useState(false);
+    const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(
+      () => () => {
+        if (resetTimer.current) clearTimeout(resetTimer.current);
+      },
+      [],
+    );
+
+    const copyCode = async () => {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      if (resetTimer.current) clearTimeout(resetTimer.current);
+      resetTimer.current = setTimeout(() => setCopied(false), 1800);
+    };
+
+    const label = copied ? "Code copied" : "Copy code";
+    return (
+      <Widget.Action
+        {...props}
+        ref={ref}
+        aria-label={props["aria-label"] ?? label}
+        data-slot="code-block-copy"
+        onPress={copyCode}
+      >
+        {copied ? "Copied" : "Copy"}
+      </Widget.Action>
+    );
+  },
+);
+
+Root.displayName = "CodeBlock.Root";
+Header.displayName = "CodeBlock.Header";
+Filename.displayName = "CodeBlock.Filename";
+Code.displayName = "CodeBlock.Code";
+CopyButton.displayName = "CodeBlock.CopyButton";
+
+export const CodeBlock = Object.assign(Root, {
+  Code,
+  CopyButton,
+  Filename,
+  Header,
+  Root,
+});
+
+export type CodeBlockProps = ComponentPropsWithRef<typeof Root> & {
+  children?: ReactNode;
+};
