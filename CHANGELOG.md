@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Keep toast close controls visible and reachable on touch and keyboard, with 32px targets on frontmost/expanded rows while hidden and exiting rows stay inactive. Restore initiating control focus when native final-toast dismissal leaves focus on the document body.
+
 ## 1.1.0 — 2026-10-06
 
 - Restore full-width section dividers in the sidebar account menu while retaining padded labels and actions.

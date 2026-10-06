@@ -54,6 +54,7 @@ Wrap the shell in `RouteProvider` with the current pathname and navigation callb
 
 ```sh
 pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
 pnpm cosmos
 pnpm verify
 pnpm pack
@@ -61,7 +62,7 @@ pnpm pack
 
 React Cosmos runs on port 5012; its Vite renderer uses 5062. Fixtures cover primitives, shell navigation, auth layouts, settings tables, empty states, and charts. Use the shared appearance control to review both themes and Cosmos responsive viewports to review mobile layouts.
 
-Contributor rules are in [AGENTS.md](AGENTS.md). `pnpm verify` includes strict source/studio type checks, code and CSS lint, tests, clean build, Cosmos export, and a tarball installation/type/build check outside this checkout. It saves the verified candidate and report in the ignored `artifacts/` folder. Built declarations include maps to the matching packaged source.
+Contributor rules are in [AGENTS.md](AGENTS.md). `pnpm verify` includes strict source/studio type checks, code and CSS lint, tests, clean build, Cosmos export, rendered toast interaction tests, and a tarball installation/type/build check outside this checkout. It saves the verified candidate and report in the ignored `artifacts/` folder. Built declarations include maps to the matching packaged source.
 
 Release notes are in [CHANGELOG.md](CHANGELOG.md). Source and third-party attribution are in `NOTICE` and `LICENSE`.
 
