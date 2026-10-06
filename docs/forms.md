@@ -57,7 +57,7 @@ Mount one `Toast.Provider` for the application, including public auth routes. Us
 
 The shared provider retains HeroUI's props and native rendering. It restores the connected control that preceded toast focus when the final toast exits and native focus was stranded on the document body. It does not move focus away from a control the user has since chosen, into an inert surface, or into a background browser tab. This keeps an initiating modal usable after pointer or keyboard toast dismissal.
 
-Role vocabulary belongs to the app. Use `createInvitationSchema(["admin", "editor", "viewer"])` for Rootset and the existing Admin/Member/Viewer schema for Towbar or Mill. Do not broaden server permissions because the shared table supports another role label.
+Use the standard Admin/Member/Viewer roles for common team settings. Apps enforce the permissions behind those roles; rendering a role label does not grant access. `createInvitationSchema` can validate a distinct domain-specific role set when a separate feature requires it.
 
 ## Notifications and charts
 

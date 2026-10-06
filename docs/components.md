@@ -46,7 +46,7 @@ Account settings live under `Patterns / Account Settings`, matching `src/pattern
 | `SessionsSettings`    | [sessions-settings.tsx](../src/patterns/account-settings/sessions-settings.tsx)       | Sessions, date formatter and revoke callback. The current session cannot be revoked here.                                                                              |
 | `ApiKeysSettings`     | [api-keys-settings.tsx](../src/patterns/account-settings/api-keys-settings.tsx)       | Credential metadata, date formatter, optional actions and revoke callback.                                                                                             |
 
-The `MembersTable` preview lives under `Patterns / Team Settings`, matching [src/patterns/team-settings/members-table.tsx](../src/patterns/team-settings/members-table.tsx). Its items and row-action slot come from the app. The `Editor role` control covers role vocabulary. `MembersTable` is also exported through `patterns/settings/tables`.
+The `MembersTable` preview lives under `Patterns / Team Settings`, matching [src/patterns/team-settings/members-table.tsx](../src/patterns/team-settings/members-table.tsx). Its items and row-action slot come from the app. The preview uses the standard Admin/Member/Viewer roles. `MembersTable` is also exported through `patterns/settings/tables`.
 
 The additional shared application patterns follow Towbar's common surfaces. Their typed data contracts, callback behavior, and boundaries are documented in [Shared application patterns](patterns.md). Each has its own fixture under the matching Patterns folder and is exported from the package root and the subpath below.
 

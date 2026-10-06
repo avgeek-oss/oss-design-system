@@ -64,18 +64,22 @@ test("the shared runtime has no Next.js or application package dependency", asyn
 });
 
 test("role validation stays scoped to each app", () => {
-  const rootset = createInvitationSchema(["admin", "editor", "viewer"]);
+  const domainRoles = createInvitationSchema(["owner", "contributor"]);
   assert.equal(
-    rootset.safeParse({ email: "alex@example.test", role: "editor" }).success,
+    domainRoles.safeParse({ email: "alex@example.test", role: "contributor" })
+      .success,
     true,
   );
   assert.equal(
-    rootset.safeParse({ email: "alex@example.test", role: "member" }).success,
+    domainRoles.safeParse({ email: "alex@example.test", role: "member" })
+      .success,
     false,
   );
   assert.equal(
-    invitationSchema.safeParse({ email: "alex@example.test", role: "editor" })
-      .success,
+    invitationSchema.safeParse({
+      email: "alex@example.test",
+      role: "contributor",
+    }).success,
     false,
   );
 });
