@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ApiKeysTable,
   type ApiKey,
@@ -24,6 +24,25 @@ export function ApiKeysSettings<T extends ApiKey>({
   actions,
 }: ApiKeysSettingsProps<T>) {
   const [revoking, setRevoking] = useState<T | null>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (revoking || !opener.current) return;
+    const target = opener.current;
+    // The native table can restore its row after the modal restores the button.
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        if (!document.hasFocus() || !target.isConnected) return;
+        const active = document.activeElement;
+        if (
+          active === document.body ||
+          active === target.closest('[role="row"]') ||
+          active === target.closest('[role="gridcell"]')
+        )
+          target.focus({ preventScroll: true });
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [revoking]);
   return (
     <>
       <ApiKeysTable
@@ -33,7 +52,14 @@ export function ApiKeysSettings<T extends ApiKey>({
         actions={(item) => (
           <>
             {actions?.(item)}
-            <Button variant="danger" onPress={() => setRevoking(item)}>
+            <Button
+              variant="danger"
+              onPress={(event) => {
+                opener.current =
+                  event.target instanceof HTMLElement ? event.target : null;
+                setRevoking(item);
+              }}
+            >
               Revoke
             </Button>
           </>
