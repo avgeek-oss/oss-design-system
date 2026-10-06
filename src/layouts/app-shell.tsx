@@ -89,6 +89,14 @@ function Content({
 }
 export const AppShell = Object.assign(Root, { Content, Root });
 
+function isCurrentLink(item: ShellLinkConfig, pathname: string) {
+  const path = item.activePath ?? item.href;
+  return (
+    !item.external &&
+    (pathname === path || (path !== "/" && pathname.startsWith(`${path}/`)))
+  );
+}
+
 function RoutedLink({
   item,
   className,
@@ -115,11 +123,7 @@ function RoutedLink({
       event.preventDefault();
       if (
         pathname !== item.href &&
-        !(
-          item.preserveSubroute &&
-          (pathname === (item.activePath ?? item.href) ||
-            pathname.startsWith(`${item.activePath ?? item.href}/`))
-        )
+        !(item.preserveSubroute && isCurrentLink(item, pathname))
       )
         navigate(item.href);
     }
@@ -140,6 +144,7 @@ function RoutedLink({
   return (
     <a
       aria-label={item.accessibleLabel}
+      aria-current={isCurrentLink(item, pathname) ? "page" : undefined}
       className={className}
       href={item.href}
       onClick={onClick}
@@ -311,11 +316,7 @@ export function ApplicationSidebar({ config }: { config: SidebarConfig }) {
                     className={menuItemVariants().item({
                       className: cn(
                         "min-w-0 text-sm",
-                        pathname === (item.activePath ?? item.href) ||
-                          ((item.activePath ?? item.href) !== "/" &&
-                            pathname.startsWith(
-                              `${item.activePath ?? item.href}/`,
-                            ))
+                        isCurrentLink(item, pathname)
                           ? "bg-default font-medium text-foreground"
                           : "font-normal text-foreground",
                       ),

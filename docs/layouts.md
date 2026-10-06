@@ -20,7 +20,11 @@ Do not put a `pt-4` wrapper around `NameSettingsForm` in this example.
 
 Set a navigation item's `activePath` when its destination is one child of a section, for example `href="/settings/profile"` with `activePath="/settings"`. Matching respects path boundaries. The default matches the destination and its descendants.
 
+Matching internal primary links expose `aria-current="page"` using the same rule as their visual selection. Account and Team descendants retain their owning section; similar prefixes such as `/settings-archive` and `/teams` do not match. `preserveSubroute` keeps the current child route when its owning primary link is activated. External links do not expose a current-page state.
+
 Primary and secondary sidebar items use HeroUI’s native menu-item styles, including the 36px minimum height, padding, hover and focus states. Sidebar links remain navigation links.
+
+Import `SecondaryItems` from `@avgeek-oss/design-system/navigation/secondary-sidebar`. Give navigation items an `href`; they render `RouteLink`, use the app's `RouteProvider`, retain modified/new-tab clicks, and close the mobile drawer only on ordinary activation. `selected` marks the current link with `aria-current="page"`. An item without `href` remains an action button and calls `onSelect(id)` before closing; `onSelect` can be omitted for link-only lists. A disabled item remains a disabled button without a navigable destination, including when it has an `href`. Existing action lists retain their behavior and density.
 
 The account menu uses labeled Account, product, and Session sections with dividers spanning the full popover width. Padding belongs inside each section, so the dividers meet both edges while labels and items remain inset. The identity header remains visually separate from the menu. The SidebarAccountMenu Cosmos fixture previews this shared component directly.
 

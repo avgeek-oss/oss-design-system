@@ -14,6 +14,7 @@ import { Menu01Icon } from "@hugeicons/core-free-icons";
 import { menuItemVariants } from "@heroui/styles";
 import { cn } from "../lib/utils.js";
 import { useMobileNavigation } from "../hooks/app-navigation.js";
+import { RouteLink } from "./route-link.js";
 
 export const DetailSettingsContext = createContext<boolean | null>(null);
 
@@ -112,6 +113,7 @@ export function SecondaryEntityHeader({
 
 export type SecondaryItem = {
   id: string;
+  href?: string;
   label: ReactNode;
   icon?: ReactNode;
   badge?: ReactNode;
@@ -120,34 +122,48 @@ export type SecondaryItem = {
   disabledReason?: string;
 };
 
+export type SecondaryItemsProps = {
+  title?: string;
+  items: SecondaryItem[];
+  selected: string;
+  onSelect?: (id: string) => void;
+};
+
 export function SecondaryItems({
   title,
   items,
   selected,
   onSelect,
-}: {
-  title?: string;
-  items: SecondaryItem[];
-  selected: string;
-  onSelect: (id: string) => void;
-}) {
+}: SecondaryItemsProps) {
   const { close } = useContext(SecondaryContext);
   return (
     <SecondarySection title={title}>
       <div className="grid gap-0.5">
-        {items.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            disabled={item.disabled}
-            aria-current={selected === item.id ? "page" : undefined}
-            title={item.disabledReason}
-            onClick={() => {
-              onSelect(item.id);
-              close();
-            }}
-            data-disabled={item.disabled || undefined}
-            className={menuItemVariants({
+        {items.map((item) => {
+          const content = (
+            <>
+              {!item.disabled ? (
+                <span
+                  aria-hidden="true"
+                  className="inline-flex shrink-0 [&_img]:size-4 [&_svg]:size-4"
+                >
+                  {item.icon ?? <HugeiconsIcon icon={Menu01Icon} />}
+                </span>
+              ) : null}
+              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              {item.badge ? (
+                <span className="inline-flex shrink-0 items-center text-xs font-mono tabular-nums text-muted">
+                  {item.badge}
+                </span>
+              ) : null}
+            </>
+          );
+          const props = {
+            "aria-current":
+              selected === item.id ? ("page" as const) : undefined,
+            title: item.disabledReason,
+            "data-disabled": item.disabled || undefined,
+            className: menuItemVariants({
               variant: item.destructive ? "danger" : "default",
             }).item({
               className: cn(
@@ -160,24 +176,42 @@ export function SecondaryItems({
                     ? "font-normal text-danger"
                     : "font-normal text-foreground",
               ),
-            })}
-          >
-            {!item.disabled ? (
-              <span
-                aria-hidden="true"
-                className="inline-flex shrink-0 [&_img]:size-4 [&_svg]:size-4"
-              >
-                {item.icon ?? <HugeiconsIcon icon={Menu01Icon} />}
-              </span>
-            ) : null}
-            <span className="min-w-0 flex-1 truncate">{item.label}</span>
-            {item.badge ? (
-              <span className="inline-flex shrink-0 items-center text-xs font-mono tabular-nums text-muted">
-                {item.badge}
-              </span>
-            ) : null}
-          </button>
-        ))}
+            }),
+          };
+          return item.href && !item.disabled ? (
+            <RouteLink
+              key={item.id}
+              {...props}
+              href={item.href}
+              onClick={(event) => {
+                if (
+                  !event.defaultPrevented &&
+                  event.button === 0 &&
+                  !event.metaKey &&
+                  !event.ctrlKey &&
+                  !event.altKey &&
+                  !event.shiftKey
+                )
+                  close();
+              }}
+            >
+              {content}
+            </RouteLink>
+          ) : (
+            <button
+              key={item.id}
+              {...props}
+              type="button"
+              disabled={item.disabled}
+              onClick={() => {
+                onSelect?.(item.id);
+                close();
+              }}
+            >
+              {content}
+            </button>
+          );
+        })}
       </div>
     </SecondarySection>
   );
