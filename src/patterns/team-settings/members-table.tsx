@@ -35,7 +35,6 @@ export function MembersTable<T extends Member>({
   currentUserId,
   emptyDescription = "Add a team member to get started.",
 }: MembersTableProps<T>) {
-  const security = items.some((item) => item.securityStatus !== undefined);
   const columns: ResourceTableColumn<T>[] = [
     {
       key: "member",
@@ -83,7 +82,7 @@ export function MembersTable<T extends Member>({
     },
     {
       key: "security",
-      header: security ? "2FA" : "Passkeys",
+      header: "Passkeys",
       cell: (item) =>
         item.securityStatus ? (
           <StatusIndicator {...item.securityStatus} />

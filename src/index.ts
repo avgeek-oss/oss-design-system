@@ -258,3 +258,28 @@ export {
   type ChoiceFieldProps,
   type ChoiceOption,
 } from "./patterns/choice-field.js";
+
+export {
+  ProfileImageSettings,
+  type ProfileImageSettingsProps,
+} from "./patterns/account-settings/profile-image-settings.js";
+
+export {
+  InvitationPasswordSetup,
+  type InvitationPasswordSetupProps,
+} from "./patterns/auth/invitation-password-setup.js";
+
+export {
+  PasskeyRecoveryVerification,
+  type PasskeyRecoveryVerificationProps,
+} from "./patterns/auth/passkey-recovery-verification.js";
+
+export {
+  RemoveMemberDialog,
+  type RemoveMemberDialogProps,
+} from "./patterns/team-settings/remove-member-dialog.js";
+
+export {
+  RevokeInvitationDialog,
+  type RevokeInvitationDialogProps,
+} from "./patterns/team-settings/revoke-invitation-dialog.js";

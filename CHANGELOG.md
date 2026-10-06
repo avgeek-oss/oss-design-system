@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.2.1 — 2026-10-07
+
+- Share profile-image settings, invitation password setup, passkey recovery verification, and team removal/revocation confirmations with fixed copy.
+- Label team member security as Passkeys consistently.
+- Allow apps to cancel a pending passkey confirmation safely. Standardize new integrations on passkeys and deprecate the legacy authenticator fallback.
 
 - Keep breadcrumb popover geometry steady through an opacity-only fade and restore native focus on interrupted-exit reopening without remounting the menu.
 - Reject whitespace-only API-key names with toast feedback and input focus, retaining the draft for correction without creating a key.

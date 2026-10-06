@@ -13,6 +13,7 @@ export type PasskeyVerificationProps = {
   onRetry: () => void;
   onCancelRequest: () => void;
   onRecoverySignIn?: () => void;
+  /** @deprecated Compatibility for existing consumers only. New integrations use passkeys and passkey recovery. */
   onAuthenticatorSignIn?: () => void;
   onBackToSignIn: () => void;
 };

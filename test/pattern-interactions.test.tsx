@@ -19,6 +19,8 @@ import { McpAuthorization } from "../src/patterns/auth/mcp-authorization.js";
 
 import { NameSettingsForm } from "../src/patterns/settings/name-form.js";
 import { SignIn } from "../src/patterns/auth/sign-in.js";
+import { InvitationPasswordSetup } from "../src/patterns/auth/invitation-password-setup.js";
+import { PasskeyRecoveryVerification } from "../src/patterns/auth/passkey-recovery-verification.js";
 import { PasskeyVerification } from "../src/patterns/auth/passkey-verification.js";
 import { ConfirmIdentityDialog } from "../src/patterns/auth/confirm-identity-dialog.js";
 import { PasskeySettings } from "../src/patterns/account-settings/passkey-settings.js";
@@ -658,7 +660,7 @@ test("custom identity verification supports app-owned ceremonies and explicit ab
   };
   const view = await mount(
     <ConfirmIdentityDialog {...props} method="custom" isPending>
-      <p>Waiting for authenticator verification</p>
+      <p>Waiting for identity verification</p>
     </ConfirmIdentityDialog>,
   );
   try {
@@ -1082,6 +1084,113 @@ test("API key names reject whitespace with toast and focus, retain the draft, an
     assert.equal(calls, 1);
     await act(async () => pending.resolve());
     assert.match(document.body.textContent ?? "", /preview-key/);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("passkey identity cancellation aborts before dismissal and retains the single pending attempt", async () => {
+  const events: string[] = [];
+  let finish!: () => void;
+  let attempts = 0;
+  const view = await mount(
+    <ConfirmIdentityDialog
+      isOpen
+      method="passkey"
+      onOpenChange={(open) => {
+        if (!open) events.push("close");
+      }}
+      onCancelRequest={() => {
+        events.push("abort");
+      }}
+      onConfirm={async () => {
+        attempts++;
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      }}
+    />,
+  );
+  try {
+    await click(button("Try passkey again"));
+    assert.equal(button("Cancel").disabled, false);
+    await click(button("Try passkey again"));
+    assert.equal(attempts, 1);
+    await click(button("Cancel"));
+    assert.deepEqual(events, ["abort", "close"]);
+    await act(async () => finish());
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("invitation password setup validates confirmation and preserves the draft after rejection", async () => {
+  let attempts = 0;
+  const view = await mount(
+    <InvitationPasswordSetup
+      brand="Example"
+      teamName="Example team"
+      email="alex@example.test"
+      role="Member"
+      onBackToSignIn={() => {}}
+      onSubmit={async (values) => {
+        attempts++;
+        assert.deepEqual(values, {
+          name: "Alex",
+          password: "long preview passphrase",
+        });
+        throw new Error("Invitation is unavailable");
+      }}
+    />,
+  );
+  try {
+    await fill("name", "Alex");
+    await fill("password", "long preview passphrase");
+    await fill("confirmPassword", "another preview passphrase");
+    await submit();
+    assert.equal(attempts, 0);
+    assertFailureToast("Passwords do not match");
+    dangerMessages = [];
+    await fill("confirmPassword", "long preview passphrase");
+    await submit();
+    assert.equal(attempts, 1);
+    assertFailureToast("Invitation is unavailable");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="name"]')?.value,
+      "Alex",
+    );
+    assert.equal(button("Create account and join").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("passkey recovery completes an existing sign-in without collecting credentials again", async () => {
+  let attempts = 0;
+  const view = await mount(
+    <PasskeyRecoveryVerification
+      brand="Example"
+      onPasskeyVerification={() => {}}
+      onBackToSignIn={() => {}}
+      onSubmit={async ({ code }) => {
+        assert.equal(code, "preview-once-code");
+        attempts++;
+        throw new Error("Recovery code has already been used");
+      }}
+    />,
+  );
+  try {
+    assert.equal(document.querySelector('input[type="password"]'), null);
+    assert.equal(document.querySelector('input[type="email"]'), null);
+    await fill("code", "preview-once-code");
+    await submit();
+    assert.equal(attempts, 1);
+    assertFailureToast("Recovery code has already been used");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="code"]')?.value,
+      "preview-once-code",
+    );
+    assert.equal(button("Sign in").disabled, false);
   } finally {
     await view.unmount();
   }

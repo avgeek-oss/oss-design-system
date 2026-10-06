@@ -10,7 +10,8 @@ export type ProfileSettingsProps = Omit<
 
 export function ProfileSettings({
   title = "Profile details",
+  label = "Your Name",
   ...props
 }: ProfileSettingsProps) {
-  return <NameSettingsForm title={title} {...props} />;
+  return <NameSettingsForm title={title} label={label} {...props} />;
 }
