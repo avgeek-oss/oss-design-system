@@ -34,6 +34,20 @@ Use `HistoryTable` when a resource list needs history pagination and loading/err
 
 `FilterDialog` maintains a draft until Apply; Cancel preserves the committed conditions. Define each field's label, allowed operators, input constraints, and whether it is searchable. Operators with `multiple: true` use a multi-value picker when a `getOptions` callback is supplied. Single-value operators use an input. The app defines operator meanings and implements search. Selected values remain available when suggestions change, stale search responses are ignored, and duplicate conditions are removed on Apply. Supply stable `getOptions` and `renderOption` callbacks. No field or operator is inferred from a project's API.
 
+## Incoming notifications
+
+`NotificationMenu` presents the notification trigger, badge, popover and rows. Use the explicit **Mark all as read** action. Opening the menu only refreshes it; it does not acknowledge or delete events. Notification read state belongs to the server, not local storage.
+
+Applications follow this shared contract:
+
+- Event records have stable `id`, workspace scope, `occurredAt` and `createdAt`, plus domain-specific type/payload. Map those records into `NotificationItem`; the UI package does not import a backend schema.
+- Read receipts are scoped by workspace, authenticated user and event, with an immutable `readAt`. Store them durably so different browsers/devices share the same read state. One user's action must not acknowledge another user's feed.
+- The feed includes every unread event regardless of age and read events whose `readAt` is within the preceding 24 hours. This is a presentation filter, not deletion of event, delivery or audit history. Retain receipts after rows age out so they cannot reappear unread.
+- List responses contain `notifications` with nullable `readAt`, total `unreadCount` independent of page size, and nullable `nextCursor`. Use bounded cursor pages with stable timestamp/ID ordering, preserving database timestamp precision. Provide access to every eligible event, rather than permanently limiting the feed to the latest 20 or 50 rows.
+- Mark-all is an idempotent server mutation scoped from the authenticated session. It marks the events visible to its database snapshot, leaves later arrivals unread and preserves existing receipt times on retries. It takes no caller-supplied user or workspace identity. It never deletes notifications.
+
+Towbar implements these responsibilities in its notification-center API and receipt table. Consumers use their own database/API adapters and authorization rules. The shared `onMarkAllRead` callback requests persistence; `markingRead` blocks repeated presses. Supply the server's total unread count and `unread: readAt === null` for rows. Preserve committed rows on a failed refresh; failed mutations use one bottom-center toast.
+
 ## Notification settings
 
 `NotificationDestinationsSettings` is the configuration surface for outgoing notifications; `NotificationMenu` displays incoming notifications. A destination supplies `id`, `label`, optional description/icon, and subscriptions keyed by category ID. Each category declares a label and allowed modes: `off`, `all`, or `failures`. Two-mode categories render checkboxes; failure-aware categories render All/Failures only choices and Clear when Off is allowed.

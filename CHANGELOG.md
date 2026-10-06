@@ -5,6 +5,9 @@
 - Support real secondary navigation links alongside action buttons, preserving native menu density, router integration, modified clicks, and mobile dismissal.
 - Expose matching internal primary navigation links as the current page, with the same section boundaries and preserved child routes as visual selection.
 - Await app-owned notification activation with duplicate request protection, toast-only failures, pending announcements, and retry/pagination composition slots. Use “Mark all as read” for the default header action.
+### Changed
+
+- Standardize incoming notifications on explicit Mark all as read, durable per-user receipts, complete unread pagination and 24-hour read retention.
 
 ## 1.1.0 — 2026-10-06
 
