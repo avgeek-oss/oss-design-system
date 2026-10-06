@@ -12,6 +12,9 @@ test("API-key confirmation restores its connected row action after Escape and Ca
     ),
   );
   await page.bringToFront();
+  // Exercise modal and collection restoration across slower rendering frames.
+  const session = await page.context().newCDPSession(page);
+  await session.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   const opener = page.getByRole("button", { name: "Revoke", exact: true });
   const dialog = page.getByRole("dialog", { name: "Revoke Automation?" });
   for (const dismissal of ["Escape", "Cancel", "Escape"]) {
@@ -19,11 +22,21 @@ test("API-key confirmation restores its connected row action after Escape and Ca
     if (touch) await opener.tap();
     else await page.keyboard.press("Enter");
     await expect(dialog).toBeVisible();
+    await expect(dialog).toBeFocused();
     const original = await opener.elementHandle();
     if (dismissal === "Escape") await page.keyboard.press("Escape");
     else
       await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(dialog).toHaveCount(0);
+    await expect(opener).toBeFocused();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) =>
+          globalThis.requestAnimationFrame(() =>
+            globalThis.requestAnimationFrame(resolve),
+          ),
+        ),
+    );
     await expect(opener).toBeFocused();
     expect(await original.evaluate((element) => element.isConnected)).toBe(
       true,

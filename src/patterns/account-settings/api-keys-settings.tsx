@@ -28,20 +28,48 @@ export function ApiKeysSettings<T extends ApiKey>({
   useEffect(() => {
     if (revoking || !opener.current) return;
     const target = opener.current;
-    // The native table can restore its row after the modal restores the button.
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => {
-        if (!document.hasFocus() || !target.isConnected) return;
-        const active = document.activeElement;
-        if (
-          active === document.body ||
-          active === target.closest('[role="row"]') ||
-          active === target.closest('[role="gridcell"]')
-        )
-          target.focus({ preventScroll: true });
-      });
+    const row = target.closest('[role="row"]');
+    const cell = target.closest('[role="gridcell"]');
+    let frame = 0;
+    let cancelled = false;
+    function stop() {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+      document.removeEventListener("focusin", onFocus, true);
+      document.removeEventListener("keydown", stop, true);
+      document.removeEventListener("pointerdown", stop, true);
+      window.removeEventListener("blur", stop);
+    }
+    function restore() {
+      if (cancelled) return;
+      if (!document.hasFocus() || !target.isConnected) {
+        stop();
+        return;
+      }
+      const active = document.activeElement;
+      if (active === document.body || active === row || active === cell)
+        target.focus({ preventScroll: true });
+    }
+    function onFocus(event: FocusEvent) {
+      if (event.target === target) return;
+      if (
+        event.target === document.body ||
+        event.target === row ||
+        event.target === cell
+      ) {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(restore);
+      } else stop();
+    }
+    // Native collection restoration can land after the modal's focus frame.
+    document.addEventListener("focusin", onFocus, true);
+    document.addEventListener("keydown", stop, true);
+    document.addEventListener("pointerdown", stop, true);
+    window.addEventListener("blur", stop);
+    frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(restore);
     });
-    return () => cancelAnimationFrame(frame);
+    return stop;
   }, [revoking]);
   return (
     <>
