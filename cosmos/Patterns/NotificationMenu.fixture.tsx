@@ -85,11 +85,15 @@ function ActivationAndRecovery() {
   const [open, setOpen] = useState(false);
   const finish = useRef<(() => void) | undefined>(undefined);
   const count = useRef(0);
+  const session = useRef(0);
   return (
     <div className="grid justify-items-end gap-4 p-4 text-sm">
       <NotificationMenu
         isOpen={open}
-        onOpenChange={setOpen}
+        onOpenChange={(next) => {
+          session.current++;
+          setOpen(next);
+        }}
         items={items}
         unreadCount={items.filter((item) => item.unread).length}
         markingRead={marking}
@@ -105,12 +109,14 @@ function ActivationAndRecovery() {
         onActivate={async (item) => {
           count.current++;
           const attempt = count.current;
+          const generation = session.current;
           setActivations(attempt);
           setPending(true);
           await new Promise<void>((resolve) => {
             finish.current = resolve;
           });
           setPending(false);
+          if (generation !== session.current) return;
           if (attempt === 1)
             throw new Error("Could not mark the notification read");
           setItems((records) =>
@@ -155,9 +161,80 @@ function ActivationAndRecovery() {
   );
 }
 
+function FocusManagement() {
+  const dialog = useRef<HTMLDivElement>(null);
+  const action = useRef<HTMLButtonElement | null>(null);
+  const restore = useRef(false);
+  const finish = useRef<(() => void) | undefined>(undefined);
+  const [pending, setPending] = useState<string>();
+  const [requests, setRequests] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState(initialItems);
+  function request(name: string, target: EventTarget | null) {
+    const container = dialog.current;
+    action.current = target instanceof HTMLButtonElement ? target : null;
+    restore.current = document.activeElement === action.current;
+    if (restore.current) container?.focus({ preventScroll: true });
+    setPending(name);
+    setRequests((count) => count + 1);
+    finish.current = () => {
+      setPending(undefined);
+      if (name === "Load more")
+        setItems((records) =>
+          records.map((record) => ({ ...record, unread: false })),
+        );
+      requestAnimationFrame(() => {
+        if (
+          restore.current &&
+          container?.isConnected &&
+          dialog.current === container &&
+          document.activeElement === container
+        )
+          action.current?.focus({ preventScroll: true });
+      });
+    };
+  }
+  return (
+    <div className="grid justify-items-end gap-4 p-4 text-sm">
+      <NotificationMenu
+        dialogRef={dialog}
+        isOpen={open}
+        onOpenChange={setOpen}
+        items={items.map((item) => ({
+          ...item,
+          source: item.unread ? "Unread" : "Read",
+        }))}
+        unreadCount={items.filter((item) => item.unread).length}
+        headerEnd={
+          <Widget.Action
+            isDisabled={Boolean(pending)}
+            onPress={(event) => request("Refresh", event.target)}
+          >
+            Refresh
+          </Widget.Action>
+        }
+        footer={
+          <Widget.Action
+            isDisabled={Boolean(pending)}
+            onPress={(event) => request("Load more", event.target)}
+          >
+            Load more
+          </Widget.Action>
+        }
+      />
+      <Button variant="secondary" onPress={() => finish.current?.()}>
+        Complete request
+      </Button>
+      <p data-focus-requests>Requests: {requests}</p>
+      <p data-focus-pending>{pending ?? "Idle"}</p>
+    </div>
+  );
+}
+
 export default {
   "Mark all read": <Notifications />,
   "App header action": <Notifications clearAction />,
+  "Focus management": <FocusManagement />,
   Loading: <Notifications loading />,
   "Activation and recovery": <ActivationAndRecovery />,
 };

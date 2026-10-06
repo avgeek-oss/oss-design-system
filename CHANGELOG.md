@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Expose the native notification dialog ref for app-owned refresh and pagination focus recovery without changing popover focus behavior.
+
 ## 1.2.1 — 2026-10-07
 
 - Share profile-image settings, invitation password setup, passkey recovery verification, team details settings, and team removal/revocation confirmations with fixed copy.

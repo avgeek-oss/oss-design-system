@@ -48,6 +48,10 @@ Applications follow this shared contract:
 
 Towbar implements these responsibilities in its notification-center API and receipt table. Consumers use their own database/API adapters and authorization rules. The shared `onMarkAllRead` callback requests persistence; `markingRead` blocks repeated presses. Supply the server's total unread count and `unread: readAt === null` for rows. Preserve committed rows on a failed refresh; failed mutations use one bottom-center toast.
 
+`dialogRef` optionally receives the native `Popover.Dialog` element. Use it when an app-owned refresh or pagination action must move focus before disabling its initiating control. Capture whether that control actually held focus, focus the dialog before changing pending state, and restore the control only if the same dialog is still connected and still holds focus. A closed or reopened menu, a disconnected control, or a deliberate focus move elsewhere must cancel that restoration. Omit the ref when native popover focus handling is sufficient. Read/unread text can use the existing `NotificationItem.source`; only supply a status known from server data.
+
+`onActivate` awaits an app-owned action, locks repeated ordinary clicks and keyboard activation, and reports a rejection through one toast while retaining the menu. Modified link clicks retain native navigation. Opening the menu never invokes activation. The app owns navigation and must ignore obsolete asynchronous results after its menu session or route changes; the shared menu likewise prevents an old completion from closing a reopened popover.
+
 ## Notification settings
 
 `NotificationDestinationsSettings` is the configuration surface for outgoing notifications; `NotificationMenu` displays incoming notifications. A destination supplies `id`, `label`, optional description/icon, and subscriptions keyed by category ID. Each category declares a label and allowed modes: `off`, `all`, or `failures`. Two-mode categories render checkboxes; failure-aware categories render All/Failures only choices and Clear when Off is allowed.
