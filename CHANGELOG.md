@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.4 — 2026-10-07
+
+- Suppress stale profile and team name-save feedback after session suspension or owner unmount, preserving the draft and request lock for a deliberate retry.
+
 ## 1.2.3 — 2026-10-07
 
 - Add controlled email-link confirmation with explicit awaited actions, and invitation-code resend with a shared pending lock and server cooldown.
