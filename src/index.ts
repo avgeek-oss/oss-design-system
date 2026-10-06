@@ -43,6 +43,7 @@ export { RecoveryCodes } from "./patterns/auth/recovery-codes.js";
 export {
   NotificationMenu,
   type NotificationItem,
+  type NotificationMenuProps,
 } from "./patterns/notifications.js";
 export { SidebarAccountMenu } from "./patterns/sidebar-account-menu.js";
 
