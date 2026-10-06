@@ -5,8 +5,9 @@ import {
   Button as AriaButton,
   type ButtonProps as AriaButtonProps,
 } from "react-aria-components";
-import type { ComponentProps } from "react";
-import { useOverlaySuspension } from "./overlay-suspension.js";
+import { useRef, type ComponentProps } from "react";
+import { mergeRefs } from "@react-aria/utils";
+import { useSuspendedOverlayFocus } from "./use-suspended-overlay-focus.js";
 
 function PopoverRoot(props: PopoverProps) {
   return <HeroPopover {...props} />;
@@ -17,8 +18,11 @@ function PopoverTrigger(props: AriaButtonProps) {
 }
 
 function PopoverContent(props: ComponentProps<typeof HeroPopover.Content>) {
-  const { isSuspended } = useOverlaySuspension();
-  return isSuspended ? null : <HeroPopover.Content {...props} />;
+  const overlay = useRef<HTMLDivElement>(null);
+  const isSuspended = useSuspendedOverlayFocus(props.isOpen, overlay);
+  return isSuspended ? null : (
+    <HeroPopover.Content {...props} ref={mergeRefs(overlay, props.ref)} />
+  );
 }
 
 export const Popover = Object.assign(PopoverRoot, HeroPopover, {
