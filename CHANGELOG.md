@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Restore full-width section dividers in the sidebar account menu while retaining padded labels and actions.
+
 - Standardize bottom-center toasts and toast-only submission failures across forms, dialogs, confirmations, and shared mutation actions. Preserve drafts and keep dialogs open for retry; inline field validation and load/policy errors remain separate.
 
 - Shared email/password settings, expanded API-key metadata, authorized clients, and save-once API-key creation.

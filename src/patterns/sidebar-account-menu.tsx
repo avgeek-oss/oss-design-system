@@ -60,6 +60,7 @@ export function SidebarAccountMenu({
         </div>
         <Dropdown.Menu
           aria-label="Account menu"
+          className="gap-0 p-0"
           onAction={(key) => {
             onAction(String(key));
             close();
@@ -69,7 +70,7 @@ export function SidebarAccountMenu({
             <Dropdown.Section
               key={group.id}
               aria-label={group.label}
-              className="w-full [&+&]:mt-1.5 [&+&]:pt-1.5"
+              className="w-full px-1.5 py-1.5 [&+&]:border-t [&+&]:border-separator"
             >
               <Header>{group.label}</Header>
               {group.items.map((item) => (

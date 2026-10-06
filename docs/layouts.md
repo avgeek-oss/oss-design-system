@@ -22,7 +22,7 @@ Set a navigation item's `activePath` when its destination is one child of a sect
 
 Primary and secondary sidebar items use HeroUI’s native menu-item styles, including the 36px minimum height, padding, hover and focus states. Sidebar links remain navigation links.
 
-The account menu uses labeled Account, product, and Session sections with spacing rather than dividers between groups. The identity header remains visually separate from the menu.
+The account menu uses labeled Account, product, and Session sections with dividers spanning the full popover width. Padding belongs inside each section, so the dividers meet both edges while labels and items remain inset. The identity header remains visually separate from the menu. The SidebarAccountMenu Cosmos fixture previews this shared component directly.
 
 ### Breadcrumbs
 
