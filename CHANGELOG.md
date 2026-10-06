@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Keep ordinary query loading announcements visually hidden while retaining accessible status and explicit visible progress.
+- Prevent repeated code-copy presses while a clipboard write is pending, with toast feedback and retry after failure.
+- Discover browser regressions through one shared suite and reuse fixture serving, browser setup, and cleanup.
+
 ## 1.2.0 — 2026-10-06
 
 - Support real secondary navigation links alongside action buttons, preserving native menu density, router integration, modified clicks, and mobile dismissal.

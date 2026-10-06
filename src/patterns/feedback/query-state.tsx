@@ -11,11 +11,7 @@ export function QueryLoading({
   ...props
 }: QueryLoadingProps) {
   return (
-    <div
-      {...props}
-      role="status"
-      className={cn("text-sm text-muted", className)}
-    >
+    <div {...props} role="status" className={cn("sr-only", className)}>
       {children}
     </div>
   );
