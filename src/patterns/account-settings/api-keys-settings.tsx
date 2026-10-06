@@ -8,6 +8,7 @@ import {
 } from "./api-keys-table.js";
 import { Button } from "../../buttons/button.js";
 import { ActionConfirmation } from "../actions/action-confirmation.js";
+import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 
 export type ApiKeysSettingsProps<T extends ApiKey = ApiKey> = Omit<
   ApiKeysTableProps<T>,
@@ -25,8 +26,9 @@ export function ApiKeysSettings<T extends ApiKey>({
 }: ApiKeysSettingsProps<T>) {
   const [revoking, setRevoking] = useState<T | null>(null);
   const opener = useRef<HTMLElement | null>(null);
+  const { isSuspended } = useOverlaySuspension();
   useEffect(() => {
-    if (revoking || !opener.current) return;
+    if (isSuspended || revoking || !opener.current) return;
     const target = opener.current;
     // A grid may restore its row after the modal returns focus to its action.
     let frame = 0;
@@ -35,7 +37,11 @@ export function ApiKeysSettings<T extends ApiKey>({
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         if (cancelled) return;
-        if (!document.hasFocus() || !target.isConnected) {
+        if (
+          !document.hasFocus() ||
+          !target.isConnected ||
+          target.closest("[hidden], [inert]")
+        ) {
           stop();
           return;
         }
@@ -73,7 +79,7 @@ export function ApiKeysSettings<T extends ApiKey>({
     window.addEventListener("blur", stop);
     restore();
     return stop;
-  }, [revoking]);
+  }, [revoking, isSuspended]);
   return (
     <>
       <ApiKeysTable

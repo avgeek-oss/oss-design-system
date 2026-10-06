@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test, expect } from "./fixtures.mjs";
 
-for (const contract of [
+const contracts = [
   {
     name: "CodeBlock",
     fixture: "cosmos/Primitives/Typography/CodeBlock.fixture.tsx",
@@ -23,30 +23,36 @@ for (const contract of [
     success: "Recovery codes copied",
     failure: "Could not copy recovery codes",
   },
-]) {
+];
+
+async function holdClipboard(page) {
+  await page.addInitScript(() => {
+    globalThis.copyWrites = 0;
+    globalThis.copiedValues = [];
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: (value) => {
+          globalThis.copiedValues.push(value);
+          globalThis.copyWrites++;
+          return new Promise((resolve, reject) => {
+            globalThis.finishCopy = resolve;
+            globalThis.failCopy = reject;
+          });
+        },
+      },
+    });
+  });
+}
+
+for (const contract of contracts) {
   test(`${contract.name} clipboard writes lock repeated presses and allow retry after failure`, async ({
     page,
     fixtureUrl,
     touch,
     theme,
   }, testInfo) => {
-    await page.addInitScript(() => {
-      globalThis.copyWrites = 0;
-      globalThis.copiedValues = [];
-      Object.defineProperty(globalThis.navigator, "clipboard", {
-        configurable: true,
-        value: {
-          writeText: (value) => {
-            globalThis.copiedValues.push(value);
-            globalThis.copyWrites++;
-            return new Promise((resolve, reject) => {
-              globalThis.finishCopy = resolve;
-              globalThis.failCopy = reject;
-            });
-          },
-        },
-      });
-    });
+    await holdClipboard(page);
     await page.goto(fixtureUrl(contract.fixture));
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     const copy = page
@@ -123,4 +129,63 @@ for (const contract of [
       "Unsupported clipboard must not fabricate writes",
     );
   });
+}
+
+for (const contract of contracts) {
+  for (const settlement of ["resolve", "reject"]) {
+    test(`${contract.name} ignores a clipboard ${settlement} after suspension or owner change and allows fresh feedback`, async ({
+      page,
+      fixtureUrl,
+    }) => {
+      await holdClipboard(page);
+      await page.goto(
+        fixtureUrl(
+          "cosmos/Primitives/Overlays/OverlaySuspensionScope.fixture.tsx",
+          contract.name,
+        ),
+      );
+      await page.bringToFront();
+      const copy = page.getByRole("button", {
+        name: contract.action,
+        exact: true,
+      });
+      const finish = async () =>
+        page.evaluate((outcome) => {
+          if (outcome === "resolve") globalThis.finishCopy();
+          else globalThis.failCopy(new Error("Clipboard denied"));
+        }, settlement);
+      await copy.click();
+      await expect(copy).toBeDisabled();
+      await page.evaluate(() =>
+        globalThis.dispatchEvent(new Event("preview:suspend")),
+      );
+      await page
+        .getByRole("button", { name: "Resume same account", exact: true })
+        .click();
+      await expect(copy).toBeDisabled();
+      await finish();
+      await expect(copy).toBeEnabled();
+      await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+      await copy.click();
+      await finish();
+      const toast = page.locator('[data-slot="toast"]');
+      await expect(toast).toHaveCount(1);
+      await expect(toast).toContainText(
+        settlement === "resolve" ? contract.success : contract.failure,
+      );
+      await toast.locator('[data-slot="toast-close"]').click();
+      await expect(toast).toHaveCount(0);
+      await copy.click();
+      await page.evaluate(() =>
+        globalThis.dispatchEvent(new Event("preview:suspend")),
+      );
+      await page
+        .getByRole("button", { name: "Switch account", exact: true })
+        .click();
+      await finish();
+      await expect(copy).toBeEnabled();
+      await expect(toast).toHaveCount(0);
+      expect(await page.evaluate(() => globalThis.copyWrites)).toBe(3);
+    });
+  }
 }

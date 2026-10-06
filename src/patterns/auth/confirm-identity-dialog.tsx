@@ -8,6 +8,7 @@ import { Modal } from "../../overlays/modal.js";
 import { toast } from "../../overlays/toast.js";
 import { AuthForm } from "./auth-form.js";
 import { currentPasswordField } from "./auth-fields.js";
+import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 
 export type ConfirmIdentityDialogProps = {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export type ConfirmIdentityDialogProps = {
 export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
+  const suspension = useOverlaySuspension();
   async function confirm(password?: string) {
     if (pending.current || props.method === "custom") return;
     pending.current = true;
@@ -71,14 +73,16 @@ export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
                 isDisabled={busy}
                 isPending={busy}
                 onPress={async () => {
+                  const isCurrent = suspension.capture();
                   try {
                     await confirm();
                   } catch (cause) {
-                    toast.danger(
-                      cause instanceof Error
-                        ? cause.message
-                        : "Unable to confirm your identity. Try again.",
-                    );
+                    if (isCurrent())
+                      toast.danger(
+                        cause instanceof Error
+                          ? cause.message
+                          : "Unable to confirm your identity. Try again.",
+                      );
                   }
                 }}
               >
@@ -87,6 +91,7 @@ export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
               </Button>
             ) : (
               <AuthForm
+                isPending={busy}
                 variant="secondary"
                 fields={[currentPasswordField]}
                 submitLabel="Confirm"

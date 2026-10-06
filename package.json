@@ -676,6 +676,10 @@
     "./patterns/auth/email-confirmation": {
       "types": "./dist/patterns/auth/email-confirmation.d.ts",
       "import": "./dist/patterns/auth/email-confirmation.js"
+    },
+    "./overlays/overlay-suspension": {
+      "types": "./dist/overlays/overlay-suspension.d.ts",
+      "import": "./dist/overlays/overlay-suspension.js"
     }
   }
 }

@@ -4,6 +4,7 @@ import { useState, type ComponentProps } from "react";
 import { SessionsTable } from "../settings/tables.js";
 import { Button } from "../../buttons/button.js";
 import { toast } from "../../overlays/toast.js";
+import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 import { SettingsConfirmation } from "./settings-confirmation.js";
 
 export type SessionsSettingsProps = Omit<
@@ -18,6 +19,7 @@ export function SessionsSettings({
   formatDate,
   onRevoke,
 }: SessionsSettingsProps) {
+  const suspension = useOverlaySuspension();
   const [revoking, setRevoking] = useState<string | null>(null);
   return (
     <>
@@ -44,8 +46,9 @@ export function SessionsSettings({
           onConfirm={async () => {
             if (items.find((item) => item.id === revoking)?.current)
               throw new Error("You cannot revoke your current session here.");
+            const isCurrent = suspension.capture();
             await onRevoke(revoking);
-            toast.success("Session revoked");
+            if (isCurrent()) toast.success("Session revoked");
           }}
         />
       )}

@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { Button } from "../../buttons/button.js";
 import { toast } from "../../overlays/toast.js";
+import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 
 export function RecoveryCodes({
   codes,
@@ -14,6 +15,7 @@ export function RecoveryCodes({
 }) {
   const pending = useRef(false);
   const [isPending, setIsPending] = useState(false);
+  const suspension = useOverlaySuspension();
   const text = codes.join("\n") + "\n";
   return (
     <div className="content-grid">
@@ -34,13 +36,14 @@ export function RecoveryCodes({
           isPending={isPending}
           onPress={async () => {
             if (pending.current) return;
+            const isCurrent = suspension.capture();
             pending.current = true;
             setIsPending(true);
             try {
               await navigator.clipboard.writeText(text);
-              toast.success("Recovery codes copied");
+              if (isCurrent()) toast.success("Recovery codes copied");
             } catch {
-              toast.danger("Could not copy recovery codes");
+              if (isCurrent()) toast.danger("Could not copy recovery codes");
             } finally {
               pending.current = false;
               setIsPending(false);

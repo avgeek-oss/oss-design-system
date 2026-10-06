@@ -77,6 +77,7 @@ function CreateContent({
     defaultExpiry ?? expiryOptions[0]?.id ?? "",
   );
   const [created, setCreated] = useState<CreatedApiKey>();
+  const [nameDraft, setNameDraft] = useState("");
   const doneRef = useRef<HTMLButtonElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -156,6 +157,10 @@ function CreateContent({
                     id={nameId}
                     ref={nameRef}
                     name="name"
+                    value={nameDraft}
+                    onChange={(event) =>
+                      setNameDraft(event.currentTarget.value)
+                    }
                     required
                     maxLength={120}
                     autoComplete="off"

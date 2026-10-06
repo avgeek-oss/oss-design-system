@@ -13,6 +13,7 @@ import { SourceCodeIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Widget, type WidgetActionProps } from "../data-display/widget.js";
 import { toast } from "../overlays/toast.js";
+import { useOverlaySuspension } from "../overlays/overlay-suspension.js";
 import { cn } from "../lib/utils.js";
 
 const htmlTheme: PrismTheme = {
@@ -117,17 +118,20 @@ const CopyButton = forwardRef<HTMLButtonElement, CopyButtonProps>(
   ({ code, ...props }, ref) => {
     const pending = useRef(false);
     const [isPending, setIsPending] = useState(false);
+    const suspension = useOverlaySuspension();
     const copyCode = async () => {
       if (pending.current || props.isDisabled || props.isPending) return;
+      const isCurrent = suspension.capture();
       pending.current = true;
       setIsPending(true);
       try {
         await navigator.clipboard.writeText(code);
-        toast.success("Copied to clipboard.");
+        if (isCurrent()) toast.success("Copied to clipboard.");
       } catch {
-        toast.danger(
-          "Could not copy to the clipboard. Select and copy the text instead.",
-        );
+        if (isCurrent())
+          toast.danger(
+            "Could not copy to the clipboard. Select and copy the text instead.",
+          );
       } finally {
         pending.current = false;
         setIsPending(false);

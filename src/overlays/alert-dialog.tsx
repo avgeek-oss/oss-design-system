@@ -1,3 +1,25 @@
 "use client";
-export { AlertDialog } from "@heroui/react";
+import {
+  AlertDialog as HeroAlertDialog,
+  type AlertDialogProps,
+} from "@heroui/react";
+import { useRef, type ComponentProps } from "react";
+import { mergeRefs } from "@react-aria/utils";
+import { useSuspendedOverlayFocus } from "./use-suspended-overlay-focus.js";
+
+function AlertDialogRoot(props: AlertDialogProps) {
+  return <HeroAlertDialog {...props} />;
+}
+function AlertDialogBackdrop(
+  props: ComponentProps<typeof HeroAlertDialog.Backdrop>,
+) {
+  const overlay = useRef<HTMLDivElement>(null);
+  const isSuspended = useSuspendedOverlayFocus(props.isOpen, overlay);
+  return isSuspended ? null : (
+    <HeroAlertDialog.Backdrop {...props} ref={mergeRefs(overlay, props.ref)} />
+  );
+}
+export const AlertDialog = Object.assign(AlertDialogRoot, HeroAlertDialog, {
+  Backdrop: AlertDialogBackdrop,
+});
 export type { AlertDialogProps } from "@heroui/react";

@@ -97,3 +97,28 @@ Use `Widget.Action` for inline underlined actions in widget headers and footers.
 Use `Widget` for related form content and metrics. Right-aligned actions require a right-aligned column header. Mark a meaningful row header with `isRowHeader` if it is not the first column. Empty-state content belongs inside the content area. Table footers use `text-xs` muted metadata; the native table empty-state cell uses the same inner surface and padding as populated cells.
 
 Use `InlineExternalLink` for external text links. It has one style, with a dashed underline offset of 2px and a new-tab marker. It opens in a new tab by default; setting another target omits the marker.
+
+## Suspending retained overlays
+
+Wrap a retained application subtree in `OverlaySuspensionScope` when the app temporarily presents another surface, such as sign-in after session expiry. Set `isSuspended` from the application’s state. Put the replacement surface outside the scope. The scope does not hide the application itself, establish authentication, cancel requests, or change logical open state.
+
+```tsx
+<>
+  {expired && <SignIn brand={brand} onSubmit={signIn} />}
+  <OverlaySuspensionScope isSuspended={expired}>
+    <div hidden={expired} inert={expired}>
+      <PasskeySettings {...passkeySettings} />
+    </div>
+  </OverlaySuspensionScope>
+</>
+```
+
+Shared `Modal.Backdrop`, `AlertDialog.Backdrop`, `Dropdown.Popover`, `Popover.Content` and `Select.Popover` unmount their native portals during suspension. This releases native focus, inert and scroll locks without firing `onOpenChange`; logical open state retained by the native Root or the caller resumes when suspension ends. A standalone portal using only `defaultOpen` remounts its own local state. Native HeroUI props, refs, dismissal and interaction behavior remain available. A nested scope inherits its parent’s suspension.
+
+Passkey add/rename, API-key creation, member forms and notification-destination dialogs keep non-secret field drafts above their backdrop. Controlled custom fields and children must keep their own draft state above the native portal. Password fields inside a dismissed portal are intentionally not retained. Preferences date-format, time-format and time-zone selectors use the supported native Select portal. Other primitives that own a portal, including calendar/combobox popovers and drawers, are not controlled by this scope; applications must close those through their native controlled APIs or conditionally compose their portal with `useOverlaySuspension().isSuspended`.
+
+After a resumed Modal/AlertDialog root or Select closes, the wrapper waits for the native exit to detach and restores its native trigger through React Aria's public contexts. Passkey add/rename and recovery-code completion retain their management opener explicitly. Restoration skips suspended, unmounted, hidden, inert or disabled targets and preserves focus deliberately moved to another live control. Standalone controlled dialogs without a native trigger context keep the caller's focus-return responsibility.
+
+The application must abort or settle a suspended WebAuthn/request attempt and reject uncertain server acknowledgments. Shared async actions ignore a suspended or unmounted attempt’s late result and feedback, even after the same owner resumes. They retain pending state until the callback settles and permit a fresh request afterward. Unmount or key the retained application subtree when the authenticated owner changes so another account never inherits its drafts.
+
+For a custom async overlay, call `const isCurrent = capture()` from `useOverlaySuspension()` before awaiting the app callback, then check `isCurrent()` before showing feedback, closing the dialog or storing its result. The predicate becomes false after suspension or owner unmount and stays false after resumption. This only guards UI continuation; the app still owns cancellation, request identity and committed server data.
