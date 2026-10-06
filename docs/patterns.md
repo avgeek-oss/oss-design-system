@@ -36,7 +36,7 @@ Use `HistoryTable` when a resource list needs history pagination and loading/err
 
 ## Incoming notifications
 
-`NotificationMenu` presents the notification trigger, badge, popover and rows. Use the explicit **Mark all as read** action. Opening the menu only refreshes it; it does not acknowledge or delete events. Notification read state belongs to the server, not local storage.
+`NotificationMenu` presents the notification trigger, badge, popover and rows. Use the explicit **Mark all as read** action. Opening the menu only refreshes it; it does not acknowledge or delete events. Notification read state belongs to the server, not local storage. The notification trigger keeps its geometry during pointer, touch and keyboard presses; this pattern-specific exception preserves native opening, focus, hover and background feedback without changing other buttons.
 
 Applications follow this shared contract:
 
@@ -47,6 +47,10 @@ Applications follow this shared contract:
 - Mark-all is an idempotent server mutation scoped from the authenticated session. It marks the events visible to its database snapshot, leaves later arrivals unread and preserves existing receipt times on retries. It takes no caller-supplied user or workspace identity. It never deletes notifications.
 
 Towbar implements these responsibilities in its notification-center API and receipt table. Consumers use their own database/API adapters and authorization rules. The shared `onMarkAllRead` callback requests persistence; `markingRead` blocks repeated presses. Supply the server's total unread count and `unread: readAt === null` for rows. Preserve committed rows on a failed refresh; failed mutations use one bottom-center toast.
+
+`dialogRef` optionally receives the native `Popover.Dialog` element. Use it when an app-owned refresh or pagination action must move focus before disabling its initiating control. Capture whether that control actually held focus, focus the dialog before changing pending state, and restore the control only if the same dialog is still connected and still holds focus. A closed or reopened menu, a disconnected control, or a deliberate focus move elsewhere must cancel that restoration. Omit the ref when native popover focus handling is sufficient. Read/unread text can use the existing `NotificationItem.source`; only supply a status known from server data.
+
+`onActivate` awaits an app-owned action, locks repeated ordinary clicks and keyboard activation, and reports a rejection through one toast while retaining the menu. Modified link clicks retain native navigation. Opening the menu never invokes activation. The app owns navigation and must ignore obsolete asynchronous results after its menu session or route changes; the shared menu likewise prevents an old completion from closing a reopened popover.
 
 ## Notification settings
 

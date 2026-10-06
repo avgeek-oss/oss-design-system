@@ -1,4 +1,5 @@
 "use client";
+import { useRef, useState } from "react";
 import { Button } from "../../buttons/button.js";
 import { toast } from "../../overlays/toast.js";
 
@@ -11,6 +12,8 @@ export function RecoveryCodes({
   filename?: string;
   onContinue: () => void;
 }) {
+  const pending = useRef(false);
+  const [isPending, setIsPending] = useState(false);
   const text = codes.join("\n") + "\n";
   return (
     <div className="content-grid">
@@ -28,12 +31,19 @@ export function RecoveryCodes({
       <div className="flex flex-wrap gap-2">
         <Button
           variant="secondary"
+          isPending={isPending}
           onPress={async () => {
+            if (pending.current) return;
+            pending.current = true;
+            setIsPending(true);
             try {
               await navigator.clipboard.writeText(text);
               toast.success("Recovery codes copied");
             } catch {
               toast.danger("Could not copy recovery codes");
+            } finally {
+              pending.current = false;
+              setIsPending(false);
             }
           }}
         >

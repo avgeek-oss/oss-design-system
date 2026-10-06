@@ -1,4 +1,82 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { AuthForm } from "../../dist/patterns/auth/auth-form.js";
 import { test, expect } from "./fixtures.mjs";
+
+test("auth form native submission keeps credentials out of the URL before JavaScript handles events", async ({
+  page,
+  fixtureOrigin,
+}) => {
+  const destination = `${fixtureOrigin}/native-form`;
+  const markup = renderToStaticMarkup(
+    createElement(AuthForm, {
+      fields: [
+        { name: "email", label: "Email", type: "email", required: true },
+        {
+          name: "password",
+          label: "Password",
+          type: "password",
+          required: true,
+        },
+      ],
+      submitLabel: "Continue",
+      onSubmit: async () => {
+        throw new Error("The static form has no JavaScript handlers");
+      },
+    }),
+  );
+  const submissions = [];
+  await page.route(destination, async (route) => {
+    const request = route.request();
+    if (request.method() === "POST") {
+      submissions.push({
+        url: request.url(),
+        body: request.postData(),
+      });
+      await route.fulfill({
+        contentType: "text/html",
+        body: "<h1>Request received</h1>",
+      });
+    } else {
+      await route.fulfill({ contentType: "text/html", body: markup });
+    }
+  });
+  await page.goto(destination);
+  await page
+    .getByRole("textbox", { name: "Email", exact: true })
+    .fill("alex@example.test");
+  await page.getByLabel("Password", { exact: true }).fill("private passphrase");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Request received" }),
+  ).toBeVisible();
+  expect(submissions).toHaveLength(1);
+  expect(submissions[0].url).toBe(destination);
+  const body = new URLSearchParams(submissions[0].body);
+  expect(body.get("email")).toBe("alex@example.test");
+  expect(body.get("password")).toBe("private passphrase");
+});
+
+test("sign-in clears completed passwords and cached-page credentials while retaining email", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", "Credential retry"),
+  );
+  const email = page.getByRole("textbox", { name: /^Email/ });
+  const password = page.getByLabel("Password", { exact: true });
+  await email.fill("alex@example.test");
+  await password.fill("preview password");
+  await password.press("Enter");
+  await expect(page.locator('[data-slot="toast"]')).toHaveCount(1);
+  await expect(password).toHaveValue("");
+  await expect(email).toHaveValue("alex@example.test");
+  await password.fill("another password");
+  await page.evaluate(() => globalThis.dispatchEvent(new Event("pagehide")));
+  await expect(password).toHaveValue("");
+  await expect(email).toHaveValue("alex@example.test");
+});
 
 for (const variant of ["Name validation", "Permission name validation"]) {
   test(`API key ${variant.toLowerCase()} keeps invalid drafts and allows one trimmed submission`, async ({
@@ -96,4 +174,60 @@ test("invitation entry focuses email and moves focus to the returned link action
   await done.click();
   await expect(dialog).toHaveCount(0);
   await expect(opener).toBeFocused();
+});
+
+test("sign-in verification navigation uses the shared request and private acknowledgment", async ({
+  page,
+  fixtureUrl,
+  touch,
+  theme,
+}, testInfo) => {
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", "Default"),
+  );
+  await page.bringToFront();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+  const verification = page.getByRole("button", {
+    name: "Need a new verification email?",
+    exact: true,
+  });
+  if (touch) await verification.tap();
+  else {
+    await verification.focus();
+    await page.keyboard.press("Enter");
+  }
+  await expect(
+    page.getByRole("heading", { name: "Verify your email", exact: true }),
+  ).toBeVisible();
+  const email = page.getByRole("textbox", { name: /^Email/ });
+  await expect(email).not.toBeFocused();
+  await email.fill("alex@example.test");
+  await page.screenshot({
+    path: testInfo.outputPath("verification-email.png"),
+  });
+  if (touch)
+    await page
+      .getByRole("button", { name: "Send verification link", exact: true })
+      .tap();
+  else await email.press("Enter");
+  await expect(page.locator("form")).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "If an account needs email verification, we’ll send a link. Check your inbox and spam folder.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(page.locator(":focus")).toContainText("Verify your email");
+  await page
+    .getByRole("button", { name: "Request another link", exact: true })
+    .click();
+  await expect(page.getByRole("textbox", { name: /^Email/ })).toHaveValue(
+    "alex@example.test",
+  );
+  await page
+    .getByRole("button", { name: "← Back to Sign In", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Sign in", exact: true }),
+  ).toBeVisible();
 });

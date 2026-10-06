@@ -18,6 +18,7 @@ import { IdentityCredentialsForm } from "../src/patterns/auth/identity-credentia
 import { McpAuthorization } from "../src/patterns/auth/mcp-authorization.js";
 
 import { NameSettingsForm } from "../src/patterns/settings/name-form.js";
+import { VerificationEmail } from "../src/patterns/auth/verification-email.js";
 import { SignIn } from "../src/patterns/auth/sign-in.js";
 import { InvitationPasswordSetup } from "../src/patterns/auth/invitation-password-setup.js";
 import { PasskeyRecoveryVerification } from "../src/patterns/auth/passkey-recovery-verification.js";
@@ -28,6 +29,7 @@ import { MemberEditDialog } from "../src/patterns/team-settings/member-edit-dial
 import { TeamGeneralSettings } from "../src/patterns/team-settings/team-general-settings.js";
 import { MembersTable } from "../src/patterns/team-settings/members-table.js";
 import { InvitationsTable } from "../src/patterns/team-settings/invitations-table.js";
+import { RecoveryCodes } from "../src/patterns/auth/recovery-codes.js";
 import { CodeBlock } from "../src/typography/code-block.js";
 
 import { ResourceTable } from "../src/patterns/resource-table.js";
@@ -575,6 +577,9 @@ test("external sign-in pending blocks all submit paths and preserves the credent
     onPasskeySignIn: () => {
       calls++;
     },
+    onResendVerification: () => {
+      calls++;
+    },
   };
   const view = await mount(<SignIn {...props} />);
   try {
@@ -585,6 +590,7 @@ test("external sign-in pending blocks all submit paths and preserves the credent
       "Signing in…",
       "Forgot password?",
       "Sign in with Passkey",
+      "Need a new verification email?",
     ]) {
       assert.equal(button(label).disabled, true);
       await click(button(label));
@@ -598,6 +604,10 @@ test("external sign-in pending blocks all submit paths and preserves the credent
     );
     await submit();
     assert.equal(calls, 1);
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="password"]')?.value,
+      "",
+    );
   } finally {
     await view.unmount();
   }
@@ -973,49 +983,74 @@ test("name settings lock simultaneous submissions and retain the draft for retry
   }
 });
 
-test("code copying locks same-frame presses until the clipboard settles and unlocks after rejection", async () => {
-  const successes: ReactNode[] = [];
-  mock.method(toast, "success", (message: ReactNode) => {
-    successes.push(message);
-    return "copied";
-  });
-  const pending = deferred();
-  let writes = 0;
-  Object.defineProperty(navigator, "clipboard", {
-    configurable: true,
-    value: {
-      writeText: async () => {
-        writes++;
-        if (writes === 1) {
-          await pending.promise;
-          throw new Error("Clipboard denied");
-        }
-      },
-    },
-  });
-  const view = await mount(<CodeBlock.CopyButton code="private-key" />);
-  try {
-    const copy = button("Copy");
-    await act(async () => {
-      copy.click();
-      copy.click();
+for (const contract of [
+  {
+    name: "CodeBlock",
+    element: <CodeBlock.CopyButton code="private-key" />,
+    label: "Copy",
+    value: "private-key",
+  },
+  {
+    name: "RecoveryCodes",
+    element: (
+      <RecoveryCodes
+        codes={["first-code", "second-code"]}
+        onContinue={() => {}}
+      />
+    ),
+    label: "Copy codes",
+    value: "first-code\nsecond-code\n",
+  },
+]) {
+  test(`${contract.name} copying locks same-frame presses until the clipboard settles and unlocks after rejection`, async () => {
+    const successes: ReactNode[] = [];
+    mock.method(toast, "success", (message: ReactNode) => {
+      successes.push(message);
+      return "copied";
     });
-    assert.equal(writes, 1);
-    assert.equal(copy.getAttribute("aria-disabled"), "true");
-    assert.equal(copy.getAttribute("aria-label"), "Copy code");
-    assert.equal(successes.length, 0);
-    await act(async () => pending.resolve());
-    assert.equal(dangerMessages.length, 1);
-    assert.notEqual(copy.getAttribute("aria-disabled"), "true");
-    await click(copy);
-    assert.equal(writes, 2);
-    assert.equal(successes.length, 1);
-    assert.equal(copy.textContent, "Copy");
-  } finally {
-    await view.unmount();
-    Reflect.deleteProperty(navigator, "clipboard");
-  }
-});
+    const pending = deferred();
+    let writes = 0;
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => {
+          assert.equal(value, contract.value);
+          writes++;
+          if (writes === 1) {
+            await pending.promise;
+            throw new Error("Clipboard denied");
+          }
+        },
+      },
+    });
+    const view = await mount(contract.element);
+    try {
+      const copy = button(contract.label);
+      await act(async () => {
+        copy.click();
+        copy.click();
+      });
+      assert.equal(writes, 1);
+      assert.ok(copy.disabled || copy.getAttribute("aria-disabled") === "true");
+      assert.equal(successes.length, 0);
+      await act(async () => pending.resolve());
+      assert.equal(dangerMessages.length, 1);
+      assert.notEqual(copy.getAttribute("aria-disabled"), "true");
+      assert.equal(copy.disabled, false);
+      await click(copy);
+      assert.equal(writes, 2);
+      assert.equal(successes.length, 1);
+      assert.equal(copy.textContent, contract.label);
+      assert.doesNotMatch(
+        document.body.textContent ?? "",
+        /Could not copy|copied/i,
+      );
+    } finally {
+      await view.unmount();
+      Reflect.deleteProperty(navigator, "clipboard");
+    }
+  });
+}
 
 test("initial loading preserves its accessible status, app attributes, and updated announcement", async () => {
   const view = await mount(
@@ -1331,6 +1366,138 @@ test("passkey verification permits cancellation only while an abort callback is 
     );
     assert.equal(button("Cancel passkey request").disabled, false);
     assert.equal(button("← Back to Sign In").disabled, false);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("verification requests lock navigation, retain failed drafts and acknowledge without account disclosure", async () => {
+  const pending = deferred();
+  let calls = 0;
+  let back = 0;
+  const view = await mount(
+    <VerificationEmail
+      brand="Example"
+      onBackToSignIn={() => {
+        back++;
+      }}
+      onSubmit={async ({ email }) => {
+        assert.equal(email, "alex@example.test");
+        calls++;
+        if (calls === 1) {
+          await pending.promise;
+          throw new Error("Verification request failed");
+        }
+      }}
+    />,
+  );
+  try {
+    await fill("email", "alex@example.test");
+    await submit();
+    await submit();
+    assert.equal(calls, 1);
+    assert.equal(button("Sending…").disabled, true);
+    assert.equal(button("← Back to Sign In").disabled, true);
+    await click(button("← Back to Sign In"));
+    assert.equal(back, 0);
+    await act(async () => pending.resolve());
+    assertFailureToast("Verification request failed");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="email"]')?.value,
+      "alex@example.test",
+    );
+    assert.equal(button("← Back to Sign In").disabled, false);
+    await submit();
+    assert.equal(calls, 2);
+    assert.equal(document.querySelector("form"), null);
+    assert.match(
+      document.body.textContent ?? "",
+      /If an account needs email verification/,
+    );
+    assert.equal(
+      document.activeElement?.textContent?.includes("Verify your email"),
+      true,
+    );
+    await click(button("Request another link"));
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="email"]')?.value,
+      "alex@example.test",
+    );
+    await click(button("← Back to Sign In"));
+    assert.equal(back, 1);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("sign-in blocks verification navigation during its own request and allows retry after failure", async () => {
+  const pending = deferred();
+  let navigations = 0;
+  const view = await mount(
+    <SignIn
+      brand="Example"
+      onForgotPassword={() => {
+        navigations++;
+      }}
+      onResendVerification={() => {
+        navigations++;
+      }}
+      onPasskeySignIn={() => {
+        navigations++;
+      }}
+      onSubmit={async () => {
+        await pending.promise;
+        throw new Error("Sign-in failed");
+      }}
+    />,
+  );
+  try {
+    await fill("identifier", "alex@example.test");
+    await fill("password", "preview password");
+    await submit();
+    for (const label of [
+      "Forgot password?",
+      "Need a new verification email?",
+      "Sign in with Passkey",
+    ]) {
+      assert.equal(button(label).disabled, true);
+      await click(button(label));
+    }
+    assert.equal(navigations, 0);
+    await act(async () => pending.resolve());
+    assertFailureToast("Sign-in failed");
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="password"]')?.value,
+      "",
+    );
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="identifier"]')
+        ?.value,
+      "alex@example.test",
+    );
+    await fill("password", "another password");
+    await act(async () => window.dispatchEvent(new Event("pagehide")));
+    assert.equal(
+      document.querySelector<HTMLInputElement>('input[name="password"]')?.value,
+      "",
+    );
+    await click(button("Need a new verification email?"));
+    assert.equal(navigations, 1);
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("sign-in omits actions whose capabilities are unavailable", async () => {
+  const view = await mount(
+    <SignIn brand="Example" onSubmit={async () => {}} />,
+  );
+  try {
+    assert.doesNotMatch(
+      document.body.textContent ?? "",
+      /Forgot password|Need a new verification email|Sign in with Passkey/,
+    );
+    assert.match(document.body.textContent ?? "", /Sign in to your account/);
   } finally {
     await view.unmount();
   }

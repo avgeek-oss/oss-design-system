@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.2 — 2026-10-07
+
+- Keep auth form values out of URLs by using POST for native submissions before JavaScript handles the form.
+
+- Lock recovery-code copying during clipboard writes, with one toast outcome and retry after failure.
+
+- Add the public VerificationEmail flow and optional sign-in verification-email action, with neutral account copy, supported recovery actions, pending navigation guards and password clearing after completed sign-in attempts.
+
+- Keep notification trigger geometry steady during pointer, touch and keyboard presses while retaining native popover interaction and other button behavior.
+
+- Expose the native notification dialog ref for app-owned refresh and pagination focus recovery without changing popover focus behavior.
+
 ## 1.2.1 — 2026-10-07
 
 - Share profile-image settings, invitation password setup, passkey recovery verification, team details settings, and team removal/revocation confirmations with fixed copy.

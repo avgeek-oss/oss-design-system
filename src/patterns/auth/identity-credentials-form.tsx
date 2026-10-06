@@ -94,6 +94,15 @@ export function IdentityCredentialsForm({
     setValue("identifier", identifier);
   }, [currentIdentifier, identifier, setValue]);
 
+  useEffect(() => {
+    const clearPassword = () => setValue("password", "");
+    window.addEventListener("pagehide", clearPassword);
+    return () => {
+      window.removeEventListener("pagehide", clearPassword);
+      clearPassword();
+    };
+  }, [setValue]);
+
   const submit = handleSubmit(
     async (credentials) => {
       if (disabled) return;
@@ -112,6 +121,8 @@ export function IdentityCredentialsForm({
         const message =
           error instanceof Error ? error.message : "Sign in failed";
         toast.danger(message);
+      } finally {
+        setValue("password", "");
       }
     },
     (errors) => {

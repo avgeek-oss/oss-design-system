@@ -4,6 +4,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type Ref,
   type ReactNode,
 } from "react";
 import { Notification02Icon } from "@hugeicons/core-free-icons";
@@ -40,6 +41,7 @@ export interface NotificationMenuProps {
   onActivate?: (item: NotificationItem) => void | Promise<void>;
   emptyContent?: ReactNode;
   footer?: ReactNode;
+  dialogRef?: Ref<HTMLDivElement>;
 }
 
 export function NotificationMenu({
@@ -55,6 +57,7 @@ export function NotificationMenu({
   onActivate,
   emptyContent,
   footer,
+  dialogRef,
 }: NotificationMenuProps) {
   const [internalOpen, setInternalOpen] = useState(defaultIsOpen);
   const activation = useAsyncAction("Could not open the notification");
@@ -105,7 +108,7 @@ export function NotificationMenu({
         placement="bottom end"
         className="w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl bg-transparent p-0"
       >
-        <Popover.Dialog className="p-0 outline-none">
+        <Popover.Dialog ref={dialogRef} className="p-0 outline-none">
           <Widget>
             <Widget.Header
               className="widget__header--notification"

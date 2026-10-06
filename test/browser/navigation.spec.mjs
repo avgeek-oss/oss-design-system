@@ -566,3 +566,211 @@ for (const kind of ["dropdown", "select"]) {
     await expect(trigger).toBeFocused();
   });
 }
+
+test("notification dialog ref preserves focus through disabled refresh and pagination", async ({
+  page,
+  fixtureUrl,
+  touch,
+  theme,
+}, testInfo) => {
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/NotificationMenu.fixture.tsx",
+      "Focus management",
+    ),
+  );
+  await page.bringToFront();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+  const trigger = page.getByRole("button", { name: /^Notifications/ });
+  await press(trigger, touch);
+  const dialog = page.getByRole("dialog");
+  const original = await dialog.elementHandle();
+  assert.ok(original);
+  const row = page.getByRole("link", { name: /Deployment completed/ });
+  await expect(row).toContainText("Unread");
+  const complete = async () =>
+    page
+      .getByRole("button", { name: "Complete request", exact: true })
+      .evaluate((element) => element.click());
+  for (const [index, name] of ["Refresh", "Load more"].entries()) {
+    const action = dialog.getByRole("button", { name, exact: true });
+    await action.focus();
+    await page.keyboard.press("Enter");
+    await expect(action).toBeDisabled();
+    await expect(dialog).toBeFocused();
+    await expect(page.locator("[data-focus-requests]")).toHaveText(
+      `Requests: ${index + 1}`,
+    );
+    await complete();
+    await expect(action).toBeEnabled();
+    await expect(action).toBeFocused();
+    assert.equal(
+      await original.evaluate(
+        (element) =>
+          element.isConnected &&
+          element === globalThis.document.querySelector('[role="dialog"]'),
+      ),
+      true,
+    );
+  }
+  await expect(row).toContainText("Read");
+  const refresh = dialog.getByRole("button", { name: "Refresh", exact: true });
+  await refresh.focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toBeFocused();
+  await row.focus();
+  await complete();
+  await expect(refresh).toBeEnabled();
+  await expect(row).toBeFocused();
+  // Pointer activation does not grant ownership of keyboard focus.
+  await press(
+    dialog.getByRole("button", { name: "Load more", exact: true }),
+    touch,
+  );
+  await row.focus();
+  await complete();
+  await expect(row).toBeFocused();
+  await page.screenshot({
+    path: testInfo.outputPath("notification-focus.png"),
+    animations: "disabled",
+  });
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
+test("a notification completed after close and reopen leaves the current menu alone", async ({
+  page,
+  fixtureUrl,
+  touch,
+}) => {
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/NotificationMenu.fixture.tsx",
+      "Activation and recovery",
+    ),
+  );
+  await page.bringToFront();
+  const trigger = page.getByRole("button", { name: /^Notifications/ });
+  await press(trigger, touch);
+  const task = page.getByRole("link", { name: /Deployment completed/ });
+  await task.focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("[data-activation-count]")).toHaveText(
+    "Activations: 1",
+  );
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await press(trigger, touch);
+  const complete = page.getByRole("button", {
+    name: "Complete activation",
+    exact: true,
+  });
+  await task.focus();
+  await complete.evaluate((element) => element.click());
+  await expect(page.locator("[data-navigation]")).toHaveText("Not navigated");
+  await expect(task).toHaveAttribute("aria-busy", "false");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+  await expect(task).toBeFocused();
+});
+
+test("notification trigger keeps its geometry during held pointer, keyboard and touch presses", async ({
+  page,
+  fixtureUrl,
+  touch,
+  theme,
+}) => {
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/NotificationMenu.fixture.tsx", "Mark all read"),
+  );
+  await page.bringToFront();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+  const trigger = page.getByRole("button", { name: /^Notifications/ });
+  const rest = await trigger.boundingBox();
+  assert.ok(rest);
+  async function assertSteady(pressed = true) {
+    if (pressed) await expect(trigger).toHaveAttribute("data-pressed", "true");
+    else await expect(trigger).not.toHaveAttribute("data-pressed", "true");
+    const samples = await trigger.evaluate(async (element) => {
+      const frames = [];
+      for (let i = 0; i < 12; i++) {
+        const bounds = element.getBoundingClientRect();
+        frames.push({
+          x: bounds.x,
+          y: bounds.y,
+          width: bounds.width,
+          height: bounds.height,
+          identity: new globalThis.DOMMatrixReadOnly(
+            globalThis.getComputedStyle(element).transform,
+          ).isIdentity,
+        });
+        await new Promise(globalThis.requestAnimationFrame);
+      }
+      return frames;
+    });
+    for (const frame of samples) {
+      assert.equal(frame.identity, true, "Notification presses must not scale");
+      for (const key of ["x", "y", "width", "height"])
+        assert.ok(
+          Math.abs(frame[key] - rest[key]) < 0.2,
+          `Held press must preserve ${key}`,
+        );
+    }
+  }
+  async function dismiss() {
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await assertSteady(false);
+  }
+  await assertSteady(false);
+  await page.mouse.move(rest.x + rest.width / 2, rest.y + rest.height / 2);
+  await page.mouse.down();
+  await assertSteady();
+  await page.mouse.up();
+  await dismiss();
+  await trigger.focus();
+  await page.keyboard.down("Space");
+  await assertSteady();
+  await page.keyboard.up("Space");
+  await dismiss();
+  if (touch) {
+    const session = await page.context().newCDPSession(page);
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [
+        { x: rest.x + rest.width / 2, y: rest.y + rest.height / 2 },
+      ],
+    });
+    await assertSteady();
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await session.detach();
+    await dismiss();
+  }
+  const auxiliary = page.getByRole("button", {
+    name: "Restore notifications",
+    exact: true,
+  });
+  await auxiliary.focus();
+  await page.keyboard.down("Space");
+  await expect(auxiliary).toHaveAttribute("data-pressed", "true");
+  assert.equal(
+    await auxiliary.evaluate(async (element) => {
+      for (let i = 0; i < 12; i++)
+        await new Promise(globalThis.requestAnimationFrame);
+      return new globalThis.DOMMatrixReadOnly(
+        globalThis.getComputedStyle(element).transform,
+      ).isIdentity;
+    }),
+    false,
+    "Other native buttons retain their press behavior",
+  );
+  await page.keyboard.up("Space");
+});
