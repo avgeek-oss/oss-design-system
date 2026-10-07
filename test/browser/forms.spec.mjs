@@ -955,3 +955,39 @@ for (const outcome of ["resolve", "reject"]) {
     );
   });
 }
+
+test("time-zone results scroll independently and focus uses a background", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/Account Settings/PreferencesSettings.fixture.tsx",
+      "All time zones",
+    ),
+  );
+  await page.getByRole("button", { name: /Time zone/ }).click();
+  const list = page.getByRole("listbox");
+  await expect(list).toBeVisible();
+  const search = page.getByRole("searchbox", { name: "Search time zones" });
+  await expect(search).toBeVisible();
+  const scroll = await list.evaluate((element) => {
+    const before = element.scrollTop;
+    element.scrollTop = element.scrollHeight;
+    return {
+      before,
+      after: element.scrollTop,
+      overflow: globalThis.getComputedStyle(element).overflowY,
+    };
+  });
+  expect(scroll.after).toBeGreaterThan(scroll.before);
+  expect(scroll.overflow).toBe("auto");
+  await search.fill("Africa");
+  await search.press("ArrowDown");
+  const focused = list.locator('[data-focused="true"]');
+  await expect(focused).toHaveCount(1);
+  await expect(focused).toHaveCSS("outline-style", "none");
+  await expect(focused).toHaveCSS("box-shadow", "none");
+  await focused.click();
+  await expect(list).toHaveCount(0);
+});

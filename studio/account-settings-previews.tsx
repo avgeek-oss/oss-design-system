@@ -41,8 +41,10 @@ export function ProfileSettingsPreview() {
 }
 export function PreferencesSettingsPreview({
   embedded = false,
+  allTimeZones = false,
 }: {
   embedded?: boolean;
+  allTimeZones?: boolean;
 }) {
   const [value, setValue] = useState<DateTimePreferences>({
     dateFormat: "day-short-month-year",
@@ -53,7 +55,14 @@ export function PreferencesSettingsPreview({
   const content = (
     <PreferencesSettings
       value={value}
-      options={preferenceOptions}
+      options={
+        allTimeZones
+          ? {
+              ...preferenceOptions,
+              timeZones: ["UTC", ...Intl.supportedValuesOf("timeZone")],
+            }
+          : preferenceOptions
+      }
       formatPreview={(preferences) => {
         const instant = new Date("2026-10-06T14:30:00Z");
         const parts = new Intl.DateTimeFormat("en-GB", {

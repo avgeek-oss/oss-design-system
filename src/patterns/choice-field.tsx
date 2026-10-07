@@ -42,7 +42,11 @@ export function ChoiceField<T extends string>({
       <Label isRequired={isRequired}>{label}</Label>
       <Select.Trigger>
         <Select.Value className="flex min-w-0 flex-1 items-center gap-2">
-          {selected?.icon}
+          {selected?.icon ? (
+            <span aria-hidden="true" className="shrink-0 [&_svg]:size-4">
+              {selected.icon}
+            </span>
+          ) : null}
           <span className="truncate">{selected?.label}</span>
         </Select.Value>
         <Select.Indicator />
@@ -57,7 +61,14 @@ export function ChoiceField<T extends string>({
             >
               <div className="grid min-w-0 flex-1 gap-1">
                 <span className="flex items-center gap-2">
-                  {option.icon}
+                  {option.icon ? (
+                    <span
+                      aria-hidden="true"
+                      className="shrink-0 [&_svg]:size-4"
+                    >
+                      {option.icon}
+                    </span>
+                  ) : null}
                   {option.label}
                 </span>
                 {option.description ? (

@@ -1,6 +1,6 @@
 {
   "name": "@avgeek-oss/design-system",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Shared React components, application layouts and UI patterns for Avgeek OSS apps.",
   "type": "module",
   "license": "Apache-2.0",
@@ -684,6 +684,22 @@
     "./utilities/date-time-preferences": {
       "types": "./dist/utilities/date-time-preferences.d.ts",
       "import": "./dist/utilities/date-time-preferences.js"
+    },
+    "./patterns/team-settings/team-role-options": {
+      "types": "./dist/patterns/team-settings/team-role-options.d.ts",
+      "import": "./dist/patterns/team-settings/team-role-options.js"
+    },
+    "./patterns/settings/page-title": {
+      "types": "./dist/patterns/settings/page-title.d.ts",
+      "import": "./dist/patterns/settings/page-title.js"
+    },
+    "./patterns/account-settings/mcp-guide-settings": {
+      "types": "./dist/patterns/account-settings/mcp-guide-settings.d.ts",
+      "import": "./dist/patterns/account-settings/mcp-guide-settings.js"
+    },
+    "./patterns/account-settings/mcp-connections-settings": {
+      "types": "./dist/patterns/account-settings/mcp-connections-settings.d.ts",
+      "import": "./dist/patterns/account-settings/mcp-connections-settings.js"
     }
   }
 }
