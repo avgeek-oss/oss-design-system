@@ -30,6 +30,7 @@ export function SignIn({
   onPasskeySignIn,
 }: SignInProps) {
   const [submitting, setSubmitting] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
   const pending = isPending || submitting;
   return (
     <AuthScreen brand={brand} title="Sign in" description={description}>
@@ -41,6 +42,7 @@ export function SignIn({
         identifierType="email"
         identifierAutoComplete="email"
         defaultIdentifier={defaultEmail}
+        onIdentifierChange={() => setNeedsVerification(false)}
         submitIcon={<HugeiconsIcon aria-hidden icon={Login01Icon} size={16} />}
         passwordAction={
           onForgotPassword ? (
@@ -50,19 +52,23 @@ export function SignIn({
           ) : undefined
         }
         onSubmit={async (credentials) => {
+          setNeedsVerification(false);
           setSubmitting(true);
           try {
             await onSubmit(credentials);
+          } catch (error) {
+            setNeedsVerification(
+              typeof error === "object" &&
+                error !== null &&
+                "code" in error &&
+                error.code === "EMAIL_NOT_VERIFIED",
+            );
+            throw error;
           } finally {
             setSubmitting(false);
           }
         }}
       />
-      {onResendVerification && (
-        <AuthAction disabled={pending} onClick={onResendVerification}>
-          Need a new verification email?
-        </AuthAction>
-      )}
       {onPasskeySignIn && (
         <Button
           isDisabled={pending}
@@ -72,6 +78,15 @@ export function SignIn({
         >
           Sign in with Passkey
         </Button>
+      )}
+      {needsVerification && onResendVerification && (
+        <AuthAction
+          className="justify-self-center"
+          disabled={pending}
+          onClick={onResendVerification}
+        >
+          Need a new verification email?
+        </AuthAction>
       )}
     </AuthScreen>
   );

@@ -176,6 +176,43 @@ test("invitation entry focuses email and moves focus to the returned link action
   await expect(opener).toBeFocused();
 });
 
+test("auth page composition retains the same gutters as a standalone auth screen", async ({
+  page,
+  fixtureUrl,
+  width,
+}) => {
+  const frames = [];
+  for (const variant of ["Default", "Page layout"]) {
+    await page.goto(
+      fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", variant),
+    );
+    await expect(
+      page.getByRole("heading", { name: "Sign in", exact: true }),
+    ).toBeVisible();
+    frames.push(
+      await page
+        .locator('[data-slot="identity-auth-content"]')
+        .evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          return {
+            left: bounds.left,
+            top: bounds.top,
+            width: bounds.width,
+            overflow:
+              element.ownerDocument.documentElement.scrollWidth >
+              element.ownerDocument.defaultView.innerWidth,
+          };
+        }),
+    );
+  }
+  expect(frames[1]).toEqual(frames[0]);
+  expect(frames[1].overflow).toBe(false);
+  if (width < 640) {
+    expect(frames[1].left).toBe(16);
+    expect(frames[1].top).toBe(32);
+  }
+});
+
 test("sign-in verification navigation uses the shared request and private acknowledgment", async ({
   page,
   fixtureUrl,
@@ -183,7 +220,10 @@ test("sign-in verification navigation uses the shared request and private acknow
   theme,
 }, testInfo) => {
   await page.goto(
-    fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", "Default"),
+    fixtureUrl(
+      "cosmos/Patterns/Auth/SignIn.fixture.tsx",
+      "Email verification recovery",
+    ),
   );
   await page.bringToFront();
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -191,6 +231,23 @@ test("sign-in verification navigation uses the shared request and private acknow
     name: "Need a new verification email?",
     exact: true,
   });
+  await expect(verification).toHaveCount(0);
+  await page.getByRole("textbox", { name: /^Email/ }).fill("alex@example.test");
+  await page
+    .getByLabel("Password", { exact: false })
+    .first()
+    .fill("preview password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(verification).toBeVisible();
+  const position = await verification.evaluate((element) => {
+    const action = element.getBoundingClientRect();
+    const content = element.parentElement.getBoundingClientRect();
+    return Math.abs(
+      action.x + action.width / 2 - content.x - content.width / 2,
+    );
+  });
+  expect(position).toBeLessThan(1);
+  await page.locator('[data-slot="toast-close"]').click();
   if (touch) await verification.tap();
   else {
     await verification.focus();

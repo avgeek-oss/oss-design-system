@@ -55,7 +55,13 @@ export function useAuthPreviewSubmit() {
   };
 }
 
-export function AuthPreview({ initial }: { initial: AuthPreviewScreen }) {
+export function AuthPreview({
+  initial,
+  signInFailureCode,
+}: {
+  initial: AuthPreviewScreen;
+  signInFailureCode?: "EMAIL_NOT_VERIFIED";
+}) {
   const [screen, setScreen] = useState(initial);
   const [passkeyBusy, setPasskeyBusy] = useState(false);
   const passkeyAttempt = useRef<AbortController | null>(null);
@@ -86,6 +92,10 @@ export function AuthPreview({ initial }: { initial: AuthPreviewScreen }) {
         onPasskeySignIn={() => setScreen("PasskeyVerification")}
         onSubmit={async () => {
           await submit();
+          if (signInFailureCode)
+            throw Object.assign(new Error("Verify your email to sign in."), {
+              code: signInFailureCode,
+            });
           setScreen("PasskeyVerification");
         }}
       />

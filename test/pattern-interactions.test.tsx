@@ -587,12 +587,15 @@ test("external sign-in pending blocks all submit paths and preserves the credent
   try {
     await fill("identifier", "alex@example.test");
     await fill("password", "preview password");
+    assert.doesNotMatch(
+      document.body.textContent ?? "",
+      /Need a new verification email/,
+    );
     await view.render(<SignIn {...props} isPending />);
     for (const label of [
       "Signing in…",
       "Forgot password?",
       "Sign in with Passkey",
-      "Need a new verification email?",
     ]) {
       assert.equal(button(label).disabled, true);
       await click(button(label));
@@ -1449,7 +1452,9 @@ test("sign-in blocks verification navigation during its own request and allows r
       }}
       onSubmit={async () => {
         await pending.promise;
-        throw new Error("Sign-in failed");
+        throw Object.assign(new Error("Verify your email to sign in."), {
+          code: "EMAIL_NOT_VERIFIED",
+        });
       }}
     />,
   );
@@ -1457,17 +1462,13 @@ test("sign-in blocks verification navigation during its own request and allows r
     await fill("identifier", "alex@example.test");
     await fill("password", "preview password");
     await submit();
-    for (const label of [
-      "Forgot password?",
-      "Need a new verification email?",
-      "Sign in with Passkey",
-    ]) {
+    for (const label of ["Forgot password?", "Sign in with Passkey"]) {
       assert.equal(button(label).disabled, true);
       await click(button(label));
     }
     assert.equal(navigations, 0);
     await act(async () => pending.resolve());
-    assertFailureToast("Sign-in failed");
+    assertFailureToast("Verify your email to sign in.");
     assert.equal(
       document.querySelector<HTMLInputElement>('input[name="password"]')?.value,
       "",
@@ -1485,6 +1486,65 @@ test("sign-in blocks verification navigation during its own request and allows r
     );
     await click(button("Need a new verification email?"));
     assert.equal(navigations, 1);
+    await fill("identifier", "another@example.test");
+    assert.doesNotMatch(
+      document.body.textContent ?? "",
+      /Need a new verification email/,
+    );
+  } finally {
+    await view.unmount();
+  }
+});
+
+for (const error of [
+  new Error("Email not verified"),
+  Object.assign(new Error("Email not verified"), {
+    code: "INVALID_EMAIL_OR_PASSWORD",
+  }),
+]) {
+  test(`sign-in ignores verification message text with code ${"code" in error ? error.code : "absent"}`, async () => {
+    const view = await mount(
+      <SignIn
+        brand="Example"
+        onResendVerification={() => {}}
+        onSubmit={async () => {
+          throw error;
+        }}
+      />,
+    );
+    try {
+      await fill("identifier", "alex@example.test");
+      await fill("password", "preview password");
+      await submit();
+      assertFailureToast("Email not verified");
+      assert.doesNotMatch(
+        document.body.textContent ?? "",
+        /Need a new verification email/,
+      );
+    } finally {
+      await view.unmount();
+    }
+  });
+}
+
+test("visible verification recovery respects external pending state", async () => {
+  const props = {
+    brand: "Example",
+    onResendVerification: () => {},
+    onSubmit: async () => {
+      throw Object.assign(new Error("Verify your email"), {
+        code: "EMAIL_NOT_VERIFIED",
+      });
+    },
+  };
+  const view = await mount(<SignIn {...props} />);
+  try {
+    await fill("identifier", "alex@example.test");
+    await fill("password", "preview password");
+    await submit();
+    assert.equal(button("Need a new verification email?").disabled, false);
+    await view.render(<SignIn {...props} isPending />);
+    assert.equal(button("Need a new verification email?").disabled, true);
   } finally {
     await view.unmount();
   }
