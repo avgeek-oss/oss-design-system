@@ -8,6 +8,10 @@ import {
   useContext,
 } from "react";
 import { Widget } from "./widget.js";
+import {
+  AttributeListFrame,
+  attributeListRowSpacing,
+} from "./attribute-list-frame.js";
 import { cn } from "../lib/utils.js";
 import { HeadingHelp } from "../overlays/heading-help.js";
 
@@ -69,6 +73,20 @@ const Root = forwardRef<HTMLDivElement, AttributesProps>(
           </div>
         </VariantContext.Provider>
       );
+    if (variant === "list")
+      return (
+        <VariantContext.Provider value={variant}>
+          <AttributeListFrame
+            ref={ref}
+            title={title}
+            icon={icon}
+            className={className}
+            {...props}
+          >
+            <dl className="grid">{children}</dl>
+          </AttributeListFrame>
+        </VariantContext.Provider>
+      );
     return (
       <VariantContext.Provider value={variant}>
         <Widget
@@ -84,15 +102,8 @@ const Root = forwardRef<HTMLDivElement, AttributesProps>(
               {title}
             </Widget.Title>
           </Widget.Header>
-          <Widget.Content className={variant === "list" ? "p-0" : undefined}>
-            <dl
-              className={cn(
-                variant === "card" ? "content-grid" : "grid",
-                variant === "card" && columns[count],
-              )}
-            >
-              {children}
-            </dl>
+          <Widget.Content>
+            <dl className={cn("content-grid", columns[count])}>{children}</dl>
           </Widget.Content>
         </Widget>
       </VariantContext.Provider>
@@ -115,18 +126,19 @@ const Item = forwardRef<HTMLDivElement, AttributesItemProps>(
       <div
         ref={ref}
         className={cn(
+          "attributes__item",
           variant === "card"
             ? "grid min-w-0 gap-1"
             : cn(
                 "flex min-w-0 items-center justify-between gap-4 border-b border-separator py-3 last:border-0",
-                variant === "list" && "px-4",
+                variant === "list" && attributeListRowSpacing,
                 variant === "embedded" && "first:pt-0 last:pb-0",
               ),
           className,
         )}
         {...props}
       >
-        <dt className="flex min-w-0 items-center gap-2 text-sm font-medium text-muted">
+        <dt className="flex min-w-0 items-center gap-2 text-sm font-normal text-muted">
           {icon ? (
             <span aria-hidden className="[&_svg]:size-4">
               {icon}

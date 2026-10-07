@@ -155,7 +155,8 @@ export {
   CreateApiKeyDialog,
   type CreateApiKeyDialogProps,
   type CreateApiKeyValues,
-  type CreateApiKeyMetadataValues,
+  apiKeyPermissionOptions,
+  apiKeyExpiryOptions,
   type CreatedApiKey,
 } from "./patterns/account-settings/create-api-key-dialog.js";
 
@@ -321,3 +322,19 @@ export * from "./patterns/team-settings/team-role-options.js";
 export * from "./patterns/settings/page-title.js";
 export * from "./patterns/account-settings/mcp-guide-settings.js";
 export * from "./patterns/account-settings/mcp-connections-settings.js";
+
+export * from "./patterns/feedback/loading-skeleton.js";
+
+export {
+  ExpandableAttributeList,
+  ExpandableAttributeListRoot,
+  ExpandableAttributeListItem,
+  type ExpandableAttributeListProps,
+  type ExpandableAttributeListItemProps,
+} from "./patterns/expandable-attribute-list.js";
+
+export {
+  ErrorPage,
+  type ErrorPageProps,
+  type ErrorPageStatus,
+} from "./patterns/feedback/error-page.js";

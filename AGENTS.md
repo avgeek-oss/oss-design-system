@@ -4,6 +4,8 @@
 
 This repository owns the shared React UI for Avgeek OSS apps: HeroUI primitives, application layouts, and reusable auth, account settings, team settings, and data patterns. Towbar is the baseline for common features, surfaces, and UI data contracts; other applications adopt that standard. It reduces copied UI and makes reviewed behavior consistent across consumers.
 
+This package also owns authentication email copy, its branded email shell, and common loading skeleton surfaces. Backend consumers use the dedicated `emails/render` entry point; keep it server-safe and out of the UI root barrel. Apps retain email recipients, token generation, expiry, trusted origins, encrypted outboxes, cancellation, SMTP delivery and retries. Use [docs/emails-and-loading.md](docs/emails-and-loading.md); do not duplicate auth templates or skeleton surfaces in consumers.
+
 Apps own routing destinations, permissions, API calls, persistence, domain date serialization, branding, WebAuthn ceremonies, and recovery-code generation. Components accept typed data and callbacks. Never move application services or authorization policy into this package, or import app packages into `src`. Next.js belongs only in `src/adapters/next.tsx`; it is an optional peer.
 
 Read [DESIGN.md](DESIGN.md) and the relevant file in [docs](docs) before changing UI. Read [docs/components.md](docs/components.md) before adding an export. The installed HeroUI types and existing source are the authority for available APIs and variants.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.8 — 2026-10-08
+
+- Add shared authentication emails with a server-safe renderer, loading skeletons, error pages and expandable attribute lists.
+- Require explicit Name, Permissions and Expires after choices when creating API keys; standardize permission and expiry options without preselected values.
+- Align breadcrumbs, sidebar toggles, secondary sidebar spacing, searchable picker padding, menu radii, calendar controls and mobile input typography.
+- Dim read notification content to 50 percent and keep MCP client selectors compact on desktop.
+
 ## 1.2.7
 
 - Align semantic status text and icons with soft-chip foregrounds in both themes; chip and account-menu icons inherit their labels.

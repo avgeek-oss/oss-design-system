@@ -4,7 +4,7 @@ import ComputerIcon from "@hugeicons/core-free-icons/ComputerIcon";
 import Key01Icon from "@hugeicons/core-free-icons/Key01Icon";
 import Link01Icon from "@hugeicons/core-free-icons/Link01Icon";
 import Mail01Icon from "@hugeicons/core-free-icons/Mail01Icon";
-import SecurityCheckIcon from "@hugeicons/core-free-icons/SecurityCheckIcon";
+import FingerPrintIcon from "@hugeicons/core-free-icons/FingerPrintIcon";
 import Settings01Icon from "@hugeicons/core-free-icons/Settings01Icon";
 import UserAccountIcon from "@hugeicons/core-free-icons/UserAccountIcon";
 import UserGroupIcon from "@hugeicons/core-free-icons/UserGroupIcon";
@@ -26,7 +26,7 @@ const icons = {
   profile: UserAccountIcon,
   preferences: Settings01Icon,
   "email-password": Mail01Icon,
-  passkeys: SecurityCheckIcon,
+  passkeys: FingerPrintIcon,
   sessions: ComputerIcon,
   "api-keys": Key01Icon,
   "mcp-connections": Link01Icon,

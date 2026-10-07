@@ -16,4 +16,14 @@ Base primitives retain HeroUI's variants, colors and behavior. Shared CSS correc
 
 The shared ListBox tick reservation is a layout correction: picker popover padding must not overlap the selection indicator. It applies to all rows with an indicator; native colors, sizing and selection behavior remain in place.
 
+Chip labels stay on one line, including multiword labels and labels with icons. Their shared white-space and word-breaking rules prevent inherited table/content styles from splitting a label. Containers reserve the chip's intrinsic width; do not override this contract in an app.
+
+Secondary-section field labels use the compact muted hierarchy described in the layout guide. Select, ComboBox and Autocomplete popovers derive their outer radius from the field radius plus the 8px inset. These corrections belong to the shared stylesheet; consumers do not restyle individual labels or picker corners.
+
+Selection displays and menu options remain 14px on mobile and desktop. Only actual text-entry controls retain the larger 16px mobile text, including search fields and editable ComboBox inputs. Preserve native control heights; use the typography contract in the forms guide.
+
 Semantic danger, warning and success tokens use the same foreground as their soft chips. Status counts, standalone icons and text must use these tokens; chip icons inherit their chip foreground. Theme-specific solid foregrounds preserve contrast. Profile details combines the avatar and name form; preferences omit previews and explanatory footers. Searchable picker results scroll below a fixed, opaque search field.
+
+Backgrounds, cards, inputs, popovers and neutral controls use one shared OKLCH ramp. The hue comes from `--accent`; chroma stays at or below 0.001 so large surfaces look neutral. Dark page lightness is 0.09, with raised surfaces between 0.16 and 0.235. Light pages use 0.982 and cards 0.998. Apps set their accent, not separate surface/background ramps. Preserve surface contrast and verify both themes when changing these tokens.
+
+Route-level failures use the shared `ErrorPage` pattern for 404, 500, unavailable and forbidden states. Recovery actions and destinations belong to the app; avoid app-specific error cards or raw exception details. See [patterns](docs/patterns.md#error-pages).

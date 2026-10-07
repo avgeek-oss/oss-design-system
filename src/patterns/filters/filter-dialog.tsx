@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import type { ReactNode } from "react";
 import {
+  Add01Icon,
   ArrowDown01Icon,
   Delete02Icon,
   FilterIcon,
@@ -154,7 +155,7 @@ export function FilterDialog<Field extends string, Operator extends string>({
                   return (
                     <div
                       key={index}
-                      className="grid grid-cols-[minmax(0,1fr)_2rem] items-end gap-2"
+                      className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-2"
                     >
                       <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_9.5rem_minmax(0,2fr)]">
                         <FilterSelect
@@ -250,7 +251,7 @@ export function FilterDialog<Field extends string, Operator extends string>({
                       <Button
                         isIconOnly
                         variant="danger-soft"
-                        className="size-8 min-w-0 shrink-0 rounded-lg"
+                        className="shrink-0 rounded-full"
                         aria-label={`Remove condition ${index + 1}`}
                         onPress={() =>
                           setDraft(draft.filter((_, i) => i !== index))
@@ -269,6 +270,7 @@ export function FilterDialog<Field extends string, Operator extends string>({
                     if (condition) setDraft([...(draft ?? []), condition]);
                   }}
                 >
+                  <HugeiconsIcon icon={Add01Icon} aria-hidden="true" />
                   Add condition
                 </Button>
               </form>

@@ -98,6 +98,18 @@ async function fill(name: string, value: string) {
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
 }
+async function chooseKeyOption(label: string) {
+  const select = [...document.querySelectorAll("select")].find((element) =>
+    [...element.options].some((option) => option.textContent === label),
+  );
+  assert.ok(select, `Missing selection option: ${label}`);
+  const option = [...select.options].find((item) => item.textContent === label);
+  assert.ok(option);
+  await act(async () => {
+    select.value = option.value;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+}
 async function submit() {
   const form = document.querySelector("form");
   assert.ok(form);
@@ -242,6 +254,8 @@ test("API key creation retains the name on failure and removes the revealed secr
   const view = await mount(<Example />);
   try {
     await fill("name", "Automation");
+    await chooseKeyOption("Read-only");
+    await chooseKeyOption("90 days");
     await submit();
     assertFailureToast("Creation failed");
     assert.equal(
@@ -700,23 +714,34 @@ test("custom identity verification supports app-owned ceremonies and explicit ab
   }
 });
 
-test("API keys without permission policy submit only name and expiry", async () => {
+test("API keys require explicit permission and expiry selections before submitting", async () => {
   let calls = 0;
   const view = await mount(
     <CreateApiKeyDialog
       isOpen
       onOpenChange={() => {}}
-      expiryOptions={[{ id: "90", label: "90 days" }]}
       onCreate={async (values) => {
         calls++;
-        assert.deepEqual(values, { name: "Automation", expiry: "90" });
+        assert.deepEqual(values, {
+          name: "Automation",
+          permission: "read",
+          expiry: "never",
+        });
         return { token: "preview-key" };
       }}
     />,
   );
   try {
-    assert.doesNotMatch(document.body.textContent ?? "", /Permissions/);
+    assert.match(document.body.textContent ?? "", /Permissions/);
     await fill("name", "Automation");
+    await submit();
+    assert.equal(calls, 0);
+    assert.equal(button("Create key").disabled, true);
+    await chooseKeyOption("Read-only");
+    await submit();
+    assert.equal(calls, 0);
+    await chooseKeyOption("Never");
+    assert.equal(button("Create key").disabled, false);
     await submit();
     assert.equal(calls, 1);
     assert.match(document.body.textContent ?? "", /preview-key/);
@@ -1090,13 +1115,19 @@ test("API key names reject whitespace with toast and focus, retain the draft, an
       expiryOptions={[{ id: "90", label: "90 days" }]}
       onCreate={async (values) => {
         calls++;
-        assert.deepEqual(values, { name: "Automation", expiry: "90" });
+        assert.deepEqual(values, {
+          name: "Automation",
+          permission: "read",
+          expiry: "90",
+        });
         await pending.promise;
         return { token: "preview-key" };
       }}
     />,
   );
   try {
+    await chooseKeyOption("Read-only");
+    await chooseKeyOption("90 days");
     await fill("name", "   ");
     for (let attempt = 0; attempt < 2; attempt++) {
       await submit();

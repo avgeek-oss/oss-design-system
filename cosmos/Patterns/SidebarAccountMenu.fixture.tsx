@@ -4,7 +4,7 @@ import {
   BookOpen01Icon,
   Key01Icon,
   Logout01Icon,
-  SecurityCheckIcon,
+  Mail01Icon,
   Settings01Icon,
   UserAccountIcon,
 } from "@hugeicons/core-free-icons";
@@ -37,13 +37,13 @@ function AccountMenuPreview() {
                   icon: <HugeiconsIcon icon={Settings01Icon} />,
                 },
                 {
-                  id: "passkeys",
-                  label: "Passkeys",
-                  icon: <HugeiconsIcon icon={SecurityCheckIcon} />,
+                  id: "email-password",
+                  label: "Email & Password",
+                  icon: <HugeiconsIcon icon={Mail01Icon} />,
                 },
                 {
                   id: "api-keys",
-                  label: "My API Keys",
+                  label: "API Keys",
                   icon: <HugeiconsIcon icon={Key01Icon} />,
                 },
               ],

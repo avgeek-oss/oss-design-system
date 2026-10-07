@@ -480,8 +480,45 @@ for (const kind of ["dropdown", "select"]) {
         ? '[data-slot="dropdown-popover"]'
         : '[data-slot="select-popover"]',
     );
+    const trails = page.getByRole("navigation", { name: "Breadcrumb" });
+    await expect(trails.getByText("Stats", { exact: true })).toHaveCount(0);
+    const dailyTrail = trails.filter({ hasText: "Daily View" });
+    await expect(dailyTrail.locator("li")).toHaveCount(1);
+    await expect(dailyTrail.locator('[aria-current="page"]')).toHaveText(
+      "Daily View",
+    );
+    await expect(dailyTrail.getByText("/", { exact: true })).toHaveCount(0);
+    for (const trail of await trails.all()) {
+      const items = trail.locator("li");
+      await expect(trail.locator('[aria-current="page"]')).toHaveCount(1);
+      const emphasis = await items.evaluateAll((items) =>
+        items.map((item) => {
+          const label = item.lastElementChild;
+          const style = globalThis.getComputedStyle(
+            label.querySelector("button") ?? label,
+          );
+          return { color: style.color, weight: style.fontWeight };
+        }),
+      );
+      const current = emphasis.at(-1);
+      assert.equal(current.weight, "500");
+      for (const parent of emphasis.slice(0, -1)) {
+        assert.equal(parent.weight, "400");
+        assert.notEqual(parent.color, current.color);
+      }
+    }
+    const triggerColor = await trigger.evaluate(
+      (element) => globalThis.getComputedStyle(element).color,
+    );
     await press(trigger, touch);
     await sampleFrames(popover);
+    assert.equal(
+      await trigger.evaluate(
+        (element) => globalThis.getComputedStyle(element).color,
+      ),
+      triggerColor,
+      "Opening a breadcrumb menu retains its hierarchy emphasis",
+    );
     if (reducedMotion === "reduce")
       assert.equal(
         await popover.evaluate(

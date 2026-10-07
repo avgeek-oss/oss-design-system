@@ -85,7 +85,7 @@ export function HistoryFilter({
           <span className="flex min-w-0 max-w-full items-center gap-2">
             {selectedIcon ? (
               <span
-                className="flex size-4 shrink-0 items-center justify-center leading-none [&>span]:size-4 [&_img]:size-4 [&_svg]:size-4"
+                className="inline-flex shrink-0 items-center justify-center leading-none [&_svg]:size-4"
                 aria-hidden="true"
               >
                 {selectedIcon}
@@ -113,7 +113,7 @@ export function HistoryFilter({
           >
             <SearchField
               aria-label={`Search ${label.toLowerCase()}`}
-
+              className="p-2"
               variant="secondary"
             >
               <SearchField.Group>

@@ -35,11 +35,20 @@ const initialItems: NotificationItem[] = [
 function Notifications({
   clearAction = false,
   loading = false,
+  readFirst = false,
 }: {
   clearAction?: boolean;
   loading?: boolean;
+  readFirst?: boolean;
 }) {
-  const [items, setItems] = useState(loading ? [] : initialItems);
+  const [items, setItems] = useState<NotificationItem[]>(
+    loading
+      ? []
+      : initialItems.map((item, index) => ({
+          ...item,
+          unread: !(readFirst && index === 0),
+        })),
+  );
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="grid justify-items-end gap-4 p-4">
@@ -264,6 +273,7 @@ function IgnoredActivation({
 
 export default {
   "Mark all read": <Notifications />,
+  "Read and unread": <Notifications readFirst />,
   "App header action": <Notifications clearAction />,
   "Focus management": <FocusManagement />,
   Loading: <Notifications loading />,

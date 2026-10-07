@@ -68,7 +68,7 @@ export function HeadingHelp({
       <Button
         aria-label={`About ${title}`}
         onPress={() => setIsOpen(true)}
-        className="relative inline-flex size-6 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full text-muted outline-none pointer-fine:hover:text-foreground focus-visible:ring-2 focus-visible:ring-focus pointer-coarse:before:absolute pointer-coarse:before:-inset-2.5 pointer-coarse:before:content-['']"
+        className="relative -ms-1 inline-flex size-6 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full text-muted outline-none pointer-fine:hover:text-foreground focus-visible:ring-2 focus-visible:ring-focus pointer-coarse:before:absolute pointer-coarse:before:-inset-2.5 pointer-coarse:before:content-['']"
       >
         <HugeiconsIcon
           aria-hidden="true"

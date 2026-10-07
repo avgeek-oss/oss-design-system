@@ -155,6 +155,27 @@ The React-free `utilities/date-time-preferences` public subpath and root export 
 
 `teamRoleOptions` (`patterns/team-settings/team-role-options`) supplies Admin, Member and Viewer with 16px icons and short generic descriptions for invitation and member-edit pickers. Applications retain their existing permission enforcement.
 
-`McpGuideSettings` (`patterns/account-settings/mcp-guide-settings`) owns the client selector, configuration code and MCP setup and troubleshooting link. Pass app-owned `configurations` and `documentationUrl`; configuration entries contain `id`, `label`, optional `icon`, `filename` and `code`. Keep additional connection prose in the documentation.
+`McpGuideSettings` (`patterns/account-settings/mcp-guide-settings`) owns the client selector, configuration code and MCP setup and troubleshooting link. The selector is compact on desktop and full width on mobile; configuration code retains the widget width. Pass app-owned `configurations` and `documentationUrl`; configuration entries contain `id`, `label`, optional `icon`, `filename` and `code`. Keep additional connection prose in the documentation.
 
 `McpConnectionsSettings` (`patterns/account-settings/mcp-connections-settings`) shows authorized MCP clients on their own account page. Pass `AuthorizedClient` items, `formatDate` and an awaited `onRevoke(id)`. A failed revocation keeps its confirmation available; refresh committed items after success. API Keys is for manually created keys.
+
+## Expandable attribute lists
+
+`ExpandableAttributeList` ([source](../src/patterns/expandable-attribute-list.tsx)) is previewed under `Patterns / ExpandableAttributeList`. It shares the Attributes list frame, row spacing and full-width dividers. Use `Attributes variant="list"` directly for noninteractive label/value lists, such as weigh-ins. Use the expandable pattern for mixed activity lists where only some rows have details. See [pattern usage](patterns.md#expandable-attribute-lists).
+
+## Emails and loading patterns
+
+See [emails and loading](emails-and-loading.md) for usage and ownership rules.
+
+| Export                              | Source                                                                                      | Cosmos                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------- |
+| AuthEmail                           | [src/emails/auth-email.tsx](../src/emails/auth-email.tsx)                                   | Patterns / Emails / AuthEmail          |
+| EmailShell                          | [src/emails/email-shell.tsx](../src/emails/email-shell.tsx)                                 | Patterns / Emails / EmailShell         |
+| renderAuthEmail, renderEmailMessage | [src/emails/render.tsx](../src/emails/render.tsx)                                           | Server renderer for the same templates |
+| LoadingSkeleton, SkeletonCard       | [src/patterns/feedback/loading-skeleton.tsx](../src/patterns/feedback/loading-skeleton.tsx) | Patterns / Feedback / LoadingSkeleton  |
+
+## Error pages
+
+Use `ErrorPage` ([source](../src/patterns/feedback/error-page.tsx)) for a route that cannot render: `status="not-found"` for 404, `status="server-error"` for 500, `status="unavailable"` for connection or service outages, and `status="forbidden"` for access restrictions. Cosmos previews these under `Patterns / Feedback / ErrorPage`. Import from the package root or `patterns/feedback/error-page`.
+
+The pattern owns the centered layout, status icon, heading hierarchy, explanation and recovery controls. Apps supply `onRetry`, `isPending`, `returnHref` and `returnLabel`; optional children compose additional recovery actions. Retry is shown only when supplied. Apps retain routing, session policy, error classification and data fetching. Never pass raw exception details into user-facing copy. Keep actionable error-page explanations visible; mutation failures still use toasts. Use `QueryError` for a query failure within an otherwise usable page, and `EmptyState` for successful requests with no records.

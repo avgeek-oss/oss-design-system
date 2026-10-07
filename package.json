@@ -1,6 +1,6 @@
 {
   "name": "@avgeek-oss/design-system",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Shared React components, application layouts and UI patterns for Avgeek OSS apps.",
   "type": "module",
   "license": "Apache-2.0",
@@ -77,7 +77,8 @@
     "recharts": "^3.10.1",
     "tailwind-merge": "^3.7.0",
     "tailwindcss": "4.3.3",
-    "zod": "^4.5.4"
+    "zod": "^4.5.4",
+    "react-email": "6.11.0"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
@@ -700,6 +701,30 @@
     "./patterns/account-settings/mcp-connections-settings": {
       "types": "./dist/patterns/account-settings/mcp-connections-settings.d.ts",
       "import": "./dist/patterns/account-settings/mcp-connections-settings.js"
+    },
+    "./emails/email-shell": {
+      "types": "./dist/emails/email-shell.d.ts",
+      "import": "./dist/emails/email-shell.js"
+    },
+    "./emails/auth-email": {
+      "types": "./dist/emails/auth-email.d.ts",
+      "import": "./dist/emails/auth-email.js"
+    },
+    "./emails/render": {
+      "types": "./dist/emails/render.d.ts",
+      "import": "./dist/emails/render.js"
+    },
+    "./patterns/feedback/loading-skeleton": {
+      "types": "./dist/patterns/feedback/loading-skeleton.d.ts",
+      "import": "./dist/patterns/feedback/loading-skeleton.js"
+    },
+    "./patterns/expandable-attribute-list": {
+      "types": "./dist/patterns/expandable-attribute-list.d.ts",
+      "import": "./dist/patterns/expandable-attribute-list.js"
+    },
+    "./patterns/feedback/error-page": {
+      "types": "./dist/patterns/feedback/error-page.d.ts",
+      "import": "./dist/patterns/feedback/error-page.js"
     }
   }
 }

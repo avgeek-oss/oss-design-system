@@ -11,71 +11,45 @@ import { toast } from "../../overlays/toast.js";
 import { ChoiceField, type ChoiceOption } from "../choice-field.js";
 import { useAsyncAction } from "../use-async-action.js";
 
-export type CreateApiKeyMetadataValues = { name: string; expiry: string };
-export type CreateApiKeyValues = CreateApiKeyMetadataValues & {
+export const apiKeyPermissionOptions = [
+  { id: "read", label: "Read-only" },
+  { id: "edit", label: "Edit" },
+  { id: "admin", label: "Administrative permissions" },
+] as const satisfies readonly ChoiceOption[];
+export const apiKeyExpiryOptions = [
+  { id: "30", label: "30 days" },
+  { id: "90", label: "90 days" },
+  { id: "365", label: "1 year" },
+  { id: "never", label: "Never" },
+] as const satisfies readonly ChoiceOption[];
+export type CreateApiKeyValues = {
+  name: string;
   permission: string;
+  expiry: string;
 };
 export type CreatedApiKey = { token: string | null };
-type CreateApiKeyDialogBaseProps = {
+export type CreateApiKeyDialogProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  expiryOptions: readonly ChoiceOption[];
-  defaultExpiry?: string;
+  permissionOptions?: readonly ChoiceOption[];
+  expiryOptions?: readonly ChoiceOption[];
+  onCreate: (values: CreateApiKeyValues) => Promise<CreatedApiKey>;
   children?: ReactNode;
 };
-export type CreateApiKeyDialogProps = CreateApiKeyDialogBaseProps &
-  (
-    | {
-        permissionOptions: readonly ChoiceOption[];
-        defaultPermission?: string;
-        onCreate: (values: CreateApiKeyValues) => Promise<CreatedApiKey>;
-      }
-    | {
-        permissionOptions?: undefined;
-        defaultPermission?: never;
-        onCreate: (
-          values: CreateApiKeyMetadataValues,
-        ) => Promise<CreatedApiKey>;
-      }
-  );
-type CreateContentProps = Omit<CreateApiKeyDialogBaseProps, "isOpen"> & {
-  permissionOptions?: readonly ChoiceOption[];
-  defaultPermission?: string;
-  onCreate: (values: CreateApiKeyValues) => Promise<CreatedApiKey>;
-};
-export function CreateApiKeyDialog(
-  props: Extract<
-    CreateApiKeyDialogProps,
-    { permissionOptions: readonly ChoiceOption[] }
-  >,
-): ReactNode;
-export function CreateApiKeyDialog(
-  props: Extract<CreateApiKeyDialogProps, { permissionOptions?: undefined }>,
-): ReactNode;
-export function CreateApiKeyDialog(props: CreateApiKeyDialogProps): ReactNode;
+type CreateContentProps = Omit<CreateApiKeyDialogProps, "isOpen">;
 export function CreateApiKeyDialog(props: CreateApiKeyDialogProps) {
-  const create = (values: CreateApiKeyValues) =>
-    props.permissionOptions === undefined
-      ? props.onCreate({ name: values.name, expiry: values.expiry })
-      : props.onCreate(values);
-  return props.isOpen ? <CreateContent {...props} onCreate={create} /> : null;
+  return props.isOpen ? <CreateContent {...props} /> : null;
 }
 function CreateContent({
   onOpenChange,
-  permissionOptions,
-  expiryOptions,
-  defaultPermission,
-  defaultExpiry,
+  permissionOptions = apiKeyPermissionOptions,
+  expiryOptions = apiKeyExpiryOptions,
   onCreate,
   children,
 }: CreateContentProps) {
   const nameId = useId();
-  const [permission, setPermission] = useState(
-    defaultPermission ?? permissionOptions?.[0]?.id ?? "",
-  );
-  const [expiry, setExpiry] = useState(
-    defaultExpiry ?? expiryOptions[0]?.id ?? "",
-  );
+  const [permission, setPermission] = useState("");
+  const [expiry, setExpiry] = useState("");
   const [created, setCreated] = useState<CreatedApiKey>();
   const [nameDraft, setNameDraft] = useState("");
   const doneRef = useRef<HTMLButtonElement>(null);
@@ -85,8 +59,7 @@ function CreateContent({
   }, [created]);
   const action = useAsyncAction("Could not create key");
   const canCreate =
-    (permissionOptions === undefined ||
-      permissionOptions.some((option) => option.id === permission)) &&
+    permissionOptions.some((option) => option.id === permission) &&
     expiryOptions.some((option) => option.id === expiry);
   return (
     <Modal.Backdrop
@@ -168,16 +141,14 @@ function CreateContent({
                     disabled={action.isPending}
                   />
                 </Field>
-                {permissionOptions && (
-                  <ChoiceField
-                    label="Permissions"
-                    value={permission}
-                    options={permissionOptions}
-                    onChange={setPermission}
-                    isRequired
-                    isDisabled={action.isPending}
-                  />
-                )}
+                <ChoiceField
+                  label="Permissions"
+                  value={permission}
+                  options={permissionOptions}
+                  onChange={setPermission}
+                  isRequired
+                  isDisabled={action.isPending}
+                />
                 <ChoiceField
                   label="Expires after"
                   value={expiry}

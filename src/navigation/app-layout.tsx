@@ -9,6 +9,8 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { PanelLeftIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { RouteProvider, useRoutePathname } from "../hooks/route-context.js";
 import { cn } from "../lib/utils.js";
 import { Drawer } from "../overlays/drawer.js";
@@ -260,7 +262,13 @@ export function AppLayout({
                     <Drawer.CloseTrigger
                       aria-label="Close navigation"
                       className="end-3 top-2.5 size-11 bg-transparent hover:bg-transparent data-[hovered=true]:bg-transparent group-data-[secondary-navigation=true]/navigation:hidden"
-                    />
+                    >
+                      <HugeiconsIcon
+                        aria-hidden
+                        icon={PanelLeftIcon}
+                        className="size-5"
+                      />
+                    </Drawer.CloseTrigger>
                   </div>
                   <div
                     className="hidden min-h-0 min-w-0 flex-col border-s border-separator group-data-[secondary-navigation=true]/navigation:flex"
@@ -270,7 +278,13 @@ export function AppLayout({
                       <Drawer.CloseTrigger
                         aria-label="Close navigation"
                         className="static size-11 bg-transparent hover:bg-transparent data-[hovered=true]:bg-transparent"
-                      />
+                      >
+                        <HugeiconsIcon
+                          aria-hidden
+                          icon={PanelLeftIcon}
+                          className="size-5"
+                        />
+                      </Drawer.CloseTrigger>
                     </div>
                     <nav
                       aria-label="Page navigation"

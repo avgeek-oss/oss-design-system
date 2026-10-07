@@ -3,14 +3,19 @@ import { AppLayout } from "../../src/navigation/app-layout";
 import { RouteProvider } from "../../src/hooks/route-context";
 import {
   SecondaryItems,
+  SecondarySection,
   SecondarySidebarLayout,
 } from "../../src/navigation/secondary-sidebar";
 import { Button } from "../../src/buttons/button";
+import { ChoiceField } from "../../src/patterns/choice-field";
+import { HistoryFilter } from "../../src/patterns/history/history-filter";
 
 export default function SecondaryNavigation() {
   const [pathname, setPathname] = useState("/profile");
   const [open, setOpen] = useState(false);
   const [actions, setActions] = useState(0);
+  const [sort, setSort] = useState("newest");
+  const [assignee, setAssignee] = useState("");
   return (
     <RouteProvider pathname={pathname} navigate={setPathname}>
       <AppLayout
@@ -47,6 +52,29 @@ export default function SecondaryNavigation() {
               { id: "action", label: "Refresh account" },
             ]}
           />
+          <SecondarySection title="Sort tasks">
+            <ChoiceField
+              label="Sort order"
+              value={sort}
+              onChange={setSort}
+              options={[
+                { id: "newest", label: "Newest first" },
+                { id: "title", label: "Title" },
+              ]}
+            />
+          </SecondarySection>
+          <SecondarySection title="Filter tasks">
+            <HistoryFilter
+              label="Assignee"
+              value={assignee}
+              onChange={setAssignee}
+              searchPlaceholder="Search assignees…"
+              options={[
+                { id: "alex", label: "Alex Morgan" },
+                { id: "long", label: "A teammate with a longer display name" },
+              ]}
+            />
+          </SecondarySection>
           <div className="grid gap-3 p-4 text-sm">
             <p data-route>{pathname}</p>
             <p data-actions>Actions: {actions}</p>

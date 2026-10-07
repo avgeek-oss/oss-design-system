@@ -192,3 +192,36 @@ test("semantic status text and chip icons share their chip foreground", async ({
     expect(colors.icon).toBe(colors.chip);
   }
 });
+
+test("loading skeleton reserves card surfaces with one accessible status", async ({
+  page,
+  fixtureUrl,
+  reducedMotion,
+}, testInfo) => {
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/Feedback/LoadingSkeleton.fixture.tsx"),
+  );
+  const status = page.getByRole("status", { name: "Loading overview" });
+  await expect(status).toBeVisible();
+  await expect(status).toHaveAttribute("aria-busy", "true");
+  const cards = status.locator(".oss-skeleton-card");
+  await expect(cards).toHaveCount(5);
+  for (const card of await cards.all()) {
+    const box = await card.boundingBox();
+    assert.ok(box && box.width > 40 && box.height >= 95);
+  }
+  if (reducedMotion === "reduce") {
+    const animation = await status
+      .locator(".oss-skeleton-card__fill")
+      .first()
+      .evaluate(
+        (element) =>
+          globalThis.getComputedStyle(element, "::after").animationName,
+      );
+    assert.equal(animation, "none");
+  }
+  await page.screenshot({
+    path: testInfo.outputPath("loading.png"),
+    animations: "disabled",
+  });
+});
