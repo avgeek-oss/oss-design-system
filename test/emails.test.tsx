@@ -7,15 +7,15 @@ for (const app of ["Towbar", "Mill", "Rootset", "Vitalog"]) {
     for (const template of authEmailTemplates) {
       const email = await renderAuthEmail(template, {
         brand: { name: app, accentColor: "#0866bd" },
-        name: "<script>name</script>",
+        name: "<ScRiPt>name</ScRiPt>",
         teamName: "Research & <Team>",
         actionUrl: "https://example.test/action#secret-token",
         verificationCode: "314159",
         role: "viewer",
       });
       assert.match(email.subject, new RegExp(`^\\[${app}\\] `));
-      assert.match(email.html, /&lt;script&gt;name&lt;\/script&gt;/);
-      assert.doesNotMatch(email.html, /<script>/);
+      assert.match(email.html, /&lt;script&gt;name&lt;\/script&gt;/i);
+      assert.doesNotMatch(email.html, /<script\b/i);
       assert.ok(
         email.text.includes("https://example.test/action#secret-token"),
       );
