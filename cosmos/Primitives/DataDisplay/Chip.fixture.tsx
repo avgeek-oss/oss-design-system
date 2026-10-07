@@ -6,14 +6,30 @@ import { Tooltip } from "../../../src/overlays/tooltip";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 
 export default function ChipVariants() {
+  const tones = {
+    default: "text-foreground",
+    accent: "text-accent",
+    danger: "text-danger",
+    success: "text-success",
+    warning: "text-warning",
+  };
   return (
     <PrimitivePreview title="Chip">
       <Variant title="Colors">
         {(["default", "accent", "danger", "success", "warning"] as const).map(
           (color) => (
-            <Chip color={color} key={color}>
-              {color}
-            </Chip>
+            <div key={color} className="grid gap-2" data-status-tone={color}>
+              <span className={tones[color]}>1 {color}</span>
+              <Chip color={color}>
+                <HugeiconsIcon
+                  icon={Tick02Icon}
+                  size={16}
+                  aria-hidden
+                  className={tones[color]}
+                />
+                <Chip.Label>{color}</Chip.Label>
+              </Chip>
+            </div>
           ),
         )}
       </Variant>

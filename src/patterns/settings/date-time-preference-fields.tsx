@@ -165,7 +165,7 @@ export function DateTimePreferenceFields({
           >
             <SearchField
               aria-label="Search time zones"
-              className="px-2 pt-2"
+              className="relative z-10 shrink-0 bg-overlay px-2 pt-2 pb-2"
               variant="secondary"
             >
               <SearchField.Group className="rounded-md">

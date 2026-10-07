@@ -31,6 +31,7 @@ export function ProfileSettingsPreview() {
     <div className="max-w-lg p-4">
       <ProfileSettings
         value={name}
+        email="alex@example.test"
         onSave={async (value) => {
           await request();
           setName(value);
@@ -63,31 +64,6 @@ export function PreferencesSettingsPreview({
             }
           : preferenceOptions
       }
-      formatPreview={(preferences) => {
-        const instant = new Date("2026-10-06T14:30:00Z");
-        const parts = new Intl.DateTimeFormat("en-GB", {
-          timeZone: preferences.timeZone,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }).formatToParts(instant);
-        const part = (type: string) =>
-          parts.find((item) => item.type === type)?.value;
-        const date =
-          preferences.dateFormat === "year-month-day"
-            ? `${part("year")}-${part("month")}-${part("day")}`
-            : new Intl.DateTimeFormat("en-GB", {
-                timeZone: preferences.timeZone,
-                dateStyle: "medium",
-              }).format(instant);
-        const time = new Intl.DateTimeFormat("en", {
-          timeZone: preferences.timeZone,
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: preferences.timeFormat === "12-hour",
-        }).format(instant);
-        return `${date} · ${time}`;
-      }}
       onSave={async (preferences) => {
         await request();
         setValue(preferences);

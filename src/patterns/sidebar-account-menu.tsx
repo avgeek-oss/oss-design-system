@@ -79,14 +79,11 @@ export function SidebarAccountMenu({
                   key={item.id}
                   textValue={item.label}
                   variant={item.destructive ? "danger" : undefined}
+                  className={item.destructive ? "text-danger" : undefined}
                 >
                   <span
                     aria-hidden
-                    className={
-                      item.destructive
-                        ? "text-danger [&_svg]:size-4"
-                        : "text-muted [&_svg]:size-4"
-                    }
+                    className="text-inherit [&_svg]:size-4 [&_svg]:text-inherit"
                   >
                     {item.icon}
                   </span>

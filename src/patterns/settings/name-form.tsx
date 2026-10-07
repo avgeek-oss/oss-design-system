@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { Button } from "../../buttons/button.js";
 import { Input } from "../../forms/input.js";
 import { Label } from "../../forms/label.js";
@@ -16,12 +16,14 @@ export function NameSettingsForm({
   value,
   maxLength = 120,
   onSave,
+  children,
 }: {
   title: string;
   label?: string;
   value: string;
   maxLength?: number;
   onSave: (name: string) => Promise<void>;
+  children?: ReactNode;
 }) {
   const id = useId();
   const [draft, setDraft] = useState(value);
@@ -33,7 +35,8 @@ export function NameSettingsForm({
       <Widget.Header>
         <Widget.Title>{title}</Widget.Title>
       </Widget.Header>
-      <Widget.Content>
+      <Widget.Content className="grid gap-4">
+        {children}
         <form
           noValidate
           className="grid gap-4"

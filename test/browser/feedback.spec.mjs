@@ -173,3 +173,22 @@ for (const scenario of ["single", "stack", "modal"]) {
     }
   });
 }
+
+test("semantic status text and chip icons share their chip foreground", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(fixtureUrl("cosmos/Primitives/DataDisplay/Chip.fixture.tsx"));
+  for (const tone of ["danger", "warning", "success"]) {
+    const example = page.locator(`[data-status-tone="${tone}"]`);
+    await expect(example).toBeVisible();
+    const colors = await example.evaluate((element) => ({
+      text: globalThis.getComputedStyle(element.querySelector(":scope > span"))
+        .color,
+      chip: globalThis.getComputedStyle(element.querySelector(".chip")).color,
+      icon: globalThis.getComputedStyle(element.querySelector("svg")).color,
+    }));
+    expect(colors.text).toBe(colors.chip);
+    expect(colors.icon).toBe(colors.chip);
+  }
+});

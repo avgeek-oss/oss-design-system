@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.7
+
+- Align semantic status text and icons with soft-chip foregrounds in both themes; chip and account-menu icons inherit their labels.
+- Combine avatar and name editing in Profile details, and omit redundant profile, preference and email-change instructions.
+- Keep searchable picker results below a fixed search field while scrolling.
+
 ## 1.2.6
 
 - Make searchable time-zone results scroll independently and highlight focused options without an overlapping outline.

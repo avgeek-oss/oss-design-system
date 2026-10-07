@@ -3,7 +3,6 @@
 import { useRef, useState, type ReactNode } from "react";
 import { Widget } from "../../data-display/widget.js";
 import { Button } from "../../buttons/button.js";
-import { FieldDescription } from "../../forms/field.js";
 import { toast } from "../../overlays/toast.js";
 import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 import {
@@ -15,6 +14,7 @@ import {
 export type PreferencesSettingsProps = {
   value: DateTimePreferences;
   options: DateTimePreferenceOptions;
+  /** @deprecated Preferences no longer display a preview. */
   formatPreview?: (preferences: DateTimePreferences) => ReactNode;
   onSave: (preferences: DateTimePreferences) => Promise<void>;
 };
@@ -22,7 +22,6 @@ export type PreferencesSettingsProps = {
 export function PreferencesSettings({
   value,
   options,
-  formatPreview,
   onSave,
 }: PreferencesSettingsProps) {
   const [draft, setDraft] = useState(value);
@@ -70,21 +69,6 @@ export function PreferencesSettings({
             variant="secondary"
             disabled={busy}
           />
-          <div className="grid gap-3">
-            {formatPreview && (
-              <div className="grid" aria-live="polite">
-                <span className="text-xs text-muted">Preview</span>
-                <span className="text-sm tabular-nums">
-                  {formatPreview(draft)}
-                </span>
-                <span className="text-xs text-muted">{draft.timeZone}</span>
-              </div>
-            )}
-            <FieldDescription>
-              Applies to dates and times throughout the app and your personal
-              API keys.
-            </FieldDescription>
-          </div>
           <Button className="w-fit" type="submit" isDisabled={busy || !changed}>
             {busy ? "Saving…" : "Save"}
           </Button>
