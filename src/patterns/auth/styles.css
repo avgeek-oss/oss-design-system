@@ -53,7 +53,14 @@
 [data-slot="identity-auth-content"] {
   display: grid;
   width: 100%;
+  min-width: 0;
   gap: calc(var(--spacing) * 8);
+}
+
+[data-slot="identity-auth-heading-copy"] {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: start;
 }
 
 @media (min-width: 640px) {

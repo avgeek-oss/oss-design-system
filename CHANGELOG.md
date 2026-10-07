@@ -4,6 +4,7 @@
 
 - Show centered verification-email recovery only after a typed `EMAIL_NOT_VERIFIED` sign-in failure, clearing it on email edits and retries while preserving pending guards and toast feedback.
 - Bring shared auth-action underlines closer to their text and document uniform branding and auth styling across team and personal apps.
+- Keep auth headings left aligned and wrap long client names and descriptions on narrow screens.
 
 ## 1.2.4 — 2026-10-07
 
