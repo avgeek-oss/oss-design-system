@@ -86,7 +86,7 @@ Use `ConfirmIdentityDialog` with `method="custom"` and `children` for an app-own
 
 `PasskeySettings.onRename` and `onReplaceRecoveryCodes` are optional capabilities. Unsupported actions are omitted. Recovery replacement appears only when that callback is supplied and the passkey list is nonempty; applications whose recovery policy depends on another factor should compose their recovery action with that factor’s settings instead. To display newly generated codes, pass both `recoveryCodes` and `onDismissRecoveryCodes`; never reconstruct old codes from stored hashes. All callbacks resolve only after the server operation completes.
 
-Use `ProfileImageSettings` beside `ProfileSettings` for the common Gravatar appearance surface. Apps supply the signed-in email and name; the component owns the external profile link and standard instructions.
+Use `ProfileSettings` with `email`, `value` and `onSave` for the common Profile details widget. It includes the Gravatar control and name form in one surface. `ProfileImageSettings` is the image control for composition inside an existing widget; do not add a separate Appearance widget.
 
 Use `InvitationPasswordSetup` when a private invitation link establishes the invited identity and the server expects name/password registration. Use `AcceptInvitation` and `InvitationVerification` when the server requires email-code verification first. Do not display a verification method that the app does not implement.
 

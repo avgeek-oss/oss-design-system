@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { Widget } from "../../data-display/widget.js";
-import { Field, FieldDescription, FieldError } from "../../forms/field.js";
+import { Field, FieldError } from "../../forms/field.js";
 import { Input } from "../../forms/input.js";
 import { Label } from "../../forms/label.js";
 import { Button } from "../../buttons/button.js";
@@ -154,10 +154,6 @@ function EditableEmailSettings({
               await onRequestChange(values.email ?? "");
             }}
           />
-          <FieldDescription>
-            We’ll send a confirmation link to your new address. Your sign-in
-            email changes only after you confirm it.
-          </FieldDescription>
           {error ? <FieldError>{error}</FieldError> : null}
           {pendingChange ? (
             <div className="grid gap-3">

@@ -982,6 +982,25 @@ test("time-zone results scroll independently and focus uses a background", async
   });
   expect(scroll.after).toBeGreaterThan(scroll.before);
   expect(scroll.overflow).toBe("auto");
+  const layers = await search.evaluate((element) => {
+    const field = element.closest(".search-field").getBoundingClientRect();
+    const list = element
+      .closest(".select__popover")
+      .querySelector('[role="listbox"]')
+      .getBoundingClientRect();
+    const point = globalThis.document.elementFromPoint(
+      field.x + field.width / 2,
+      field.y + field.height / 2,
+    );
+    return {
+      listTop: list.top,
+      searchBottom: field.bottom,
+      searchOnTop: !!point?.closest(".search-field"),
+    };
+  });
+  expect(layers.listTop).toBeGreaterThanOrEqual(layers.searchBottom - 1);
+  expect(layers.searchOnTop).toBe(true);
+
   await search.fill("Africa");
   await search.press("ArrowDown");
   const focused = list.locator('[data-focused="true"]');

@@ -15,6 +15,26 @@
 @source "../";
 
 :root {
+  --danger: color-mix(
+    in oklab,
+    oklch(0.6532 0.2328 25.74) 70%,
+    var(--foreground) 40%
+  );
+  --warning: color-mix(
+    in oklab,
+    oklch(0.7819 0.1585 72.33) 80%,
+    var(--foreground) 70%
+  );
+  --success: color-mix(
+    in oklab,
+    oklch(0.7329 0.1935 150.81) 80%,
+    var(--foreground) 60%
+  );
+  --danger-soft-foreground: var(--danger);
+  --warning-soft-foreground: var(--warning);
+  --success-soft-foreground: var(--success);
+  --warning-foreground: var(--snow);
+  --success-foreground: var(--snow);
   --workspace-page-content-width: 80rem;
   --chart-requested: oklch(0.627 0.138 254.2);
   --chart-succeeded: oklch(0.639 0.109 151.7);
@@ -22,9 +42,51 @@
 }
 
 .dark {
+  --danger: color-mix(
+    in oklab,
+    oklch(0.594 0.1967 24.63) 80%,
+    var(--foreground) 30%
+  );
+  --warning: color-mix(
+    in oklab,
+    oklch(0.8203 0.1388 76.34) 80%,
+    var(--foreground) 30%
+  );
+  --success: color-mix(
+    in oklab,
+    oklch(0.7329 0.1935 150.81) 80%,
+    var(--foreground) 30%
+  );
+  --danger-foreground: var(--eclipse);
+  --warning-foreground: var(--eclipse);
+  --success-foreground: var(--eclipse);
   --chart-requested: oklch(0.591 0.142 253.8);
   --chart-succeeded: oklch(0.673 0.141 150.8);
   --chart-failed: oklch(0.572 0.143 24.6);
+}
+
+.chip svg {
+  color: inherit;
+}
+
+.select__popover:has(.search-field) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .search-field {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    background: var(--overlay);
+  }
+
+  .list-box {
+    min-height: 0;
+    flex: 1;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+  }
 }
 
 html {
