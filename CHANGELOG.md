@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.5 — 2026-10-07
+
+- Show centered verification-email recovery only after a typed `EMAIL_NOT_VERIFIED` sign-in failure, clearing it on email edits and retries while preserving pending guards and toast feedback.
+- Bring shared auth-action underlines closer to their text and document uniform branding and auth styling across team and personal apps.
+
 ## 1.2.4 — 2026-10-07
 
 - Export a React-free shared date/time preference catalog with five date formats, four time formats and stored defaults for consistent account settings and onboarding.
