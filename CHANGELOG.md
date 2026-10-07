@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.6
+
+- Make searchable time-zone results scroll independently and highlight focused options without an overlapping outline.
+- Add common settings titles, team role options, MCP guide and MCP connection settings patterns.
+- Keep button-link icons spaced consistently and application page heading typography independent of consumer heading resets.
+
 ## 1.2.5 — 2026-10-07
 
 - Show centered verification-email recovery only after a typed `EMAIL_NOT_VERIFIED` sign-in failure, clearing it on email edits and retries while preserving pending guards and toast feedback.

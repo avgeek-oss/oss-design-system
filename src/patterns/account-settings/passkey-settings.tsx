@@ -20,6 +20,7 @@ import { useAsyncAction } from "../use-async-action.js";
 import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
 import { useFormDraft } from "../use-form-draft.js";
 import { restoreOverlayTriggerFocus } from "../../overlays/use-suspended-overlay-focus.js";
+import { SettingsPageTitle } from "../settings/page-title.js";
 import { SettingsConfirmation } from "./settings-confirmation.js";
 
 export type PasskeySettingsProps = Omit<
@@ -89,7 +90,9 @@ export function PasskeySettings({
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3 py-5">
-        <h1 className="text-xl font-medium">Passkeys</h1>
+        <h1 data-slot="application-page-heading">
+          <SettingsPageTitle section="passkeys" />
+        </h1>
         <div className="flex gap-2">
           <Button
             onPress={(event) => {

@@ -148,3 +148,13 @@ Additional shared account, invitation and passkey surfaces:
 ### Date/time preference catalog
 
 The React-free `utilities/date-time-preferences` public subpath and root export provide `dateFormatOptions`, `timeFormatOptions`, `defaultDateTimePreferences`, `DateFormatId`, `TimeFormatId` and `StandardDateTimePreferences`. Use this catalog for common preference controls instead of local option lists. See [forms](forms.md#display-preferences) for defaults, persistence and serialization boundaries.
+
+### Common settings presentation
+
+`SettingsPageTitle` (`patterns/settings/page-title`) supplies the standard common settings title and decorative 24px icon inside an application page heading. `settingsPageLabels` supplies matching navigation labels. Use the `mcp-connections` section below API Keys; keep MCP Guide separate.
+
+`teamRoleOptions` (`patterns/team-settings/team-role-options`) supplies Admin, Member and Viewer with 16px icons and short generic descriptions for invitation and member-edit pickers. Applications retain their existing permission enforcement.
+
+`McpGuideSettings` (`patterns/account-settings/mcp-guide-settings`) owns the client selector, configuration code and MCP setup and troubleshooting link. Pass app-owned `configurations` and `documentationUrl`; configuration entries contain `id`, `label`, optional `icon`, `filename` and `code`. Keep additional connection prose in the documentation.
+
+`McpConnectionsSettings` (`patterns/account-settings/mcp-connections-settings`) shows authorized MCP clients on their own account page. Pass `AuthorizedClient` items, `formatDate` and an awaited `onRevoke(id)`. A failed revocation keeps its confirmation available; refresh committed items after success. API Keys is for manually created keys.

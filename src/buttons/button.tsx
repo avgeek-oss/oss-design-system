@@ -2,6 +2,7 @@
 
 import { type Button as HeroButton, Link as HeroLink } from "@heroui/react";
 import { buttonVariants as heroButtonVariants } from "@heroui/styles";
+import { cn } from "../lib/utils.js";
 import type { ComponentProps } from "react";
 
 export { Button, buttonVariants } from "@heroui/react";
@@ -28,11 +29,14 @@ export function ButtonLink({
 }: ButtonLinkProps) {
   return (
     <HeroLink
-      className={heroButtonVariants({
-        className,
-        size,
-        variant,
-      })}
+      className={cn(
+        heroButtonVariants({
+          className,
+          size,
+          variant,
+        }),
+        "inline-flex items-center gap-2",
+      )}
       style={{ color: "var(--button-fg)", ...style }}
       {...props}
     />

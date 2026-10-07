@@ -155,7 +155,7 @@ export function DateTimePreferenceFields({
           </Select.Value>
           <Select.Indicator />
         </Select.Trigger>
-        <Select.Popover className="w-(--trigger-width) min-w-[min(18rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden">
+        <Select.Popover className="w-(--trigger-width) min-w-[min(18rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] flex flex-col overflow-hidden">
           <Autocomplete.Filter
             filter={(text, search) =>
               text
@@ -184,7 +184,7 @@ export function DateTimePreferenceFields({
                 <SearchField.ClearButton aria-label="Clear time zone search" />
               </SearchField.Group>
             </SearchField>
-            <ListBox>
+            <ListBox className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
               {options.timeZones.map((zone) => (
                 <ListBox.Item id={zone} key={zone} textValue={zone}>
                   <span className="flex min-w-0 flex-1 items-center gap-3">

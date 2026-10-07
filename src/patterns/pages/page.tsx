@@ -59,6 +59,7 @@ function TitledPage({
               )}
             >
               <TypographyHeading
+                data-slot="application-page-heading"
                 className={cn(
                   "flex min-w-0 items-center text-lg leading-7 font-medium",
                   titleOverflow === "truncate" && "overflow-hidden",

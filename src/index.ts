@@ -316,3 +316,8 @@ export {
   type TimeFormatId,
   type StandardDateTimePreferences,
 } from "./utilities/date-time-preferences.js";
+
+export * from "./patterns/team-settings/team-role-options.js";
+export * from "./patterns/settings/page-title.js";
+export * from "./patterns/account-settings/mcp-guide-settings.js";
+export * from "./patterns/account-settings/mcp-connections-settings.js";

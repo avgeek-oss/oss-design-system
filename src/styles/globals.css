@@ -108,6 +108,13 @@ body {
     pointer-events: none;
   }
 
+  .select__popover
+    .list-box-item:is([data-focused="true"], [data-focus-visible="true"]) {
+    outline: none;
+    box-shadow: none;
+    background: var(--default);
+  }
+
   /* Picker popovers override native row padding; keep content clear of the tick. */
   .list-box-item[data-slot="list-box-item"]:has(> .list-box-item__indicator) {
     padding-inline-end: calc(var(--spacing) * 8);

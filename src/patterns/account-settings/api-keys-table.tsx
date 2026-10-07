@@ -106,14 +106,16 @@ export function AuthorizedClientsTable<T extends AuthorizedClient>({
 }: AuthorizedClientsTableProps<T>) {
   return (
     <ResourceTable
-      ariaLabel="Authorized clients"
+      ariaLabel="MCP connections"
+      mobileLayout="stacked"
       items={items}
       getRowKey={(item) => item.id}
-      emptyTitle="No authorized clients"
+      emptyTitle="No MCP connections yet"
       emptyDescription={emptyDescription}
       columns={[
         {
           key: "client",
+          isRowHeader: true,
           header: "App",
           cell: (item) => (
             <div className="flex min-w-0 items-start gap-2">
