@@ -20,9 +20,11 @@ Variants for these examples are `primary` and `secondary`. `primary` is the prim
 
 These are pattern choices; the base primitives retain HeroUI defaults. Each control has its own variant fixture under `Primitives`. Cosmos patterns preview published components; composed form examples without a matching export are omitted.
 
-Associate labels with controls and descriptions with `aria-describedby`. Keep one focus ring. Editable controls use HeroUI’s responsive typography; no font-size adjustment or compact-height override is applied. Preserve long selected values with truncation and keep supplementary offsets in a separate right-aligned slot.
+Associate labels with controls and descriptions with `aria-describedby`. Keep one focus ring. Selection displays and menu options use `text-sm` (14px) at every breakpoint, including `Select` and `Autocomplete` values. Actual text-entry controls, including `Input`, `Textarea`, `SearchField` and the editable `ComboBox` input, retain HeroUI’s mobile `text-base` (16px) to prevent focus zoom, with `text-sm` from the `sm` breakpoint. Keep native control heights. Preserve long selected values with truncation and keep supplementary offsets in a separate right-aligned slot.
 
 Selectable `ListBox.Item` rows reserve 32px at the inline end for the tick and its gap, including inside picker popovers. Compose a shrinking content wrapper with `min-w-0 flex-1`, truncate the label, and keep trailing metadata `shrink-0`. Do not position metadata over the selection indicator.
+
+`Select`, `ComboBox`, and `Autocomplete` popovers use `--field-radius` plus an 8px inset, making their outer corners slightly rounder than the controls and nested search fields. Keep this shared picker radius instead of adding rounded classes to app popovers. Action menus and standalone contextual popovers retain their own surface treatment.
 
 ## Buttons
 

@@ -24,6 +24,11 @@ export default function BreadcrumbsVariants() {
           ]}
         />
       </Variant>
+      <Variant title="Sidebar categories omitted">
+        <BreadcrumbTrail
+          items={[{ label: "Stats" }, { label: "Daily View" }]}
+        />
+      </Variant>
       <Variant title="Dropdown">
         <BreadcrumbTrail
           items={[

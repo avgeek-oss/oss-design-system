@@ -47,7 +47,7 @@ export function ChoiceField<T extends string>({
               {selected.icon}
             </span>
           ) : null}
-          <span className="truncate">{selected?.label}</span>
+          <span className="truncate">{selected?.label ?? "Select…"}</span>
         </Select.Value>
         <Select.Indicator />
       </Select.Trigger>

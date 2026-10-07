@@ -2,14 +2,14 @@ import { useState } from "react";
 import { Button } from "../../../src/buttons/button";
 import {
   CreateApiKeyDialog,
-  type CreateApiKeyMetadataValues,
+  type CreateApiKeyValues,
 } from "../../../src/patterns/account-settings/create-api-key-dialog";
 import { CreateApiKeyPreview } from "../../../studio/pattern-previews";
-function NameValidation({ permissions = false }: { permissions?: boolean }) {
+function NameValidation() {
   const [isOpen, setIsOpen] = useState(false);
   const [requests, setRequests] = useState(0);
   const [name, setName] = useState("");
-  const onCreate = async (values: CreateApiKeyMetadataValues) => {
+  const onCreate = async (values: CreateApiKeyValues) => {
     setRequests((count) => count + 1);
     setName(values.name);
     await new Promise((resolve) => setTimeout(resolve, 600));
@@ -25,10 +25,6 @@ function NameValidation({ permissions = false }: { permissions?: boolean }) {
       <CreateApiKeyDialog
         isOpen={isOpen}
         onOpenChange={setIsOpen}
-        expiryOptions={[{ id: "90", label: "90 days" }]}
-        {...(permissions
-          ? { permissionOptions: [{ id: "read", label: "Read only" }] }
-          : {})}
         onCreate={onCreate}
       />
     </div>
@@ -36,7 +32,5 @@ function NameValidation({ permissions = false }: { permissions?: boolean }) {
 }
 export default {
   "Name validation": <NameValidation />,
-  "Permission name validation": <NameValidation permissions />,
   Permissions: () => <CreateApiKeyPreview />,
-  NameAndExpiry: () => <CreateApiKeyPreview permissions={false} />,
 };

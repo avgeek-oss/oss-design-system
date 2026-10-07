@@ -8,10 +8,7 @@ import {
   TypographyHeading,
   TypographyParagraph,
 } from "../../typography/typography.js";
-export type BreadcrumbAncestors = readonly [
-  AppShellBreadcrumbItems[number],
-  ...AppShellBreadcrumbItems[number][],
-];
+export type BreadcrumbAncestors = readonly AppShellBreadcrumbItems[number][];
 type Shared = Omit<ComponentProps<typeof Page>, "lead">;
 export interface ApplicationPageProps extends Shared {
   actions?: ReactNode;
@@ -108,14 +105,15 @@ export function ApplicationPage(props: ApplicationPageProps) {
     breadcrumbLabel,
     title,
   } = props;
-  const breadcrumbItems = [
-    ...breadcrumbAncestors,
-    {
-      content: breadcrumbContent,
-      contentKey: breadcrumbContentKey,
-      label: breadcrumbLabel ?? title,
-    },
-  ] as AppShellBreadcrumbItems;
+  const current = {
+    content: breadcrumbContent,
+    contentKey: breadcrumbContentKey,
+    label: breadcrumbLabel ?? title,
+  };
+  const [firstAncestor, ...otherAncestors] = breadcrumbAncestors;
+  const breadcrumbItems: AppShellBreadcrumbItems = firstAncestor
+    ? [firstAncestor, ...otherAncestors, current]
+    : [current];
 
   return (
     <>

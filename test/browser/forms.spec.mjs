@@ -78,7 +78,7 @@ test("sign-in clears completed passwords and cached-page credentials while retai
   await expect(email).toHaveValue("alex@example.test");
 });
 
-for (const variant of ["Name validation", "Permission name validation"]) {
+for (const variant of ["Name validation"]) {
   test(`API key ${variant.toLowerCase()} keeps invalid drafts and allows one trimmed submission`, async ({
     page,
     fixtureUrl,
@@ -94,8 +94,24 @@ for (const variant of ["Name validation", "Permission name validation"]) {
     );
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     await page.getByRole("button", { name: "Create key", exact: true }).click();
-    const dialog = page.getByRole("dialog");
+    const dialog = page.locator('[data-slot="modal-dialog"]');
     const name = dialog.getByRole("textbox", { name: /^Name/ });
+    const createButton = dialog.getByRole("button", {
+      name: "Create key",
+      exact: true,
+    });
+    await name.fill("Automation");
+    await expect(createButton).toBeDisabled();
+    await dialog.getByRole("button", { name: /Permissions/ }).click();
+    await page.getByRole("option", { name: "Read-only", exact: true }).click();
+    await expect(createButton).toBeDisabled();
+    await dialog.getByRole("button", { name: /Expires after/ }).click();
+    for (const option of ["30 days", "90 days", "1 year", "Never"])
+      await expect(
+        page.getByRole("option", { name: option, exact: true }),
+      ).toBeVisible();
+    await page.getByRole("option", { name: "90 days", exact: true }).click();
+    await expect(createButton).toBeEnabled();
     await name.fill("   ");
     for (let attempt = 0; attempt < 2; attempt++) {
       if (touch)
@@ -557,6 +573,14 @@ for (const scenario of [
     await dialog
       .getByRole("textbox", { name: scenario.field })
       .fill(scenario.draft);
+    if (scenario.variant === "ApiKey") {
+      await dialog.getByRole("button", { name: /Permissions/ }).click();
+      await page
+        .getByRole("option", { name: "Read-only", exact: true })
+        .click();
+      await dialog.getByRole("button", { name: /Expires after/ }).click();
+      await page.getByRole("option", { name: "Never", exact: true }).click();
+    }
     await dialog
       .getByRole("button", { name: scenario.submit, exact: true })
       .click();

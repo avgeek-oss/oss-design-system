@@ -31,12 +31,14 @@ export function McpGuideSettings({
         <Widget.Title>Connect your MCP client</Widget.Title>
       </Widget.Header>
       <Widget.Content className="grid gap-4">
-        <ChoiceField
-          label="App"
-          value={client?.id ?? ""}
-          options={configurations}
-          onChange={setClientId}
-        />
+        <div className="w-full sm:w-fit sm:min-w-64">
+          <ChoiceField
+            label="App"
+            value={client?.id ?? ""}
+            options={configurations}
+            onChange={setClientId}
+          />
+        </div>
         {client ? (
           <CodeBlock>
             <CodeBlock.Header>

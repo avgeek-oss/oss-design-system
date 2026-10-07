@@ -26,7 +26,7 @@ import { useAppNavigate } from "../hooks/app-navigation.js";
 const BreadcrumbItemContext = createContext(false);
 
 const triggerClassName =
-  "flex h-auto! min-h-0! min-w-0 max-w-40 transform-none! items-center gap-1 rounded-sm! border-0! bg-transparent! px-0! py-0! text-sm shadow-none! outline-none hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50 sm:max-w-64";
+  "flex h-auto! min-h-0! min-w-0 max-w-40 transform-none! items-center gap-1 rounded-sm! border-0! bg-transparent! px-0! py-0! text-sm shadow-none! outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50 sm:max-w-64";
 
 function BreadcrumbDropdownTrigger({
   children,
@@ -41,7 +41,7 @@ function BreadcrumbDropdownTrigger({
       className={composeRenderProps(className, (className) =>
         cn(
           triggerClassName,
-          isCurrent ? "font-medium text-foreground" : "text-muted",
+          isCurrent ? "font-medium text-foreground" : "font-normal text-muted",
           className,
         ),
       )}
@@ -69,7 +69,7 @@ function BreadcrumbSelectTrigger({
       className={composeRenderProps(className, (className) =>
         cn(
           triggerClassName,
-          isCurrent ? "font-medium text-foreground" : "text-muted",
+          isCurrent ? "font-medium text-foreground" : "font-normal text-muted",
           className,
         ),
       )}
@@ -185,7 +185,9 @@ export function BreadcrumbTrail({
 }) {
   const navigate = useAppNavigate();
   const visibleItems = items.filter(
-    (item, index) => !(index === 0 && item.href === "/"),
+    (item, index) =>
+      !(index === 0 && item.href === "/") &&
+      (index === items.length - 1 || Boolean(item.href || item.content)),
   );
 
   if (visibleItems.length === 0) return null;
@@ -218,7 +220,7 @@ export function BreadcrumbTrail({
                 </BreadcrumbItemContext.Provider>
               ) : item.href && !isLast ? (
                 <a
-                  className="block min-w-0 max-w-40 truncate text-muted hover:text-foreground sm:max-w-64"
+                  className="block min-w-0 max-w-40 truncate font-normal text-muted sm:max-w-64"
                   href={item.href}
                   onClick={(event: MouseEvent<HTMLAnchorElement>) => {
                     if (
@@ -241,7 +243,12 @@ export function BreadcrumbTrail({
               ) : (
                 <TooltipText
                   aria-current={isLast ? "page" : undefined}
-                  className="block min-w-0 truncate font-medium text-foreground"
+                  className={cn(
+                    "block min-w-0 truncate",
+                    isLast
+                      ? "font-medium text-foreground"
+                      : "font-normal text-muted",
+                  )}
                   tooltip={item.label}
                 >
                   {item.label}

@@ -1,0 +1,100 @@
+.expandable-attribute-list__items {
+  display: grid;
+  grid-template-columns: max-content 1rem minmax(0, 1fr) minmax(0, 40%) 2rem;
+  column-gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.expandable-attribute-list__item,
+.expandable-attribute-list__disclosure,
+.expandable-attribute-list__row,
+.expandable-attribute-list__panel {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.expandable-attribute-list__item {
+  border-bottom: 1px solid var(--separator);
+}
+.expandable-attribute-list__item:last-child {
+  border-bottom: 0;
+}
+.expandable-attribute-list__row {
+  align-items: center;
+  min-height: 2.75rem;
+  width: 100%;
+  text-align: start;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+}
+button.expandable-attribute-list__row {
+  cursor: pointer;
+}
+.expandable-attribute-list__row[data-hovered] {
+  background: var(--surface-secondary);
+}
+.expandable-attribute-list__row[data-focus-visible] {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+  border-radius: var(--radius);
+}
+.expandable-attribute-list__leading {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.expandable-attribute-list__icon,
+.expandable-attribute-list__indicator {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+}
+.expandable-attribute-list__icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+.expandable-attribute-list__label,
+.expandable-attribute-list__value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.expandable-attribute-list__value {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.expandable-attribute-list__indicator {
+  color: var(--muted);
+}
+.expandable-attribute-list__disclosure[data-expanded]
+  .expandable-attribute-list__indicator {
+  transform: rotate(180deg);
+}
+.expandable-attribute-list__panel {
+  padding: 0.75rem 1rem;
+}
+.expandable-attribute-list__details {
+  grid-column: 3 / 5;
+  min-width: 0;
+}
+
+.expandable-attribute-list__details .attributes__item {
+  border-bottom: 0;
+  padding-block: 0.25rem;
+}
+
+.expandable-attribute-list__details .attributes__item:first-child {
+  padding-top: 0;
+}
+
+.expandable-attribute-list__details .attributes__item:last-child {
+  padding-bottom: 0;
+}
+
+.expandable-attribute-list__panel[hidden] {
+  display: none;
+}

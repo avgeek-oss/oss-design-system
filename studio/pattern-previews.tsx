@@ -255,11 +255,7 @@ export function AuthorizedClientsPreview() {
     </Preview>
   );
 }
-export function CreateApiKeyPreview({
-  permissions = true,
-}: {
-  permissions?: boolean;
-}) {
+export function CreateApiKeyPreview() {
   const scenario = useScenario();
   const [isOpen, setOpen] = useState(false);
   return (
@@ -269,30 +265,6 @@ export function CreateApiKeyPreview({
       <CreateApiKeyDialog
         isOpen={isOpen}
         onOpenChange={setOpen}
-        {...(permissions
-          ? {
-              permissionOptions: [
-                {
-                  id: "read",
-                  label: "Read-only",
-                  description: "View resources and monitoring data.",
-                },
-                {
-                  id: "admin",
-                  label: "Administrative",
-                  description:
-                    "Manage deployments and infrastructure within your role.",
-                },
-              ],
-            }
-          : {})}
-        expiryOptions={[
-          { id: "30", label: "30 days" },
-          { id: "90", label: "90 days" },
-          { id: "365", label: "1 year" },
-          { id: "never", label: "Never" },
-        ]}
-        defaultExpiry="90"
         onCreate={async () => {
           await scenario.run();
           return { token: "demo-preview-key-save-once" };

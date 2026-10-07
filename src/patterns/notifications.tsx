@@ -14,6 +14,7 @@ import { Widget } from "../data-display/widget.js";
 import { Popover } from "../overlays/popover.js";
 import { ScrollShadow } from "../utilities/scroll-shadow.js";
 import { RouteLink } from "../navigation/route-link.js";
+import { cn } from "../lib/utils.js";
 import { useAsyncAction } from "./use-async-action.js";
 
 export type NotificationItem = {
@@ -182,7 +183,10 @@ export function NotificationMenu({
                             )
                               setOpen(false);
                           }}
-                          className="flex w-full min-w-0 gap-3 rounded-none px-4 py-3 outline-none transition-colors hover:bg-default/60 focus-visible:bg-default/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
+                          className={cn(
+                            "flex w-full min-w-0 gap-2 rounded-none px-4 py-3 outline-none transition-colors hover:bg-default/60 focus-visible:bg-default/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus",
+                            !item.unread && "[&>*]:opacity-50",
+                          )}
                         >
                           <span
                             aria-hidden="true"

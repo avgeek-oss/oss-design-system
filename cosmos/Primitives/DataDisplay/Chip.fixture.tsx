@@ -3,7 +3,7 @@ import { Chip } from "../../../src/data-display/chip";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Spinner } from "../../../src/feedback/spinner";
 import { Tooltip } from "../../../src/overlays/tooltip";
-import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { Flag01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 
 export default function ChipVariants() {
   const tones = {
@@ -68,6 +68,17 @@ export default function ChipVariants() {
           </Tooltip.Content>
         </Tooltip>
         <Chip>123</Chip>
+      </Variant>
+      <Variant title="Single-line labels">
+        <div className="w-24">
+          <Chip size="sm">
+            <Chip.Label className="inline-flex items-center gap-1.5">
+              <HugeiconsIcon icon={Flag01Icon} size={14} aria-hidden />
+              No priority
+            </Chip.Label>
+          </Chip>
+        </div>
+        <Chip>Waiting for review</Chip>
       </Variant>
     </PrimitivePreview>
   );

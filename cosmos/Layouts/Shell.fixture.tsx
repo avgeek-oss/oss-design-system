@@ -8,14 +8,15 @@ import {
   UserGroupIcon,
   Settings01Icon,
   Key01Icon,
-  SecurityCheckIcon,
+  FingerPrintIcon,
   ComputerIcon,
   SourceCodeIcon,
   MoreHorizontalIcon,
   Rocket01Icon,
   Alert02Icon,
+  Mail01Icon,
   BookOpen01Icon,
-  Logout03Icon,
+  Logout01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -72,7 +73,7 @@ const account = [
         label: "Email & Password",
         icon: icon(Key01Icon),
       },
-      { id: "passkeys", label: "Passkeys", icon: icon(SecurityCheckIcon) },
+      { id: "passkeys", label: "Passkeys", icon: icon(FingerPrintIcon) },
       { id: "sessions", label: "Sessions", icon: icon(ComputerIcon) },
     ],
   },
@@ -238,13 +239,13 @@ function Shell({ initial = "/settings/profile" }: { initial?: string }) {
                             icon: icon(Settings01Icon),
                           },
                           {
-                            id: "passkeys",
-                            label: "Passkeys",
-                            icon: icon(SecurityCheckIcon),
+                            id: "email-password",
+                            label: "Email & Password",
+                            icon: icon(Mail01Icon),
                           },
                           {
                             id: "api-keys",
-                            label: "My API Keys",
+                            label: "API Keys",
                             icon: icon(Key01Icon),
                           },
                         ],
@@ -267,7 +268,7 @@ function Shell({ initial = "/settings/profile" }: { initial?: string }) {
                           {
                             id: "logout",
                             label: "Sign out",
-                            icon: icon(Logout03Icon),
+                            icon: icon(Logout01Icon),
                             destructive: true,
                           },
                         ],

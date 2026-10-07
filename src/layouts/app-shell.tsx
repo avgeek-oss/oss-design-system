@@ -10,7 +10,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { Menu01Icon } from "@hugeicons/core-free-icons";
+import { PanelLeftIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { menuItemVariants } from "@heroui/styles";
 import { Button as AriaButton } from "react-aria-components";
@@ -177,22 +177,22 @@ export function ApplicationNavbar({
   };
 
   return (
-    <header className="sticky top-[var(--app-shell-top-offset,0px)] z-30 flex min-h-16 items-center justify-between gap-5 border-b border-separator bg-background/90 pl-2 pr-4 backdrop-blur">
+    <header className="sticky top-[var(--app-shell-top-offset,0px)] z-30 flex min-h-16 items-center justify-between gap-5 border-b border-separator bg-background/90 pl-3 pr-4 backdrop-blur">
       <div className="flex min-w-0 items-center gap-2">
         {hasSidebar ? (
           <Button
             aria-label="Toggle navigation"
             aria-expanded={sidebarOpen}
             aria-controls={sidebarOpen ? "application-navigation" : undefined}
-            className="navigation-toggle relative size-8 min-h-8 min-w-8 shrink-0 before:absolute before:-inset-1.5 before:content-['']"
+            className="navigation-toggle size-11 min-h-11 min-w-11 shrink-0"
             isIconOnly
             onPress={onSidebarToggle}
             variant="ghost"
           >
             <HugeiconsIcon
               aria-hidden="true"
-              className="size-4"
-              icon={Menu01Icon}
+              className="size-5"
+              icon={PanelLeftIcon}
             />
           </Button>
         ) : (

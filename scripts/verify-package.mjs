@@ -143,7 +143,10 @@ try {
     include: ["main.tsx"],
   });
   const entryPoints = Object.keys(packedManifest.exports).filter(
-    (entry) => !entry.endsWith(".css") && entry !== "./adapters/next",
+    (entry) =>
+      !entry.endsWith(".css") &&
+      entry !== "./adapters/next" &&
+      entry !== "./emails/render",
   );
   const imports = entryPoints.map(
     (entry, index) =>
@@ -179,6 +182,17 @@ export default defineConfig({plugins: [react(), tailwindcss()]});
     ["install", "--ignore-scripts", "--config.auto-install-peers=false"],
     consumer,
   );
+  await writeFile(
+    path.join(consumer, "email-consumer.mjs"),
+    `import assert from "node:assert/strict";
+import { renderAuthEmail } from "${manifest.name}/emails/render";
+const email = await renderAuthEmail("password-reset", {brand: {name: "Consumer", accentColor: "#0866bd"}, actionUrl: "https://example.test/reset#token"});
+assert.match(email.html, /Reset password/);
+assert.ok(email.text.includes("https://example.test/reset#token"));
+assert.equal(typeof globalThis.document, "undefined");
+`,
+  );
+  run(process.execPath, ["email-consumer.mjs"], consumer);
   const consumerModules = await readdir(path.join(consumer, "node_modules"));
   assert.ok(
     !consumerModules.includes("next"),
