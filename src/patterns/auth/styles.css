@@ -5,6 +5,12 @@
   align-items: stretch;
 }
 
+[data-slot="auth-page-content"]:has([data-slot="identity-auth-shell"]) {
+  max-width: none;
+  padding-inline: 0;
+  place-items: stretch;
+}
+
 [data-slot="app-shell-center"]:has([data-slot="identity-auth-shell"])
   [data-slot="app-shell-main"] {
   display: flex;

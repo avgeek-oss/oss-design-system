@@ -176,6 +176,41 @@ test("invitation entry focuses email and moves focus to the returned link action
   await expect(opener).toBeFocused();
 });
 
+test("auth page composition retains the same gutters as a standalone auth screen", async ({
+  page,
+  fixtureUrl,
+  width,
+}) => {
+  const frames = [];
+  for (const variant of ["Default", "Page layout"]) {
+    await page.goto(
+      fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", variant),
+    );
+    await expect(
+      page.getByRole("heading", { name: "Sign in", exact: true }),
+    ).toBeVisible();
+    frames.push(
+      await page
+        .locator('[data-slot="identity-auth-content"]')
+        .evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          return {
+            left: bounds.left,
+            top: bounds.top,
+            width: bounds.width,
+            overflow: document.documentElement.scrollWidth > innerWidth,
+          };
+        }),
+    );
+  }
+  expect(frames[1]).toEqual(frames[0]);
+  expect(frames[1].overflow).toBe(false);
+  if (width < 640) {
+    expect(frames[1].left).toBe(16);
+    expect(frames[1].top).toBe(32);
+  }
+});
+
 test("sign-in verification navigation uses the shared request and private acknowledgment", async ({
   page,
   fixtureUrl,

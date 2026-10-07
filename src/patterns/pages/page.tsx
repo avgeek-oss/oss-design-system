@@ -131,11 +131,13 @@ export function StatusPage({ children, ...props }: ApplicationPageProps) {
 }
 export function AuthPage({
   children,
+  className,
   ...props
 }: Shared & { children: ReactNode }) {
   return (
-    <Page {...props}>
+    <Page {...props} className={cn("w-full", className)}>
       <PageSection
+        data-slot="auth-page-content"
         className="grid min-h-[calc(100dvh-8rem)] place-items-center"
         width="content"
         yPadding="none"
