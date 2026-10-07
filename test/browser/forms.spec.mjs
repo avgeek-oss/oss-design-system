@@ -198,7 +198,9 @@ test("auth page composition retains the same gutters as a standalone auth screen
             left: bounds.left,
             top: bounds.top,
             width: bounds.width,
-            overflow: document.documentElement.scrollWidth > innerWidth,
+            overflow:
+              element.ownerDocument.documentElement.scrollWidth >
+              element.ownerDocument.defaultView.innerWidth,
           };
         }),
     );
