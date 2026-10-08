@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.9 — 2026-10-08
+
+- Add a shared backend-unavailable screen and automatic read-only reconnection with bounded requests and cleanup.
+
 ## 1.2.8 — 2026-10-08
 
 - Add shared authentication emails with a server-safe renderer, loading skeletons, error pages and expandable attribute lists.
