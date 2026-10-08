@@ -338,3 +338,9 @@ export {
   type ErrorPageProps,
   type ErrorPageStatus,
 } from "./patterns/feedback/error-page.js";
+
+export {
+  BackendUnavailable,
+  useBackendReconnect,
+  type BackendUnavailableProps,
+} from "./patterns/feedback/backend-unavailable.js";

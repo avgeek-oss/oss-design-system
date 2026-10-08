@@ -1,6 +1,6 @@
 {
   "name": "@avgeek-oss/design-system",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "Shared React components, application layouts and UI patterns for Avgeek OSS apps.",
   "type": "module",
   "license": "Apache-2.0",
@@ -725,6 +725,10 @@
     "./patterns/feedback/error-page": {
       "types": "./dist/patterns/feedback/error-page.d.ts",
       "import": "./dist/patterns/feedback/error-page.js"
+    },
+    "./patterns/feedback/backend-unavailable": {
+      "types": "./dist/patterns/feedback/backend-unavailable.d.ts",
+      "import": "./dist/patterns/feedback/backend-unavailable.js"
     }
   }
 }
