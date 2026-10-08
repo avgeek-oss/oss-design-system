@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.10 — 2026-10-08
+
+- Support filled and stacked area series in the shared chart, with room for axis labels and wrapping widget legends.
+- Inset searchable filter values and align secondary navigation icons with entity headers.
+
 ## 1.2.9 — 2026-10-08
 
 - Add a shared backend-unavailable screen and automatic read-only reconnection with bounded requests and cleanup.

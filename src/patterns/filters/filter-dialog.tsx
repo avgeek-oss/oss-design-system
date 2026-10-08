@@ -454,12 +454,12 @@ function FilterValueSelect<Field extends string>({
           <Popover.Dialog className="p-0 outline-none">
             <SearchField
               aria-label="Search values"
-
+              className="px-2 pt-2"
               variant="secondary"
               value={search}
               onChange={setSearch}
             >
-              <SearchField.Group>
+              <SearchField.Group className="rounded-md">
                 <SearchField.SearchIcon />
                 <SearchField.Input
                   placeholder="Search values…"
