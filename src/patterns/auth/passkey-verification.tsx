@@ -35,7 +35,7 @@ export function PasskeyVerification({
     >
       <Button className="w-full" isDisabled={isPending} onPress={onRetry}>
         <HugeiconsIcon aria-hidden icon={FingerPrintIcon} size={16} />
-        {isPending ? "Waiting for your passkey…" : "Try passkey again"}
+        {isPending ? "Waiting for your passkey…" : "Use Passkey"}
       </Button>
       {isPending && onCancelRequest && (
         <Button variant="secondary" onPress={onCancelRequest}>

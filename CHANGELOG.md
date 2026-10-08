@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.12 — 2026-10-08
+
+- Route the sidebar update notice independently from the application home link.
+- Label passkey confirmation actions Use Passkey and explain the access confirmation.
+
 ## 1.2.11 — 2026-10-08
 
 - Match secondary entity header icons to the 24px entity icons in page titles.

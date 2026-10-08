@@ -85,7 +85,13 @@ const account = [
     ],
   },
 ];
-function Shell({ initial = "/settings/profile" }: { initial?: string }) {
+function Shell({
+  initial = "/settings/profile",
+  updateAvailable = false,
+}: {
+  initial?: string;
+  updateAvailable?: boolean;
+}) {
   const [pathname, setPathname] = useState(initial);
   const { sidebarOpen: open, onSidebarOpenChange: setOpen } =
     usePersistentAppSidebar("oss-ds-fixture-sidebar");
@@ -154,6 +160,8 @@ function Shell({ initial = "/settings/profile" }: { initial?: string }) {
                 accessibleLabel: "Primary navigation",
                 brand,
                 brandVersion: "preview",
+                brandUpdateVersion: updateAvailable ? "next" : undefined,
+                brandUpdateHref: "/overview",
                 homeHref: "/overview",
                 groups: [
                   {
@@ -501,6 +509,7 @@ function Shell({ initial = "/settings/profile" }: { initial?: string }) {
   );
 }
 export default {
+  "Update available": () => <Shell updateAvailable />,
   "Account settings": Shell,
   "Page without secondary sidebar": () => <Shell initial="/overview" />,
   "Team settings": () => <Shell initial="/team/general" />,

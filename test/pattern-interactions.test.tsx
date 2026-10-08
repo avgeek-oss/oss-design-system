@@ -1185,9 +1185,17 @@ test("passkey identity cancellation aborts before dismissal and retains the sing
     />,
   );
   try {
-    await click(button("Try passkey again"));
+    const dialog = document.querySelector('[role="dialog"]');
+    const description = document.getElementById(
+      dialog?.getAttribute("aria-describedby") ?? "",
+    );
+    assert.equal(
+      description?.textContent,
+      "Authenticate yourself using your passkey to confirm and obtain required access.",
+    );
+    await click(button("Use Passkey"));
     assert.equal(button("Cancel").disabled, false);
-    await click(button("Try passkey again"));
+    await click(button("Use Passkey"));
     assert.equal(attempts, 1);
     await click(button("Cancel"));
     assert.deepEqual(events, ["abort", "close"]);

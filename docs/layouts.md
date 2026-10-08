@@ -28,6 +28,8 @@ The shared navigation toggle uses the same arrow-free `PanelLeftIcon` when the m
 
 Primary and secondary sidebar items use HeroUI’s native menu-item styles, including the 36px minimum height, padding, hover and focus states. Sidebar links remain navigation links.
 
+Set `SidebarConfig.brandUpdateVersion` to show an available update near the brand. Supply `brandUpdateHref` with the app's update-management page to make the indicator a separate navigation link; the brand title continues to use `homeHref`. Without an update destination, the indicator is informational text. Update links retain ordinary keyboard and modified-click navigation and close mobile navigation after activation.
+
 The desktop secondary sidebar uses 18px vertical padding (`py-4.5`) and 12px horizontal padding. When it contains an entity heading, that heading owns the top spacing.
 
 `SecondarySection` supplies the compact filter label style: 12px medium, muted text with an 8px inline-start inset. It applies to shared `Label` and native field labels inside the section, including sections portaled into the mobile navigation drawer. Use `ChoiceField`, `HistoryFilter`, or the native picker parts without app-specific label classes. Labels outside secondary sections retain their normal form hierarchy.

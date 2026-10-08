@@ -75,6 +75,7 @@ export interface SidebarConfig {
   brand: HeaderBrandConfig;
   brandVersion?: string;
   brandUpdateVersion?: string;
+  brandUpdateHref?: string;
   footerActions?: readonly SidebarActionConfig[];
   footerContent?: ReactNode;
   groups: readonly SidebarGroupConfig[];
