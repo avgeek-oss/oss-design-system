@@ -145,7 +145,7 @@ export function SecondaryItems({
               {!item.disabled ? (
                 <span
                   aria-hidden="true"
-                  className="inline-flex shrink-0 [&_img]:size-4 [&_svg]:size-4"
+                  className="inline-flex shrink-0 [&_img]:size-4.5 [&_svg]:size-4.5"
                 >
                   {item.icon ?? <HugeiconsIcon icon={Menu01Icon} />}
                 </span>

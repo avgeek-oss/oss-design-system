@@ -2,10 +2,11 @@
 
 import type { ComponentProps, ReactNode } from "react";
 import {
+  Area as RechartsArea,
   CartesianGrid,
+  ComposedChart as RechartsComposedChart,
   Legend,
   Line as RechartsLine,
-  LineChart as RechartsLineChart,
   ResponsiveContainer,
   ReferenceLine,
   Tooltip,
@@ -18,7 +19,7 @@ import { Spinner } from "../feedback/spinner.js";
 
 type Datum = Record<string, unknown>;
 type RootProps = Omit<ComponentProps<"div">, "children"> & {
-  chartMargin?: ComponentProps<typeof RechartsLineChart>["margin"];
+  chartMargin?: ComponentProps<typeof RechartsComposedChart>["margin"];
   children: ReactNode;
   data: Datum[];
   height?: number;
@@ -56,14 +57,14 @@ function Root({
         </div>
       ) : (
         <ResponsiveContainer height="100%" width="100%">
-          <RechartsLineChart
+          <RechartsComposedChart
             data={data}
-            margin={chartMargin}
+            margin={{ top: 12, right: 8, bottom: 8, left: 8, ...chartMargin }}
             syncId={syncId}
             syncMethod="value"
           >
             {children}
-          </RechartsLineChart>
+          </RechartsComposedChart>
         </ResponsiveContainer>
       )}
     </div>
@@ -103,6 +104,20 @@ function Line(props: ComponentProps<typeof RechartsLine>) {
   return (
     <RechartsLine
       type="linear"
+      stroke="var(--chart-requested)"
+      strokeWidth={1.8}
+      dot={false}
+      connectNulls={false}
+      isAnimationActive={false}
+      {...props}
+    />
+  );
+}
+
+function Area(props: ComponentProps<typeof RechartsArea>) {
+  return (
+    <RechartsArea
+      type="monotone"
       stroke="var(--chart-requested)"
       strokeWidth={1.8}
       dot={false}
@@ -200,6 +215,7 @@ function TooltipContent({
 }
 export const LineChart = Object.assign(Root, {
   Selection: ChartRangeSelection,
+  Area,
   Grid,
   Line,
   Legend: ChartLegend,

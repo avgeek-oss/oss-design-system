@@ -60,7 +60,7 @@ const domain = [0, 72000000] as const;
 
 export default function LineChartPreview() {
   const [series] = useFixtureSelect("Series", {
-    options: ["Multiple series", "Single series", "Percentage"],
+    options: ["Multiple series", "Single series", "Percentage", "Area"],
     defaultValue: "Multiple series",
   });
   const [dataState] = useFixtureSelect("Data state", {
@@ -125,10 +125,40 @@ export default function LineChartPreview() {
               tickFormatter={percent ? (value) => `${value}%` : undefined}
               allowDecimals={false}
             />
-            <LineChart.Line
-              dataKey={percent ? "memory" : "requests"}
-              name={percent ? "Memory" : "Requests"}
-            />
+            {series === "Area" ? (
+              <>
+                <defs>
+                  <linearGradient
+                    id="line-chart-fixture-area"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor="var(--chart-requested)"
+                      stopOpacity={0.28}
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor="var(--chart-requested)"
+                      stopOpacity={0.02}
+                    />
+                  </linearGradient>
+                </defs>
+                <LineChart.Area
+                  dataKey="requests"
+                  name="Requests"
+                  fill="url(#line-chart-fixture-area)"
+                />
+              </>
+            ) : (
+              <LineChart.Line
+                dataKey={percent ? "memory" : "requests"}
+                name={percent ? "Memory" : "Requests"}
+              />
+            )}
             {comparing ? (
               <LineChart.Line
                 dataKey="previous"
