@@ -101,10 +101,12 @@ function RoutedLink({
   item,
   className,
   children,
+  tabIndex,
 }: {
   item: ShellLinkConfig;
   className?: string;
   children?: ReactNode;
+  tabIndex?: number;
 }) {
   const navigate = useAppNavigate();
   const pathname = useRoutePathname();
@@ -135,6 +137,7 @@ function RoutedLink({
         aria-label={item.accessibleLabel}
         className={className}
         href={item.href}
+        tabIndex={tabIndex}
         onClick={onClick}
       >
         {children ?? item.label}
@@ -147,6 +150,7 @@ function RoutedLink({
       aria-current={isCurrentLink(item, pathname) ? "page" : undefined}
       className={className}
       href={item.href}
+      tabIndex={tabIndex}
       onClick={onClick}
     >
       {children ?? item.label}
@@ -259,16 +263,19 @@ export function ApplicationSidebar({ config }: { config: SidebarConfig }) {
       aria-label={config.accessibleLabel}
       className="flex h-full min-h-0 flex-col overflow-hidden"
     >
-      <RoutedLink
-        className="inline-flex min-h-16 min-w-0 shrink-0 items-center gap-2.5 border-b border-separator px-4"
-        item={homeItem}
-      >
+      <div className="inline-flex min-h-16 min-w-0 shrink-0 items-center gap-2.5 border-b border-separator px-4">
         <BrandLockup
           logo={
-            config.brand.logo ??
-            (config.brand.logoSrc ? (
-              <img alt="" className="size-8" src={config.brand.logoSrc} />
-            ) : null)
+            <RoutedLink
+              className="inline-grid size-8 place-items-center"
+              item={homeItem}
+              tabIndex={-1}
+            >
+              {config.brand.logo ??
+                (config.brand.logoSrc ? (
+                  <img alt="" className="size-8" src={config.brand.logoSrc} />
+                ) : null)}
+            </RoutedLink>
           }
         >
           <span
@@ -278,7 +285,9 @@ export function ApplicationSidebar({ config }: { config: SidebarConfig }) {
                 "lg:flex-row lg:items-baseline lg:gap-2.5",
             )}
           >
-            <span className="truncate">{config.brand.title}</span>
+            <RoutedLink className="truncate" item={homeItem}>
+              {config.brand.title}
+            </RoutedLink>
             <span className="flex min-w-0 items-baseline gap-2">
               {config.brandVersion ? (
                 <span
@@ -290,17 +299,32 @@ export function ApplicationSidebar({ config }: { config: SidebarConfig }) {
               ) : null}
               {config.brandUpdateVersion ? (
                 <span
-                  aria-label={`Update available: version ${config.brandUpdateVersion}`}
                   className="truncate text-xs font-medium text-warning-soft-foreground"
                   title={`${config.brand.title} v${config.brandUpdateVersion} is available`}
                 >
-                  Update available
+                  {config.brandUpdateHref ? (
+                    <RoutedLink
+                      item={{
+                        id: "brand-update",
+                        kind: "link",
+                        href: config.brandUpdateHref,
+                        label: "Update available",
+                        accessibleLabel: `Update available: version ${config.brandUpdateVersion}`,
+                      }}
+                    />
+                  ) : (
+                    <span
+                      aria-label={`Update available: version ${config.brandUpdateVersion}`}
+                    >
+                      Update available
+                    </span>
+                  )}
                 </span>
               ) : null}
             </span>
           </span>
         </BrandLockup>
-      </RoutedLink>
+      </div>
       <div className="grid min-h-0 flex-1 content-start gap-1 overflow-y-auto overscroll-contain px-3 py-4.5">
         {config.groups.map((group) => (
           <section className="grid gap-1 [&+&]:mt-2" key={group.id}>

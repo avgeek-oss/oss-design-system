@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { FingerPrintIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "../../buttons/button.js";
@@ -32,6 +32,7 @@ export type ConfirmIdentityDialogProps = {
 );
 
 export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
+  const descriptionId = useId();
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
   const suspension = useOverlaySuspension();
@@ -59,9 +60,19 @@ export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
       }}
     >
       <Modal.Container size="sm">
-        <Modal.Dialog>
+        <Modal.Dialog
+          aria-describedby={
+            props.method === "passkey" ? descriptionId : undefined
+          }
+        >
           <Modal.Header>
             <Modal.Heading>Confirm it’s you</Modal.Heading>
+            {props.method === "passkey" ? (
+              <p className="text-sm text-muted" id={descriptionId}>
+                Authenticate yourself using your passkey to confirm and obtain
+                required access.
+              </p>
+            ) : null}
             <Modal.CloseTrigger isDisabled={dismissDisabled} />
           </Modal.Header>
           <Modal.Body>
@@ -87,7 +98,7 @@ export function ConfirmIdentityDialog(props: ConfirmIdentityDialogProps) {
                 }}
               >
                 <HugeiconsIcon aria-hidden icon={FingerPrintIcon} size={16} />
-                Try passkey again
+                Use Passkey
               </Button>
             ) : (
               <AuthForm

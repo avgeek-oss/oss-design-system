@@ -291,6 +291,44 @@ test("custom empty recovery suppresses false empty copy and footer composes pagi
   await view.unmount();
 });
 
+test("brand updates navigate independently from the home link", async () => {
+  const routes: string[] = [];
+  const view = await mount(
+    <RouteProvider pathname="/services" navigate={(href) => routes.push(href)}>
+      <ApplicationSidebar
+        config={{
+          accessibleLabel: "Primary navigation",
+          brand: {
+            id: "test",
+            title: "Example",
+            accessibleLabel: "Example home",
+          },
+          brandVersion: "1.0.0",
+          brandUpdateVersion: "1.0.1",
+          brandUpdateHref: "/system-health",
+          homeHref: "/",
+          groups: [],
+        }}
+      />
+    </RouteProvider>,
+  );
+  const update = document.querySelector<HTMLAnchorElement>(
+    'a[aria-label="Update available: version 1.0.1"]',
+  );
+  const home = document.querySelector<HTMLAnchorElement>(
+    'a[href="/"]:not([tabindex])',
+  );
+  assert.ok(update && home);
+  assert.equal(update.getAttribute("href"), "/system-health");
+  assert.equal(update.parentElement?.closest("a"), null);
+  await act(async () => click(update, { ctrlKey: true }));
+  assert.deepEqual(routes, []);
+  await act(async () => click(update));
+  await act(async () => click(home));
+  assert.deepEqual(routes, ["/system-health", "/"]);
+  await view.unmount();
+});
+
 test("primary navigation current-page semantics match sections and preserve descendants", async () => {
   const routes: string[] = [];
   const config = {

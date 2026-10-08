@@ -96,7 +96,7 @@ Use `InvitationPasswordSetup` when a private invitation link establishes the inv
 
 Use `PasskeyRecoveryVerification` after the password has already passed and the server holds a pending passkey challenge. It collects only the recovery code. `RecoverySignIn` is for a server accepting credentials and recovery code together. Apps must bind recovery to the correct pending sign-in, consume the code exactly once and retain the password/passkey gate; these components do not establish authentication.
 
-`ConfirmIdentityDialog` with `method="passkey"` accepts optional `onCancelRequest`. When supplied, Cancel stays enabled during the ceremony, invokes cancellation, then requests dismissal. The app must abort WebAuthn before dismissal, handle deliberate cancellation without an error toast, and avoid supplying this callback during an irreversible mutation. Other pending confirmations remain protected from dismissal.
+`ConfirmIdentityDialog` with `method="passkey"` shows the shared passkey description below its title and a **Use Passkey** action. It accepts optional `onCancelRequest`. When supplied, Cancel stays enabled during the ceremony, invokes cancellation, then requests dismissal. The app must abort WebAuthn before dismissal, handle deliberate cancellation without an error toast, and avoid supplying this callback during an irreversible mutation. Other pending confirmations remain protected from dismissal.
 
 Use `RemoveMemberDialog` and `RevokeInvitationDialog` for the standard team confirmations. Apps enforce permissions and last-administrator protections, supply identity/email and await the real mutation. Rejection retains the dialog for retry with one toast. These surfaces describe access removal without promising deletion of historical work.
 
