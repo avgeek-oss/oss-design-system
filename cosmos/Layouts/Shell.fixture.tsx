@@ -49,7 +49,7 @@ import { Chip } from "../../src/data-display/chip";
 import { Dropdown } from "../../src/overlays/dropdown";
 import { toast } from "../../src/overlays/toast";
 const icon = (value: typeof UserAccountIcon) => (
-  <HugeiconsIcon aria-hidden icon={value} size={16} />
+  <HugeiconsIcon aria-hidden icon={value} />
 );
 const brand = {
   id: "fixture",
