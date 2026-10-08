@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.11 — 2026-10-08
+
+- Match secondary entity header icons to the 24px entity icons in page titles.
+
 ## 1.2.10 — 2026-10-08
 
 - Support filled and stacked area series in the shared chart, with room for axis labels and wrapping widget legends.

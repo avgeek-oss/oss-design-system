@@ -94,7 +94,7 @@ export function SecondaryEntityHeader({
         >
           <span
             aria-hidden="true"
-            className="inline-flex shrink-0 [&_img]:size-4.5 [&_svg]:size-4.5"
+            className="inline-flex shrink-0 [&_img]:size-6 [&_svg]:size-6"
           >
             {icon}
           </span>
