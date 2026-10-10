@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.13 — 2026-10-11
+
+- Require an installation setup secret in the shared team setup form, retaining account details through failed submissions and retries.
+- Allow applications to provide their own authentication email theme, including button and link colors.
+- Document verified installation administrators and named authentication email senders.
+
 ## 1.2.12 — 2026-10-08
 
 - Route the sidebar update notice independently from the application home link.
