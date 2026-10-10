@@ -12,17 +12,25 @@ import {
   Section,
   Text,
 } from "react-email";
-const emailTheme = {
+const defaultEmailTheme = {
   fontFamily:
     'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
   surface: "#ffffff",
   foreground: "#18181b",
   muted: "#71717a",
+  accentForeground: "#ffffff",
 } as const;
+export interface EmailTheme {
+  surface?: string;
+  foreground?: string;
+  muted?: string;
+  accentForeground?: string;
+}
 export interface EmailBrand {
   name: string;
   accentColor: string;
   logoUrl?: string;
+  theme?: EmailTheme;
 }
 export interface EmailDetail {
   label: string;
@@ -65,6 +73,16 @@ export function EmailShell({ brand, message: content }: EmailShellProps) {
     : null;
   if (!/^#[\da-f]{6}$/i.test(brand.accentColor))
     throw new Error("Email accent must be a six-digit hex color");
+  const emailTheme = { ...defaultEmailTheme, ...brand.theme };
+  for (const color of [
+    emailTheme.surface,
+    emailTheme.foreground,
+    emailTheme.muted,
+    emailTheme.accentForeground,
+  ]) {
+    if (!/^#[\da-f]{6}$/i.test(color))
+      throw new Error("Email theme colors must be six-digit hex colors");
+  }
   if (brand.logoUrl) validateEmailUrl(brand.logoUrl);
   for (const detail of content.details ?? [])
     if (detail.href) validateEmailUrl(detail.href);
@@ -99,19 +117,29 @@ export function EmailShell({ brand, message: content }: EmailShellProps) {
             padding: "32px 24px",
           }}
         >
-          {brand.logoUrl ? (
-            <Img
-              src={brand.logoUrl}
-              alt={brand.name}
-              width={48}
-              height={48}
-              style={{ display: "block", margin: "0 0 24px" }}
-            />
-          ) : (
-            <Text style={{ fontSize: 18, fontWeight: 600, margin: "0 0 24px" }}>
-              {brand.name}
-            </Text>
-          )}
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+              margin: "0 0 24px",
+              color: emailTheme.foreground,
+            }}
+          >
+            {brand.logoUrl ? (
+              <Img
+                src={brand.logoUrl}
+                alt=""
+                width={32}
+                height={32}
+                style={{
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  marginRight: 10,
+                }}
+              />
+            ) : null}
+            {brand.name}
+          </Text>
           <Heading
             as="h1"
             style={{
@@ -197,7 +225,7 @@ export function EmailShell({ brand, message: content }: EmailShellProps) {
                           <Link
                             href={detail.href}
                             style={{
-                              color: brand.accentColor,
+                              color: emailTheme.foreground,
                               textDecoration: "underline",
                             }}
                           >
@@ -229,7 +257,7 @@ export function EmailShell({ brand, message: content }: EmailShellProps) {
                 href={actionUrl.href}
                 style={{
                   backgroundColor: brand.accentColor,
-                  color: emailTheme.surface,
+                  color: emailTheme.accentForeground,
                   borderRadius: 8,
                   padding: "8px 16px",
                   fontFamily: emailTheme.fontFamily,
@@ -255,7 +283,7 @@ export function EmailShell({ brand, message: content }: EmailShellProps) {
                 <Link
                   href={actionUrl.href}
                   style={{
-                    color: brand.accentColor,
+                    color: emailTheme.foreground,
                     textDecoration: "underline",
                     overflowWrap: "anywhere",
                   }}

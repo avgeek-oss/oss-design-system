@@ -11,6 +11,7 @@ import {
 } from "../settings/date-time-preference-fields.js";
 
 type AccountDetails = {
+  setupSecret: string;
   team: string;
   name: string;
   email: string;
@@ -22,15 +23,18 @@ export function TeamSetup({
   brand,
   preferenceOptions,
   initialPreferences,
+  setupSecretDescription,
   onSubmit,
 }: {
   brand: ReactNode;
   preferenceOptions: DateTimePreferenceOptions;
   initialPreferences?: DateTimePreferences;
+  setupSecretDescription?: string;
   onSubmit: (values: TeamSetupValues) => Promise<void>;
 }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [account, setAccount] = useState<AccountDetails>({
+    setupSecret: "",
     team: "",
     name: "",
     email: "",
@@ -51,6 +55,17 @@ export function TeamSetup({
   }, [step]);
 
   const fields: Array<AuthField & { name: keyof AccountDetails }> = [
+    {
+      name: "setupSecret",
+      label: "Installation setup secret",
+      type: "password",
+      required: true,
+      maxLength: 1024,
+      autoComplete: "off",
+      description:
+        setupSecretDescription ??
+        "Copy the installation setup secret from your API startup logs.",
+    },
     { name: "team", label: "Team name", required: true, maxLength: 120 },
     {
       name: "name",

@@ -1034,3 +1034,52 @@ test("time-zone results scroll independently and focus uses a background", async
   await focused.click();
   await expect(list).toHaveCount(0);
 });
+
+test("installation setup requires a secret and retains account drafts after a failed claim", async ({
+  page,
+  fixtureUrl,
+}, testInfo) => {
+  await page.bringToFront();
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/Auth/TeamSetup.fixture.tsx", "Secret retry"),
+  );
+  const secret = page.getByLabel("Installation setup secret", { exact: true });
+  await page.getByLabel("Team name", { exact: true }).fill("Test team");
+  await page.getByLabel("Your Name", { exact: true }).fill("Test admin");
+  await page.getByLabel("Email", { exact: true }).fill("admin@example.test");
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("A secure test passphrase 42!");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(secret).toBeFocused();
+  await secret.fill("disposable-installation-secret");
+  await page.screenshot({
+    path: testInfo.outputPath("installation-secret.png"),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(
+    page
+      .getByRole("heading", { name: "Set your preferences" })
+      .locator("xpath=ancestor::div[@tabindex='-1']"),
+  ).toBeFocused();
+  await page
+    .getByRole("button", { name: "Complete Setup", exact: true })
+    .click();
+  await expect(page.locator('[data-slot="toast"]').last()).toContainText(
+    "The installation setup secret is incorrect",
+  );
+  await page.getByRole("button", { name: "← Back", exact: true }).click();
+  await expect(secret).toHaveValue("disposable-installation-secret");
+  await expect(page.getByLabel("Team name", { exact: true })).toHaveValue(
+    "Test team",
+  );
+  await secret.fill("corrected-disposable-secret");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Complete Setup", exact: true })
+    .click();
+  await expect(page.locator('[data-slot="toast"]').last()).toContainText(
+    "Setup completed for Test team",
+  );
+});
