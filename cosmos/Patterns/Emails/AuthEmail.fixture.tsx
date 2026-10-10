@@ -15,16 +15,20 @@ export default function EmailPreview() {
     options: ["Towbar", "Mill", "Rootset", "Vitalog"],
   });
   const accents: Record<string, string> = {
-    Towbar: "#0866bd",
-    Mill: "#744a2b",
-    Rootset: "#2f6347",
+    Towbar: "#f3c530",
+    Mill: "#734626",
+    Rootset: "#2c5f40",
     Vitalog: "#bd2936",
   };
   const email = (
     <AuthEmail
       template={template}
       data={{
-        brand: { name: app, accentColor: accents[app] ?? "#0866bd" },
+        brand: {
+          name: app,
+          accentColor: accents[app] ?? "#0866bd",
+          theme: { accentForeground: app === "Towbar" ? "#1a1813" : "#ffffff" },
+        },
         teamName: "Example team",
         actionUrl: "https://example.test/action#safe-example",
         verificationCode:

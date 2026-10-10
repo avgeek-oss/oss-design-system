@@ -78,3 +78,38 @@ test("older invitation payloads without a role do not invent membership permissi
   assert.match(email.text, /You have been invited to Example\./);
   assert.doesNotMatch(email.text, /as Member|Create and update/);
 });
+
+test("application email themes keep button text independent of the surface and render the brand name", async () => {
+  const email = await renderAuthEmail("password-reset", {
+    brand: {
+      name: "Rootset",
+      accentColor: "#2d5e44",
+      logoUrl: "https://example.test/logo.png",
+      theme: {
+        surface: "#f8faf9",
+        foreground: "#22352a",
+        muted: "#65766b",
+        accentForeground: "#fafffc",
+      },
+    },
+    actionUrl: "https://example.test/reset",
+  });
+  assert.match(email.html, /background-color:#f8faf9/);
+  assert.match(email.html, /color:#22352a/);
+  assert.match(email.html, /color:#65766b/);
+  assert.match(email.html, /background-color:#2d5e44;color:#fafffc/);
+  assert.match(email.html, />Rootset<|>\s*Rootset\s*</);
+  assert.match(email.text, /Rootset/);
+  for (const key of ["surface", "foreground", "muted", "accentForeground"]) {
+    await assert.rejects(
+      renderAuthEmail("password-reset", {
+        brand: {
+          name: "Example",
+          accentColor: "#2d5e44",
+          theme: { [key]: "red;background:url(x)" },
+        },
+      }),
+      /six-digit hex/,
+    );
+  }
+});
