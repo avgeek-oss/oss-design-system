@@ -57,8 +57,17 @@ function credentialColumns<T extends ApiKey>(
       key: "expires",
       header: "Expires",
       className: "whitespace-nowrap",
-      cell: (item) =>
-        item.expiresAt ? formatDate(item.expiresAt) : "No expiry",
+      cell: (item) => {
+        if (!item.expiresAt) return "No expiry";
+        return (
+          <div className="flex items-start gap-2">
+            {formatDate(item.expiresAt)}
+            {Date.parse(item.expiresAt) <= Date.now() ? (
+              <span className="text-xs/5 text-danger">Expired</span>
+            ) : null}
+          </div>
+        );
+      },
     },
     {
       key: "last-used",
@@ -79,7 +88,7 @@ export function ApiKeysTable<T extends ApiKey>({
     <ResourceTable
       ariaLabel="API keys"
       mobileLayout="scroll"
-      tableClassName="min-w-5xl"
+      tableClassName="min-w-4xl"
       items={items}
       getRowKey={(item) => item.id}
       emptyTitle="No API keys"
@@ -93,12 +102,6 @@ export function ApiKeysTable<T extends ApiKey>({
           cell: (item) => (
             <ResourceName name={item.name} description={item.tokenHint} />
           ),
-        },
-        {
-          key: "status",
-          header: "Status",
-          cell: (item) =>
-            item.status ? <StatusIndicator {...item.status} /> : "—",
         },
         ...credentialColumns(formatDate, actions),
       ]}

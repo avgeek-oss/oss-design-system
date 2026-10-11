@@ -80,14 +80,13 @@ test("API keys retain every field, native row headers and reachable actions at m
   await expect(table).toBeVisible();
   await expect(table.getByRole("columnheader")).toHaveText([
     "Name",
-    "Status",
     "Permissions",
     "Added",
     "Expires",
     "Last used",
     "Actions",
   ]);
-  await expect(table.getByRole("rowheader")).toHaveCount(2);
+  await expect(table.getByRole("rowheader")).toHaveCount(3);
   await expect(table.getByRole("rowheader").first()).toContainText(
     "Automation key with a long identifiable name for release operations",
   );
@@ -97,9 +96,10 @@ test("API keys retain every field, native row headers and reachable actions at m
   await expect(table.getByRole("rowheader").first()).not.toContainText(
     "Active",
   );
-  await expect(
-    table.getByRole("gridcell", { name: "Active", exact: true }),
-  ).toBeVisible();
+  await expect(table.getByText("Active", { exact: true })).toHaveCount(0);
+  const expiry = table.getByRole("row").nth(3).getByRole("gridcell").nth(2);
+  await expect(expiry).toContainText("Expired");
+  await expect(expiry).toContainText("2000-01-01");
   const permissions = table
     .getByRole("gridcell", {
       name: "Read and write boards, tasks and comments across the current workspace",
@@ -121,7 +121,7 @@ test("API keys retain every field, native row headers and reachable actions at m
       exact: true,
     }),
   ).toBeVisible();
-  for (const date of ["2026-10-01", "2026-12-30", "2026-10-06"])
+  for (const date of ["2026-10-01", "2099-12-30", "2026-10-06"])
     await expect(table.getByText(date, { exact: true })).toBeVisible();
   for (const description of await table
     .locator('[data-slot="table-cell-description"]')
@@ -154,7 +154,7 @@ test("API keys retain every field, native row headers and reachable actions at m
   if (touch) expect(bounds.scrollWidth).toBeGreaterThan(bounds.width);
   expect(bounds.pageWidth).toBeLessThanOrEqual(width);
   const cells = table.getByRole("row").nth(1).locator(".table__cell");
-  await expect(cells).toHaveCount(7);
+  await expect(cells).toHaveCount(6);
   const positions = await cells.evaluateAll((elements) =>
     elements.map((element) => element.getBoundingClientRect().top),
   );
@@ -200,7 +200,7 @@ test("API keys retain every field, native row headers and reachable actions at m
     "Revocation failed. Please retry.",
   );
   await expect(dialog).toBeVisible();
-  await expect(table.getByRole("rowheader")).toHaveCount(2);
+  await expect(table.getByRole("rowheader")).toHaveCount(3);
   await page.locator('[data-slot="toast-close"]').click();
   await confirm.focus();
   await page.keyboard.press("Enter");
@@ -208,10 +208,10 @@ test("API keys retain every field, native row headers and reachable actions at m
   await expect(
     page.getByText("Simulated requests: 2", { exact: true }),
   ).toBeVisible();
-  await expect(table.getByRole("rowheader")).toHaveCount(1);
-  await expect(table.getByRole("rowheader")).toContainText("Reporting");
+  await expect(table.getByRole("rowheader")).toHaveCount(2);
+  await expect(table.getByRole("rowheader").first()).toContainText("Reporting");
   await expect(
-    table.getByRole("button", { name: "Revoke", exact: true }),
+    table.getByRole("button", { name: "Revoke", exact: true }).first(),
   ).toBeVisible();
 });
 

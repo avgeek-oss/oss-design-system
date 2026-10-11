@@ -16,7 +16,7 @@ const keys: ApiKey[] = [
     permissions:
       "Read and write boards, tasks and comments across the current workspace",
     createdAt: "2026-10-01",
-    expiresAt: "2026-12-30",
+    expiresAt: "2099-12-30",
     lastUsedAt: "2026-10-06",
     status: { label: "Active", color: "success" },
   },
@@ -25,6 +25,13 @@ const keys: ApiKey[] = [
     name: "Reporting",
     permissions: "Read only",
     expiresAt: null,
+    lastUsedAt: null,
+  },
+  {
+    id: "expired",
+    name: "Previous integration",
+    permissions: "Read only",
+    expiresAt: "2000-01-01",
     lastUsedAt: null,
   },
 ];
