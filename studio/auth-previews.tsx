@@ -211,9 +211,11 @@ export function ConfirmIdentityPreview({
   );
 }
 export function ConsentPreview({
+  clientName = "Example MCP client",
   viewerRole = false,
   slowRequest = false,
 }: {
+  clientName?: string;
   viewerRole?: boolean;
   slowRequest?: boolean;
 }) {
@@ -250,7 +252,7 @@ export function ConsentPreview({
     <McpAuthorization
       brand={brand}
       productName="Towbar"
-      clientName="Example MCP client"
+      clientName={clientName}
       clientLogo={
         <span aria-hidden className="font-medium">
           C
