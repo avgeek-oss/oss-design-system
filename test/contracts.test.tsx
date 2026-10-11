@@ -5,11 +5,42 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Button } from "../src/buttons/button.js";
 import { Page } from "../src/layouts/page.js";
 import { IdentityAuthHeading } from "../src/patterns/auth/identity-auth-frame.js";
+import { mcpClientPresentation } from "../src/utilities/mcp-client-presentation.js";
 import {
   createNameSchema,
   createInvitationSchema,
   invitationSchema,
 } from "../src/patterns/settings/schemas.js";
+
+test("Codex names and metadata identifiers use ChatGPT branding without changing trust", () => {
+  const trust = { label: "Unverified", color: "warning" } as const;
+  for (const name of [
+    "Codex",
+    " codex ",
+    "https://chatgpt.com/oauth/codex/client.json",
+    "https://chatgpt.com/oauth/codex/YddBjjAsi-xR/client.json",
+  ]) {
+    const client = { name, trust, logo: <span>Generic logo</span> };
+    const display = mcpClientPresentation(client);
+    assert.equal(display.name, "Codex");
+    assert.notEqual(display.logo, client.logo);
+    assert.equal(display.trust, trust);
+    assert.equal(client.name, name);
+  }
+  const id = "https://chatgpt.com/oauth/codex/client.json";
+  assert.equal(mcpClientPresentation({ name: "MCP client", id }).name, "Codex");
+  assert.equal(mcpClientPresentation({ name: "MCP client", id }).id, id);
+  for (const name of [
+    "Example app",
+    "https://chatgpt.com.example.test/oauth/codex/client.json",
+    "https://chatgpt.com@example.test/oauth/codex/client.json",
+    "http://chatgpt.com/oauth/codex/client.json",
+    "https://chatgpt.com/other/client.json",
+  ]) {
+    const client = { name, logo: <span>App logo</span> };
+    assert.equal(mcpClientPresentation(client), client);
+  }
+});
 
 test("common name limits, explicit domain limits and strict invitation fields are preserved", () => {
   assert.equal(createNameSchema().safeParse("x".repeat(120)).success, true);

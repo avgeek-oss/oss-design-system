@@ -8,6 +8,7 @@ import {
 } from "../resource-table.js";
 import { StatusIndicator, type StatusDescriptor } from "../status-indicator.js";
 import { actionColumn } from "../settings/table-actions.js";
+import { mcpClientPresentation } from "../../utilities/mcp-client-presentation.js";
 
 export type ApiKey = {
   id: string;
@@ -107,7 +108,7 @@ export function AuthorizedClientsTable<T extends AuthorizedClient>({
   return (
     <ResourceTable
       ariaLabel="MCP connections"
-      mobileLayout="stacked"
+      mobileLayout="scroll"
       items={items}
       getRowKey={(item) => item.id}
       emptyTitle="No MCP connections yet"
@@ -117,24 +118,22 @@ export function AuthorizedClientsTable<T extends AuthorizedClient>({
           key: "client",
           isRowHeader: true,
           header: "App",
-          cell: (item) => (
-            <div className="flex min-w-0 items-start gap-2">
-              {item.client.logo ? (
-                <span aria-hidden="true" className="shrink-0 [&_svg]:size-5">
-                  {item.client.logo}
-                </span>
-              ) : null}
-              <div className="grid gap-1">
-                <ResourceName
-                  name={item.client.name}
-                  description={item.client.id}
-                />
-                {item.client.trust ? (
-                  <StatusIndicator {...item.client.trust} />
+          cell: (item) => {
+            const client = mcpClientPresentation(item.client);
+            return (
+              <div className="flex min-w-0 items-start gap-2">
+                {client.logo ? (
+                  <span aria-hidden="true" className="shrink-0 [&_svg]:size-5">
+                    {client.logo}
+                  </span>
                 ) : null}
+                <div className="grid gap-1">
+                  <ResourceName name={client.name} description={client.id} />
+                  {client.trust ? <StatusIndicator {...client.trust} /> : null}
+                </div>
               </div>
-            </div>
-          ),
+            );
+          },
         },
         ...credentialColumns(formatDate, actions),
       ]}

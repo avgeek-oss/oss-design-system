@@ -1,8 +1,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
-import BookOpen01Icon from "@hugeicons/core-free-icons/BookOpen01Icon";
 import ComputerIcon from "@hugeicons/core-free-icons/ComputerIcon";
 import Key01Icon from "@hugeicons/core-free-icons/Key01Icon";
-import Link01Icon from "@hugeicons/core-free-icons/Link01Icon";
+import McpServerIcon from "@hugeicons/core-free-icons/McpServerIcon";
 import Mail01Icon from "@hugeicons/core-free-icons/Mail01Icon";
 import FingerPrintIcon from "@hugeicons/core-free-icons/FingerPrintIcon";
 import Settings01Icon from "@hugeicons/core-free-icons/Settings01Icon";
@@ -29,8 +28,8 @@ const icons = {
   passkeys: FingerPrintIcon,
   sessions: ComputerIcon,
   "api-keys": Key01Icon,
-  "mcp-connections": Link01Icon,
-  mcp: BookOpen01Icon,
+  "mcp-connections": McpServerIcon,
+  mcp: McpServerIcon,
   members: UserGroupIcon,
   general: Settings01Icon,
 };

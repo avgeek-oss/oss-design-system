@@ -13,6 +13,7 @@ import { Field } from "../../forms/field.js";
 import { Label } from "../../forms/label.js";
 import { Select, ListBox } from "../../forms/select.js";
 import { toast } from "../../overlays/toast.js";
+import { mcpClientPresentation } from "../../utilities/mcp-client-presentation.js";
 
 export type McpAccessLevel = "read" | "write" | "admin";
 
@@ -54,6 +55,7 @@ export function McpAuthorization({
   onDeny,
 }: McpAuthorizationProps) {
   const applicationId = useId();
+  const client = mcpClientPresentation({ name: clientName, logo: clientLogo });
   const reportedError = useRef<ReactNode>(undefined);
   useEffect(() => {
     if (error != null && error !== reportedError.current) toast.danger(error);
@@ -82,19 +84,19 @@ export function McpAuthorization({
         <Field>
           <Label htmlFor={applicationId}>Application</Label>
           <InputGroup variant="primary" isDisabled>
-            {clientLogo && (
+            {client.logo && (
               <InputGroup.Prefix>
                 <span
                   aria-hidden="true"
                   className="flex size-5 shrink-0 items-center justify-center [&_svg]:size-5 [&_img]:size-5"
                 >
-                  {clientLogo}
+                  {client.logo}
                 </span>
               </InputGroup.Prefix>
             )}
             <InputGroup.Input
               id={applicationId}
-              value={clientName}
+              value={client.name}
               disabled
               readOnly
             />
@@ -180,7 +182,7 @@ export function McpAuthorization({
           disabled={disabled}
           onClick={onDeny}
         >
-          Back to {clientName}
+          Back to {client.name}
         </AuthAction>
       </form>
     </AuthScreen>
