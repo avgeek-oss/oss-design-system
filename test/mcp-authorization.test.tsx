@@ -1,68 +1,58 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-  McpAuthorization,
-  type McpAuthorizationDetails,
-} from "../src/patterns/auth/mcp-authorization.js";
+import { McpAuthorization } from "../src/patterns/auth/mcp-authorization.js";
 
-const details: McpAuthorizationDetails = {
+const props = {
+  brand: "Avgeek",
+  productName: "Example product",
   clientName: "Example client",
-  clientId: "example-client",
-  clientTrust: "unverified",
-  identityDescription: "The app supplied its own name.",
-  redirectUri: "https://client.example.test/callback",
-  account: { email: "alex@example.test", teamName: "Avgeek", role: "Viewer" },
-  permissionSummary: "Requests edit access.",
-  accessDescription: "Can edit records allowed by your role.",
-  accessLifetime: "7 days",
-  revocationDescription: "Revoke access in Connections.",
-  restrictions: "Account management is excluded.",
+  availableAccessLevels: ["read"] as const,
+  onAccessLevelChange: () => {},
+  onApprove: () => {},
+  onDeny: () => {},
 };
 
-test("authorization exposes app policy and blocks approval without blocking denial", () => {
+test("authorization uses the shared two-field form and client return action", () => {
   const html = renderToStaticMarkup(
-    <McpAuthorization
-      brand="Avgeek"
-      productName="Example product"
-      details={details}
-      approvalBlockedReason="Your role cannot grant edit access."
-      onAllow={() => {}}
-      onDeny={() => {}}
-    />,
+    <McpAuthorization {...props} accessLevel="read" />,
   );
   assert.match(html, /Connect to Example product/);
-  assert.match(html, /Unverified app/);
-  assert.match(html, /7 days/);
-  assert.match(html, /Revoke access in Connections/);
-  assert.match(html, /Account management is excluded/);
-  assert.match(html, /alex@example.test/);
-  assert.match(html, /https:\/\/client.example.test\/callback/);
-  assert.match(html, /<button[^>]*disabled[^>]*>Allow access<\/button>/);
+  assert.match(html, /Allow MCP connection to Example product/);
+  assert.match(html, /Application/);
+  assert.match(html, /<input[^>]*disabled[^>]*value="Example client"/);
+  assert.match(html, /Select Scope/);
+  assert.match(html, /Read-only/);
+  assert.match(html, /re-authenticate again/);
+  assert.match(html, /Back to Example client/);
+  assert.doesNotMatch(html, /Connection details|Client ID|expires|Unverified/);
+  assert.ok(html.indexOf(">Deny<") < html.indexOf(">Approve<"));
+});
+
+test("an unavailable scope blocks approval while permitting denial", () => {
+  const html = renderToStaticMarkup(
+    <McpAuthorization {...props} accessLevel="admin" />,
+  );
+  assert.match(html, /<button[^>]*disabled[^>]*>Approve<\/button>/);
   const deny = html.match(/<button[^>]*>Deny<\/button>/)?.[0];
   assert.ok(deny);
   assert.doesNotMatch(deny, /disabled/);
 });
 
-test("pending authorization disables both decisions and metadata does not imply verification", () => {
+test("pending authorization disables navigation and both decisions without inline mutation errors", () => {
   const html = renderToStaticMarkup(
     <McpAuthorization
-      brand="Avgeek"
-      productName="Example product"
-      details={{
-        ...details,
-        clientTrust: "metadata-document",
-        identityDescription: "Published metadata does not verify this app.",
-      }}
+      {...props}
+      accessLevel="read"
       isPending
-      error="Unable to connect. Try again."
-      onAllow={() => {}}
-      onDeny={() => {}}
+      error="Unable to connect"
     />,
   );
   assert.match(html, /aria-busy="true"/);
-  assert.match(html, /Published metadata does not verify this app/);
-  assert.doesNotMatch(html, /Unverified app/);
-  assert.doesNotMatch(html, /Unable to connect. Try again/);
   assert.match(html, /<button[^>]*disabled[^>]*>Deny<\/button>/);
+  assert.match(
+    html,
+    /<button[^>]*disabled[^>]*>Back to Example client<\/button>/,
+  );
+  assert.doesNotMatch(html, /Unable to connect/);
 });
