@@ -175,7 +175,11 @@ export function McpAuthorization({
             Approve
           </Button>
         </div>
-        <AuthAction disabled={disabled} onClick={onDeny}>
+        <AuthAction
+          className="max-w-full text-left [overflow-wrap:anywhere]"
+          disabled={disabled}
+          onClick={onDeny}
+        >
           Back to {clientName}
         </AuthAction>
       </form>

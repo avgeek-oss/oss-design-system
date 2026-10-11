@@ -71,3 +71,29 @@ test("MCP consent locks scope, approval and return while a decision is pending",
     page.getByText("Preview connection approved", { exact: true }),
   ).toBeVisible();
 });
+
+test("MCP consent keeps unbroken client names within the viewport", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(fixtureUrl(fixture, "Long client name"));
+  await expect(page.getByLabel("Application", { exact: true })).toHaveValue(
+    "M".repeat(100),
+  );
+  const back = page.getByRole("button", {
+    name: "Back to " + "M".repeat(100),
+    exact: true,
+  });
+  await expect(back).toBeVisible();
+  expect(
+    await page.evaluate(
+      () =>
+        globalThis.document.documentElement.scrollWidth <=
+        globalThis.innerWidth,
+    ),
+  ).toBe(true);
+  await back.click();
+  await expect(
+    page.getByText("Preview connection denied", { exact: true }),
+  ).toBeVisible();
+});
