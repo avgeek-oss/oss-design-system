@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.14 — 2026-10-11
+
+- Add a shared attachment file chooser and drop control with validation, stable upload progress, and retained retry after failure.
+- Accept an initial dropped file so applications can open an upload modal and upload once, including under React Strict Mode.
+
 ## 1.2.13 — 2026-10-11
 
 - Require an installation setup secret in the shared team setup form, retaining account details through failed submissions and retries.
