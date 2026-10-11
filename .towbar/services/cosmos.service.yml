@@ -24,7 +24,7 @@ health:
 ingress:
   type: proxy
 domains:
-  primary: ds.oss.avgeek.ltd
+  primary: oss-ds.avgeek.ltd
 tls:
   mode: cloudflare-dns
   proxied: false
