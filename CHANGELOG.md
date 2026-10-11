@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.15
+
+- Standardize MCP consent with an application input, user-selected Read-only, Write and Administrator scope, common role guidance and Deny/Approve actions. Return to the client through the app-owned denial callback.
+
 ## 1.2.14 — 2026-10-11
 
 - Add a shared attachment file chooser and drop control with validation, stable upload progress, and retained retry after failure.

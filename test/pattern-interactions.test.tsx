@@ -471,22 +471,13 @@ test("authorization reports changed submission failures once while preserving po
       <McpAuthorization
         brand="Avgeek"
         productName="Example"
-        details={{
-          clientName: "Example client",
-          clientId: "example",
-          clientTrust: "metadata-document",
-          identityDescription: "The app supplied its metadata.",
-          redirectUri: "https://example.test/callback",
-          account: { email: "alex@example.test" },
-          permissionSummary: "Read services.",
-          accessDescription: "Read account services.",
-          accessLifetime: "7 days",
-          revocationDescription: "Revoke in account settings.",
-          restrictions: "Account management is excluded.",
-        }}
+        clientName="Example client"
+        accessLevel="read"
+        availableAccessLevels={["read"]}
+        onAccessLevelChange={() => {}}
         error={error}
         approvalBlockedReason="Your role cannot grant access."
-        onAllow={() => {}}
+        onApprove={() => {}}
         onDeny={() => {}}
       />
     </StrictMode>
@@ -925,20 +916,11 @@ test("disabled authorization decisions cannot replay a consumed request and do n
       brand="Example"
       productName="Example"
       isDisabled
-      details={{
-        clientName: "Client",
-        clientId: "client",
-        clientTrust: "unverified",
-        identityDescription: "Unverified metadata",
-        redirectUri: "https://example.test/callback",
-        account: { email: "alex@example.test" },
-        permissionSummary: "Read tasks",
-        accessDescription: "Read tasks in this team",
-        accessLifetime: "7 days",
-        revocationDescription: "Revoke in account settings",
-        restrictions: "Account management excluded",
-      }}
-      onAllow={() => {
+      clientName="Client"
+      accessLevel="read"
+      availableAccessLevels={["read"]}
+      onAccessLevelChange={() => {}}
+      onApprove={() => {
         calls++;
       }}
       onDeny={() => {
@@ -949,7 +931,7 @@ test("disabled authorization decisions cannot replay a consumed request and do n
   try {
     await submit();
     const decisions = [...document.querySelectorAll("button")].filter((item) =>
-      /Allow|Deny/.test(item.textContent ?? ""),
+      /Approve|Deny/.test(item.textContent ?? ""),
     );
     assert.equal(decisions.length, 2);
     for (const decision of decisions) {

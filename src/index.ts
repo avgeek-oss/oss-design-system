@@ -44,7 +44,7 @@ export {
 export { AuthScreen } from "./patterns/auth/auth-screen.js";
 export {
   McpAuthorization,
-  type McpAuthorizationDetails,
+  type McpAccessLevel,
   type McpAuthorizationProps,
 } from "./patterns/auth/mcp-authorization.js";
 export { TeamSetup, type TeamSetupValues } from "./patterns/auth/team-setup.js";

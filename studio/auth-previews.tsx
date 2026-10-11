@@ -210,13 +210,19 @@ export function ConfirmIdentityPreview({
     </div>
   );
 }
-export function ConsentPreview() {
-  const [write] = useFixtureInput("Edit access", false);
-  const [unverified] = useFixtureInput("Unverified client", false);
-  const [viewer] = useFixtureInput("Viewer role", false);
-  const [localApp] = useFixtureInput("Local app", false);
-  const [slow] = useFixtureInput("Slow authorization", false);
+export function ConsentPreview({
+  viewerRole = false,
+  slowRequest = false,
+}: {
+  viewerRole?: boolean;
+  slowRequest?: boolean;
+}) {
+  const [viewer] = useFixtureInput("Viewer role", viewerRole);
+  const [slow] = useFixtureInput("Slow authorization", slowRequest);
   const [fail] = useFixtureInput("Authorization failure", false);
+  const [accessLevel, setAccessLevel] = useState<"read" | "write" | "admin">(
+    "read",
+  );
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
   const requestPending = useRef(false);
@@ -232,7 +238,9 @@ export function ConsentPreview() {
         allow ? "Preview connection approved" : "Preview connection denied",
       );
     } catch (cause) {
-      setError((cause as Error).message);
+      setError(
+        cause instanceof Error ? cause.message : "Unable to connect this app.",
+      );
     } finally {
       requestPending.current = false;
       setPending(false);
@@ -242,49 +250,18 @@ export function ConsentPreview() {
     <McpAuthorization
       brand={brand}
       productName="Towbar"
-      details={{
-        clientName: "Example MCP client",
-        clientId: unverified
-          ? "example-mcp-client"
-          : "https://client.example.test/.well-known/oauth-client.json",
-        clientLogo: (
-          <span
-            aria-hidden
-            className="grid size-8 shrink-0 place-items-center rounded-lg bg-default font-medium"
-          >
-            C
-          </span>
-        ),
-        clientTrust: unverified ? "unverified" : "metadata-document",
-        identityDescription: unverified
-          ? "The app supplied its own name. Towbar has not verified its identity."
-          : "App details published by client.example.test. This does not verify the app making this request.",
-        redirectUri: localApp
-          ? "http://127.0.0.1:54321/callback"
-          : "https://client.example.test/oauth/callback",
-        account: {
-          name: "Alex Morgan",
-          email: "alex@example.test",
-          teamName: "Avgeek",
-          role: viewer ? "Viewer" : "Admin",
-        },
-        permissionSummary: `Wants to ${write ? "read and edit" : "read"} your Towbar data.`,
-        accessDescription: `${write ? "Can view and make changes allowed by your Towbar role, including updating secrets." : "Can only view data allowed by your Towbar role."} Cannot manage accounts or reveal stored credentials.`,
-        accessLifetime: "30 days",
-        revocationDescription: "Revoke it anytime in your personal API keys.",
-        restrictions: "Administrative access is excluded.",
-        deviceConnectionNotice: localApp
-          ? "This opens an app on your device. Only continue if you started this connection yourself."
-          : undefined,
-      }}
+      clientName="Example MCP client"
+      clientLogo={
+        <span aria-hidden className="font-medium">
+          C
+        </span>
+      }
+      accessLevel={accessLevel}
+      availableAccessLevels={viewer ? ["read"] : ["read", "write", "admin"]}
+      onAccessLevelChange={setAccessLevel}
       isPending={pending}
       error={error}
-      approvalBlockedReason={
-        write && viewer
-          ? "Your Viewer role cannot grant edit access. Reconnect with read-only access."
-          : undefined
-      }
-      onAllow={() => void decide(true)}
+      onApprove={() => void decide(true)}
       onDeny={() => void decide(false)}
     />
   );

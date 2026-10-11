@@ -1,161 +1,183 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import ViewIcon from "@hugeicons/core-free-icons/ViewIcon";
+import Edit02Icon from "@hugeicons/core-free-icons/Edit02Icon";
+import UserShield01Icon from "@hugeicons/core-free-icons/UserShield01Icon";
 import { AuthScreen } from "./auth-screen.js";
+import { AuthAction } from "./auth-action.js";
 import { Button } from "../../buttons/button.js";
-import { Alert } from "../../feedback/alert.js";
+import { InputGroup } from "../../forms/input-group.js";
+import { Field } from "../../forms/field.js";
+import { Label } from "../../forms/label.js";
+import { Select, ListBox } from "../../forms/select.js";
 import { toast } from "../../overlays/toast.js";
 
-export type McpAuthorizationDetails = {
-  clientName: string;
-  clientId: string;
-  clientLogo?: ReactNode;
-  clientTrust: "metadata-document" | "unverified";
-  identityDescription: ReactNode;
-  redirectUri: string;
-  account: { name?: string; email: string; teamName?: string; role?: string };
-  permissionSummary: ReactNode;
-  accessDescription: ReactNode;
-  accessLifetime: ReactNode;
-  revocationDescription: ReactNode;
-  restrictions: ReactNode;
-  deviceConnectionNotice?: ReactNode;
-};
+export type McpAccessLevel = "read" | "write" | "admin";
 
 export type McpAuthorizationProps = {
   brand: ReactNode;
   productName: string;
-  details: McpAuthorizationDetails;
+  clientName: string;
+  clientLogo?: ReactNode;
+  accessLevel: McpAccessLevel;
+  availableAccessLevels: readonly McpAccessLevel[];
+  onAccessLevelChange: (value: McpAccessLevel) => void;
   isPending?: boolean;
   isDisabled?: boolean;
   error?: ReactNode;
   approvalBlockedReason?: ReactNode;
-  onAllow: () => void;
+  onApprove: () => void;
   onDeny: () => void;
-  children?: ReactNode;
 };
+
+const scopes = [
+  { id: "read", label: "Read-only", icon: ViewIcon },
+  { id: "write", label: "Write", icon: Edit02Icon },
+  { id: "admin", label: "Administrator", icon: UserShield01Icon },
+] as const;
 
 export function McpAuthorization({
   brand,
   productName,
-  details,
+  clientName,
+  clientLogo,
+  accessLevel,
+  availableAccessLevels,
+  onAccessLevelChange,
   isPending = false,
   isDisabled = false,
   error,
   approvalBlockedReason,
-  onAllow,
+  onApprove,
   onDeny,
-  children,
 }: McpAuthorizationProps) {
+  const applicationId = useId();
   const reportedError = useRef<ReactNode>(undefined);
   useEffect(() => {
     if (error != null && error !== reportedError.current) toast.danger(error);
     reportedError.current = error;
   }, [error]);
-  const approvalBlocked = approvalBlockedReason != null;
+  const selected = scopes.find((scope) => scope.id === accessLevel);
+  const approvalBlocked =
+    approvalBlockedReason != null ||
+    !availableAccessLevels.includes(accessLevel);
+  const disabled = isPending || isDisabled;
   return (
     <AuthScreen
       brand={brand}
       title={`Connect to ${productName}`}
-      description="Choose whether to give this app access."
+      description={`Allow MCP connection to ${productName}. Review the application and the scope to continue.`}
     >
       <form
         className="grid min-w-0 gap-6 text-sm"
+        method="post"
         aria-busy={isPending}
         onSubmit={(event) => {
           event.preventDefault();
-          if (!isPending && !isDisabled && !approvalBlocked) onAllow();
+          if (!disabled && !approvalBlocked) onApprove();
         }}
       >
-        <div className="grid gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            {details.clientLogo}
-            <span className="min-w-0 break-words text-base font-medium">
-              {details.clientName}
-            </span>
-          </div>
-          <p className="text-muted">{details.permissionSummary}</p>
-        </div>
-        {details.clientTrust === "unverified" && (
-          <Alert status="warning">
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Description>
-                Unverified app. Only continue if you recognize this app and
-                started this connection yourself.
-              </Alert.Description>
-            </Alert.Content>
-          </Alert>
-        )}
-        <div className="grid gap-3">
-          <div>
-            <p>
-              Signed in as{" "}
-              <strong className="break-all">{details.account.email}</strong>
-              {details.account.teamName
-                ? ` in ${details.account.teamName}`
-                : ""}
-              .
-            </p>
-            {(details.account.name || details.account.role) && (
-              <p className="text-muted">
-                {[details.account.name, details.account.role]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
+        <Field>
+          <Label htmlFor={applicationId}>Application</Label>
+          <InputGroup variant="primary" isDisabled>
+            {clientLogo && (
+              <InputGroup.Prefix>
+                <span
+                  aria-hidden="true"
+                  className="flex size-5 shrink-0 items-center justify-center [&_svg]:size-5 [&_img]:size-5"
+                >
+                  {clientLogo}
+                </span>
+              </InputGroup.Prefix>
             )}
-          </div>
-          <p>{details.accessDescription}</p>
-          <p>
-            Access expires in <strong>{details.accessLifetime}</strong>.{" "}
-            {details.revocationDescription}
-          </p>
-          {details.deviceConnectionNotice && (
-            <p className="text-muted">{details.deviceConnectionNotice}</p>
-          )}
-        </div>
-        <details className="min-w-0">
-          <summary className="w-fit cursor-pointer text-muted underline decoration-dashed underline-offset-2 hover:text-foreground">
-            Connection details
-          </summary>
-          <div className="grid gap-3 pt-3 text-muted">
-            <p>{details.identityDescription}</p>
-            <dl className="grid min-w-0 gap-3">
-              <div>
-                <dt className="font-medium">Client ID</dt>
-                <dd className="break-all">{details.clientId}</dd>
-              </div>
-              <div>
-                <dt className="font-medium">Return URL</dt>
-                <dd className="break-all">{details.redirectUri}</dd>
-              </div>
-            </dl>
-            <p>{details.restrictions}</p>
-          </div>
-        </details>
-        {children}
-        {approvalBlocked && (
-          <p role="alert" className="text-sm text-danger-soft-foreground">
+            <InputGroup.Input
+              id={applicationId}
+              value={clientName}
+              disabled
+              readOnly
+            />
+          </InputGroup>
+        </Field>
+        <Select
+          aria-label="Select Scope"
+          variant="primary"
+          selectedKey={accessLevel}
+          isDisabled={disabled}
+          disabledKeys={scopes
+            .filter((scope) => !availableAccessLevels.includes(scope.id))
+            .map((scope) => scope.id)}
+          onSelectionChange={(key) => {
+            const scope = scopes.find((item) => item.id === key);
+            if (scope && availableAccessLevels.includes(scope.id))
+              onAccessLevelChange(scope.id);
+          }}
+        >
+          <Label>Select Scope</Label>
+          <Select.Trigger>
+            <Select.Value className="flex min-w-0 flex-1 items-center gap-2">
+              {selected && (
+                <HugeiconsIcon
+                  icon={selected.icon}
+                  size={16}
+                  aria-hidden="true"
+                />
+              )}
+              <span className="truncate">{selected?.label}</span>
+            </Select.Value>
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {scopes.map((scope) => (
+                <ListBox.Item
+                  id={scope.id}
+                  key={scope.id}
+                  textValue={scope.label}
+                >
+                  <HugeiconsIcon
+                    icon={scope.icon}
+                    size={16}
+                    aria-hidden="true"
+                  />
+                  <span className="min-w-0 flex-1">{scope.label}</span>
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
+        </Select>
+        <p className="text-muted">
+          Access to the application would be governed based on your current
+          access role. In case it is updated in the future, you would be
+          required to re-authenticate again.
+        </p>
+        {approvalBlockedReason != null && (
+          <p role="alert" className="text-sm text-danger">
             {approvalBlockedReason}
           </p>
         )}
         <div className="flex flex-wrap gap-2">
           <Button
-            type="submit"
-            isDisabled={isPending || isDisabled || approvalBlocked}
-            isPending={isPending}
-          >
-            Allow access
-          </Button>
-          <Button
             type="button"
             variant="secondary"
-            isDisabled={isPending || isDisabled}
+            isDisabled={disabled}
             onPress={onDeny}
           >
             Deny
           </Button>
+          <Button
+            type="submit"
+            isDisabled={disabled || approvalBlocked}
+            isPending={isPending}
+          >
+            Approve
+          </Button>
         </div>
+        <AuthAction disabled={disabled} onClick={onDeny}>
+          Back to {clientName}
+        </AuthAction>
       </form>
     </AuthScreen>
   );
