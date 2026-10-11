@@ -14,6 +14,9 @@ test("Codex metadata connections show a friendly name, logo and revocation title
   const table = page.getByRole("grid", { name: "MCP connections" });
   const codex = table.getByRole("rowheader").first();
   await expect(codex).toContainText("Codex");
+  const name = codex.getByText("Codex", { exact: true });
+  await expect(name).toBeVisible();
+  expect((await name.boundingBox()).width).toBeGreaterThan(40);
   await expect(codex.locator("svg")).toHaveCount(1);
   await expect(table).toContainText("Administrative permissions");
   await expect(table.getByRole("columnheader")).toHaveText([
