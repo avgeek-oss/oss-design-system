@@ -151,7 +151,7 @@ The React-free `utilities/date-time-preferences` public subpath and root export 
 
 ### Common settings presentation
 
-`SettingsPageTitle` (`patterns/settings/page-title`) supplies the standard common settings title and decorative 24px icon inside an application page heading. `settingsPageLabels` supplies matching navigation labels. Use the `mcp-connections` section below API Keys; keep MCP Guide separate.
+`SettingsPageTitle` (`patterns/settings/page-title`) supplies the standard common settings title and decorative 24px icon inside an application page heading. `settingsPageLabels` supplies matching navigation labels. Use the `mcp-connections` section below API Keys; keep MCP Guide separate. Both MCP pages and their navigation items use `McpServerIcon`.
 
 `teamRoleOptions` (`patterns/team-settings/team-role-options`) supplies Admin, Member and Viewer with 16px icons and short generic descriptions for invitation and member-edit pickers. Applications retain their existing permission enforcement.
 

@@ -1,5 +1,65 @@
 import { test, expect } from "./fixtures.mjs";
 
+test("Codex metadata connections show a friendly name, logo and revocation title", async ({
+  page,
+  fixtureUrl,
+  width,
+}, testInfo) => {
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/Account Settings/McpConnectionsSettings.fixture.tsx",
+    ),
+  );
+  await page.bringToFront();
+  const table = page.getByRole("grid", { name: "MCP connections" });
+  const codex = table.getByRole("rowheader").first();
+  await expect(codex).toContainText("Codex");
+  await expect(codex.locator("svg")).toHaveCount(1);
+  await expect(table).toContainText("Administrative permissions");
+  await expect(table.getByRole("columnheader")).toHaveText([
+    "App",
+    "Permissions",
+    "Added",
+    "Expires",
+    "Last used",
+    "Actions",
+  ]);
+  const cells = table.getByRole("row").nth(1).locator(".table__cell");
+  const positions = await cells.evaluateAll((elements) =>
+    elements.map((element) => element.getBoundingClientRect().top),
+  );
+  expect(new Set(positions).size).toBe(1);
+  await expect(table.getByRole("rowheader").nth(1)).toContainText(
+    "Example app",
+  );
+  expect(
+    await page.evaluate(() => globalThis.document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(width);
+  await page.screenshot({
+    path: testInfo.outputPath("mcp-connections.png"),
+    animations: "disabled",
+  });
+  const revoke = table
+    .getByRole("button", { name: "Revoke", exact: true })
+    .first();
+  await revoke.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", {
+    name: "Revoke Codex?",
+    exact: true,
+  });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(revoke).toBeFocused();
+  await revoke.click();
+  await dialog
+    .getByRole("button", { name: "Revoke connection", exact: true })
+    .click();
+  await expect(table.getByRole("rowheader")).toHaveCount(1);
+  await expect(table.getByRole("rowheader")).toContainText("Example app");
+});
+
 test("API keys retain every field, native row headers and reachable actions at mobile and desktop widths", async ({
   page,
   fixtureUrl,

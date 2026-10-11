@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   ApiKeysTable,
   type ApiKey,
@@ -8,7 +8,7 @@ import {
 } from "./api-keys-table.js";
 import { Button } from "../../buttons/button.js";
 import { ActionConfirmation } from "../actions/action-confirmation.js";
-import { useOverlaySuspension } from "../../overlays/overlay-suspension.js";
+import { useConfirmationOpener } from "./use-confirmation-opener.js";
 
 export type ApiKeysSettingsProps<T extends ApiKey = ApiKey> = Omit<
   ApiKeysTableProps<T>,
@@ -25,61 +25,7 @@ export function ApiKeysSettings<T extends ApiKey>({
   actions,
 }: ApiKeysSettingsProps<T>) {
   const [revoking, setRevoking] = useState<T | null>(null);
-  const opener = useRef<HTMLElement | null>(null);
-  const { isSuspended } = useOverlaySuspension();
-  useEffect(() => {
-    if (isSuspended || revoking || !opener.current) return;
-    const target = opener.current;
-    // A grid may restore its row after the modal returns focus to its action.
-    let frame = 0;
-    let cancelled = false;
-    const restore = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        if (cancelled) return;
-        if (
-          !document.hasFocus() ||
-          !target.isConnected ||
-          target.closest("[hidden], [inert]")
-        ) {
-          stop();
-          return;
-        }
-        const active = document.activeElement;
-        if (
-          active === document.body ||
-          active === target.closest('[role="row"]') ||
-          active === target.closest('[role="gridcell"]')
-        )
-          target.focus({ preventScroll: true });
-      });
-    };
-    const stop = () => {
-      cancelled = true;
-      cancelAnimationFrame(frame);
-      document.removeEventListener("focusin", onFocus, true);
-      document.removeEventListener("pointerdown", stop, true);
-      document.removeEventListener("keydown", stop, true);
-      window.removeEventListener("blur", stop);
-    };
-    const onFocus = (event: FocusEvent) => {
-      const active = event.target;
-      if (active === target) return;
-      if (
-        active === document.body ||
-        active === target.closest('[role="row"]') ||
-        active === target.closest('[role="gridcell"]')
-      )
-        restore();
-      else stop();
-    };
-    document.addEventListener("focusin", onFocus, true);
-    document.addEventListener("pointerdown", stop, true);
-    document.addEventListener("keydown", stop, true);
-    window.addEventListener("blur", stop);
-    restore();
-    return stop;
-  }, [revoking, isSuspended]);
+  const opener = useConfirmationOpener(revoking !== null);
   return (
     <>
       <ApiKeysTable

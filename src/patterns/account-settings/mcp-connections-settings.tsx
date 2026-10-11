@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useConfirmationOpener } from "./use-confirmation-opener.js";
 import { Button } from "../../buttons/button.js";
 import { ActionConfirmation } from "../actions/action-confirmation.js";
 import {
@@ -7,6 +8,7 @@ import {
   type AuthorizedClient,
   type AuthorizedClientsTableProps,
 } from "./api-keys-table.js";
+import { mcpClientPresentation } from "../../utilities/mcp-client-presentation.js";
 
 export type McpConnectionsSettingsProps<
   T extends AuthorizedClient = AuthorizedClient,
@@ -18,12 +20,20 @@ export function McpConnectionsSettings<T extends AuthorizedClient>({
   ...props
 }: McpConnectionsSettingsProps<T>) {
   const [revoking, setRevoking] = useState<T | null>(null);
+  const opener = useConfirmationOpener(revoking !== null);
   return (
     <>
       <AuthorizedClientsTable
         {...props}
         actions={(client) => (
-          <Button variant="danger" onPress={() => setRevoking(client)}>
+          <Button
+            variant="danger"
+            onPress={(event) => {
+              opener.current =
+                event.target instanceof HTMLElement ? event.target : null;
+              setRevoking(client);
+            }}
+          >
             Revoke
           </Button>
         )}
@@ -31,7 +41,7 @@ export function McpConnectionsSettings<T extends AuthorizedClient>({
       {revoking ? (
         <ActionConfirmation
           isOpen
-          title={`Revoke ${revoking.client.name}?`}
+          title={`Revoke ${mcpClientPresentation(revoking.client).name}?`}
           description="This app will lose access immediately. Sign in again from the app to reconnect."
           confirmLabel="Revoke connection"
           onOpenChange={(open) => {
