@@ -344,3 +344,5 @@ export {
   useBackendReconnect,
   type BackendUnavailableProps,
 } from "./patterns/feedback/backend-unavailable.js";
+
+export { FileUpload, type FileUploadProps } from "./patterns/file-upload.js";

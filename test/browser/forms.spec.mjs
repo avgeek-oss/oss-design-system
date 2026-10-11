@@ -1083,3 +1083,111 @@ test("installation setup requires a secret and retains account drafts after a fa
     "Setup completed for Test team",
   );
 });
+
+test("file upload supports keyboard selection, pending locks and failed-file retry without overflow", async ({
+  page,
+  fixtureUrl,
+  theme,
+}, testInfo) => {
+  await page.goto(
+    fixtureUrl("cosmos/Patterns/FileUpload.fixture.tsx", "Failure and retry"),
+  );
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+  const upload = page.getByRole("button", {
+    name: "Upload attachment",
+    exact: true,
+  });
+  const initialWidth = (await upload.boundingBox()).width;
+  await upload.focus();
+  const chooserPromise = page.waitForEvent("filechooser");
+  await upload.press("Enter");
+  const chooser = await chooserPromise;
+  const fileName = "a-long-attachment-name-for-responsive-layout-review.png";
+  await chooser.setFiles({
+    name: fileName,
+    mimeType: "image/png",
+    buffer: Buffer.from("fixture image"),
+  });
+  const pendingUpload = page.getByRole("button", {
+    name: "Uploading…",
+    exact: true,
+  });
+  await expect(pendingUpload).toBeDisabled();
+  expect((await pendingUpload.boundingBox()).width).toBeCloseTo(
+    initialWidth,
+    1,
+  );
+  await expect(
+    page.getByRole("status").filter({ hasText: fileName }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator('[data-slot="toast"]')
+      .filter({ hasText: "The upload failed. Try again." }),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: "Retry upload", exact: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("button", { name: "Choose another file", exact: true }),
+  ).toBeEnabled();
+  await expect(page.getByRole("list", { name: "Uploaded files" })).toHaveCount(
+    0,
+  );
+  await page.screenshot({ path: testInfo.outputPath("file-upload-retry.png") });
+  expect(
+    await page.evaluate(
+      () =>
+        globalThis.document.documentElement.scrollWidth <=
+        globalThis.innerWidth,
+    ),
+  ).toBe(true);
+  const retry = page.getByRole("button", { name: "Retry upload", exact: true });
+  const retryWidth = (await retry.boundingBox()).width;
+  await retry.click();
+  await expect(pendingUpload).toBeDisabled();
+  expect((await pendingUpload.boundingBox()).width).toBeCloseTo(retryWidth, 1);
+  await expect(page.getByRole("list", { name: "Uploaded files" })).toHaveText(
+    fileName,
+  );
+  await expect(upload).toBeEnabled();
+  await expect(
+    page.getByRole("status").filter({ hasText: fileName }),
+  ).toHaveCount(0);
+});
+
+test("initial dropped file starts without a picker, retains failed retry and uploads once", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/FileUpload.fixture.tsx",
+      "Initial dropped file",
+    ),
+  );
+  await expect(
+    page.getByRole("button", { name: "Uploading…", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("status").filter({ hasText: "dropped-diagram.png" }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator('[data-slot="toast"]')
+      .filter({ hasText: "The upload failed. Try again." }),
+  ).toHaveCount(1);
+  await page.getByRole("button", { name: "Retry upload", exact: true }).click();
+  await expect(page.getByRole("list", { name: "Uploaded files" })).toHaveText(
+    "dropped-diagram.png",
+  );
+  await expect(
+    page.getByRole("button", { name: "Upload attachment", exact: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("list", { name: "Uploaded files" }).getByRole("listitem"),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("status").filter({ hasText: "dropped-diagram.png" }),
+  ).toHaveCount(0);
+});
