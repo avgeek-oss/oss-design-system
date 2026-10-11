@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://towbar.dev/schemas/app.v2.json
+id: oss-design-system-cosmos
+name: OSS Design System
+description: Shared components and patterns in the React Cosmos catalogue.
+deployment:
+  type: dockerfile
+  context: .
+  dockerfile: infra/cosmos/Dockerfile
+  target: runtime
+  architecture: arm64
+  resources:
+    cpus: 1
+    memory: 2g
+autoDeploy: false
+container:
+  port: 8080
+  resources:
+    cpus: 0.25
+    memory: 256m
+health:
+  type: http
+  path: /
+  timeoutSeconds: 60
+ingress:
+  type: proxy
+domains:
+  primary: ds.oss.avgeek.ltd
+tls:
+  mode: cloudflare-dns
+environments:
+  production:
+    server: 13.206.149.158
