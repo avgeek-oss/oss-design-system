@@ -87,7 +87,9 @@ test("MCP consent keeps unbroken client names within the viewport", async ({
   await expect(back).toBeVisible();
   expect(
     await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
+      () =>
+        globalThis.document.documentElement.scrollWidth <=
+        globalThis.innerWidth,
     ),
   ).toBe(true);
   await back.click();
