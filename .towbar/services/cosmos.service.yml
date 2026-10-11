@@ -27,6 +27,7 @@ domains:
   primary: ds.oss.avgeek.ltd
 tls:
   mode: cloudflare-dns
+  proxied: false
 environments:
   production:
     server: 13.206.149.158
