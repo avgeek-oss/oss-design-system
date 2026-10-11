@@ -19,6 +19,13 @@ test("API-key confirmation restores its connected row action after Escape and Ca
     if (touch) await opener.tap();
     else await page.keyboard.press("Enter");
     await expect(dialog).toBeVisible();
+    await expect
+      .poll(() =>
+        dialog.evaluate((element) =>
+          element.contains(globalThis.document.activeElement),
+        ),
+      )
+      .toBe(true);
     const original = await opener.elementHandle();
     if (dismissal === "Escape") await page.keyboard.press("Escape");
     else
