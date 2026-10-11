@@ -86,27 +86,62 @@ test("API keys retain every field, native row headers and reachable actions at m
     "Last used",
     "Actions",
   ]);
-  await expect(table.getByRole("rowheader")).toHaveCount(2);
+  await expect(table.getByRole("rowheader")).toHaveCount(3);
   await expect(table.getByRole("rowheader").first()).toContainText(
     "Automation key with a long identifiable name for release operations",
   );
   await expect(table.getByRole("rowheader").first()).toContainText(
     "key_••••12ab",
   );
-  await expect(table.getByText("Active", { exact: true })).toBeVisible();
+  await expect(table.getByRole("rowheader").first()).not.toContainText(
+    "Active",
+  );
+  await expect(table.getByText("Active", { exact: true })).toHaveCount(0);
+  const expiry = table.getByRole("row").nth(3).getByRole("gridcell").nth(2);
+  await expect(expiry).toContainText("Expired");
+  await expect(expiry).toContainText("2000-01-01");
+  const permissions = table
+    .getByRole("gridcell", {
+      name: "Read and write boards, tasks and comments across the current workspace",
+      exact: true,
+    })
+    .locator('[data-slot="tooltip-trigger"]');
+  const permissionHeight = await permissions.evaluate((element) => ({
+    height: element.getBoundingClientRect().height,
+    lineHeight: Number.parseFloat(
+      globalThis.getComputedStyle(element).lineHeight,
+    ),
+  }));
+  expect(permissionHeight.height).toBeLessThanOrEqual(
+    permissionHeight.lineHeight * 2,
+  );
   await expect(
     table.getByRole("gridcell", {
       name: "Read and write boards, tasks and comments across the current workspace",
       exact: true,
     }),
   ).toBeVisible();
-  for (const date of ["2026-10-01", "2026-12-30", "2026-10-06"])
+  for (const date of ["2026-10-01", "2099-12-30", "2026-10-06"])
     await expect(table.getByText(date, { exact: true })).toBeVisible();
+  for (const description of await table
+    .locator('[data-slot="table-cell-description"]')
+    .all()) {
+    const dimensions = await description.evaluate((element) => ({
+      height: element.getBoundingClientRect().height,
+      lineHeight: Number.parseFloat(
+        globalThis.getComputedStyle(element).lineHeight,
+      ),
+    }));
+    expect(dimensions.height).toBeLessThanOrEqual(dimensions.lineHeight);
+  }
   await expect(
     table.getByRole("gridcell", { name: "No expiry", exact: true }),
   ).toBeVisible();
   await expect(
-    table.getByRole("gridcell", { name: "Never", exact: true }),
+    table.getByRole("row", { name: /Reporting/ }).getByRole("gridcell", {
+      name: "Never",
+      exact: true,
+    }),
   ).toBeVisible();
   const bounds = await table.evaluate((element) => {
     const container = element.closest(".table__scroll-container");
@@ -119,8 +154,18 @@ test("API keys retain every field, native row headers and reachable actions at m
       pageWidth: globalThis.document.documentElement.scrollWidth,
     };
   });
-  expect(bounds.scrollWidth).toBeLessThanOrEqual(bounds.width + 1);
+  if (touch) expect(bounds.scrollWidth).toBeGreaterThan(bounds.width);
   expect(bounds.pageWidth).toBeLessThanOrEqual(width);
+  const cells = table.getByRole("row").nth(1).locator(".table__cell");
+  await expect(cells).toHaveCount(6);
+  const positions = await cells.evaluateAll((elements) =>
+    elements.map((element) => element.getBoundingClientRect().top),
+  );
+  expect(new Set(positions).size).toBe(1);
+  await table.evaluate((element) => {
+    const container = element.closest(".table__scroll-container");
+    container.scrollLeft = container.scrollWidth;
+  });
   const revoke = table
     .getByRole("button", { name: "Revoke", exact: true })
     .first();
@@ -129,19 +174,6 @@ test("API keys retain every field, native row headers and reachable actions at m
   expect(actionBounds.x + actionBounds.width).toBeLessThanOrEqual(
     bounds.right + 1,
   );
-  if (touch) {
-    const cells = table.getByRole("row").nth(1).locator(".table__cell");
-    await expect(cells).toHaveCount(6);
-    const positions = await cells.evaluateAll((elements) =>
-      elements.map((element) => {
-        const rect = element.getBoundingClientRect();
-        return { top: rect.top, left: rect.left, width: rect.width };
-      }),
-    );
-    expect(positions[1].top).toBeGreaterThan(positions[0].top);
-    expect(positions[3].top).toBe(positions[2].top);
-    expect(positions[5].top).toBeGreaterThan(positions[4].top);
-  }
   await page.screenshot({
     path: testInfo.outputPath("metadata.png"),
     animations: "disabled",
@@ -171,7 +203,7 @@ test("API keys retain every field, native row headers and reachable actions at m
     "Revocation failed. Please retry.",
   );
   await expect(dialog).toBeVisible();
-  await expect(table.getByRole("rowheader")).toHaveCount(2);
+  await expect(table.getByRole("rowheader")).toHaveCount(3);
   await page.locator('[data-slot="toast-close"]').click();
   await confirm.focus();
   await page.keyboard.press("Enter");
@@ -179,10 +211,10 @@ test("API keys retain every field, native row headers and reachable actions at m
   await expect(
     page.getByText("Simulated requests: 2", { exact: true }),
   ).toBeVisible();
-  await expect(table.getByRole("rowheader")).toHaveCount(1);
-  await expect(table.getByRole("rowheader")).toContainText("Reporting");
+  await expect(table.getByRole("rowheader")).toHaveCount(2);
+  await expect(table.getByRole("rowheader").first()).toContainText("Reporting");
   await expect(
-    table.getByRole("button", { name: "Revoke", exact: true }),
+    table.getByRole("button", { name: "Revoke", exact: true }).first(),
   ).toBeVisible();
 });
 
