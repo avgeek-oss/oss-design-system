@@ -1155,3 +1155,39 @@ test("file upload supports keyboard selection, pending locks and failed-file ret
     page.getByRole("status").filter({ hasText: fileName }),
   ).toHaveCount(0);
 });
+
+test("initial dropped file starts without a picker, retains failed retry and uploads once", async ({
+  page,
+  fixtureUrl,
+}) => {
+  await page.goto(
+    fixtureUrl(
+      "cosmos/Patterns/FileUpload.fixture.tsx",
+      "Initial dropped file",
+    ),
+  );
+  await expect(
+    page.getByRole("button", { name: "Uploading…", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("status").filter({ hasText: "dropped-diagram.png" }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator('[data-slot="toast"]')
+      .filter({ hasText: "The upload failed. Try again." }),
+  ).toHaveCount(1);
+  await page.getByRole("button", { name: "Retry upload", exact: true }).click();
+  await expect(page.getByRole("list", { name: "Uploaded files" })).toHaveText(
+    "dropped-diagram.png",
+  );
+  await expect(
+    page.getByRole("button", { name: "Upload attachment", exact: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("list", { name: "Uploaded files" }).getByRole("listitem"),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("status").filter({ hasText: "dropped-diagram.png" }),
+  ).toHaveCount(0);
+});

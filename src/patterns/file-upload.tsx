@@ -2,6 +2,8 @@
 
 import {
   forwardRef,
+  useCallback,
+  useEffect,
   useId,
   useRef,
   useState,
@@ -20,6 +22,7 @@ export type FileUploadProps = Omit<
   "onDrop" | "onDragOver" | "onDragEnter" | "onDragLeave"
 > & {
   onUpload: (file: File) => Promise<void>;
+  initialFile?: File;
   accept?: string;
   maxSizeBytes?: number;
   isDisabled?: boolean;
@@ -42,6 +45,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
   function FileUpload(
     {
       onUpload,
+      initialFile,
       accept = "image/*,application/pdf",
       maxSizeBytes = 10 * 1024 * 1024,
       isDisabled = false,
@@ -57,35 +61,59 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
     const lock = useRef(false);
     const dragDepth = useRef(0);
     const [isDragging, setDragging] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const action = useAsyncAction("Could not upload the file");
-    const disabled = isDisabled || action.isPending;
+    const [selectedFile, setSelectedFile] = useState<File | null>(
+      initialFile ?? null,
+    );
+    const [initialSelection] = useState(() => ({
+      file: initialFile,
+      disabled: isDisabled,
+    }));
+    const initialFileConsumed = useRef(false);
+    const { isPending, run } = useAsyncAction("Could not upload the file");
+    const disabled = isDisabled || isPending;
 
-    async function upload(file: File) {
-      if (isDisabled || lock.current) return;
-      if (!acceptsFile(file, accept)) {
-        toast.danger("Choose a supported file type.");
-        return;
-      }
-      if (file.size === 0) {
-        toast.danger("Choose a file that is not empty.");
-        return;
-      }
-      if (file.size > maxSizeBytes) {
-        toast.danger("This file exceeds the upload size limit.");
-        return;
-      }
-      lock.current = true;
-      setSelectedFile(file);
-      try {
-        const result = await action.run(() => onUpload(file));
-        if (result.ok) {
-          setSelectedFile(null);
+    const upload = useCallback(
+      async (file: File) => {
+        if (isDisabled || lock.current) return;
+        if (!acceptsFile(file, accept)) {
+          toast.danger("Choose a supported file type.");
+          return;
         }
-      } finally {
-        lock.current = false;
-      }
-    }
+        if (file.size === 0) {
+          toast.danger("Choose a file that is not empty.");
+          return;
+        }
+        if (file.size > maxSizeBytes) {
+          toast.danger("This file exceeds the upload size limit.");
+          return;
+        }
+        lock.current = true;
+        setSelectedFile(file);
+        try {
+          const result = await run(() => onUpload(file));
+          if (result.ok) {
+            setSelectedFile(null);
+          }
+        } finally {
+          lock.current = false;
+        }
+      },
+      [isDisabled, accept, maxSizeBytes, onUpload, run],
+    );
+
+    useEffect(() => {
+      if (initialFileConsumed.current) return;
+      let active = true;
+      queueMicrotask(() => {
+        if (!active || initialFileConsumed.current) return;
+        initialFileConsumed.current = true;
+        if (initialSelection.file && !initialSelection.disabled)
+          void upload(initialSelection.file);
+      });
+      return () => {
+        active = false;
+      };
+    }, [initialSelection, upload]);
 
     function acceptsDrag(event: DragEvent<HTMLDivElement>) {
       return event.dataTransfer.types.includes("Files");
@@ -95,7 +123,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
       <div
         {...props}
         ref={ref}
-        aria-busy={action.isPending}
+        aria-busy={isPending}
         className={cn(
           "flex min-w-0 flex-col gap-3 rounded-xl border border-dashed p-4",
           isDragging ? "border-accent bg-accent/5" : "border-separator",
@@ -152,7 +180,7 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
             type="button"
             variant="secondary"
             isDisabled={disabled}
-            isPending={action.isPending}
+            isPending={isPending}
             aria-describedby={description ? descriptionId : undefined}
             onPress={async () => {
               if (selectedFile) await upload(selectedFile);
@@ -163,34 +191,34 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(
               <span
                 className={cn(
                   "col-start-1 row-start-1",
-                  (action.isPending || selectedFile) && "invisible",
+                  (isPending || selectedFile) && "invisible",
                 )}
-                aria-hidden={action.isPending || !!selectedFile}
+                aria-hidden={isPending || !!selectedFile}
               >
                 {label}
               </span>
               <span
                 className={cn(
                   "col-start-1 row-start-1",
-                  (action.isPending || !selectedFile) && "invisible",
+                  (isPending || !selectedFile) && "invisible",
                 )}
-                aria-hidden={action.isPending || !selectedFile}
+                aria-hidden={isPending || !selectedFile}
               >
                 Retry upload
               </span>
               <span
                 className={cn(
                   "col-start-1 row-start-1 inline-flex items-center justify-center gap-2",
-                  !action.isPending && "invisible",
+                  !isPending && "invisible",
                 )}
-                aria-hidden={!action.isPending}
+                aria-hidden={!isPending}
               >
                 <Spinner size="sm" aria-hidden="true" />
                 Uploading…
               </span>
             </span>
           </Button>
-          {selectedFile && !action.isPending ? (
+          {selectedFile && !isPending ? (
             <Button
               type="button"
               variant="secondary"
