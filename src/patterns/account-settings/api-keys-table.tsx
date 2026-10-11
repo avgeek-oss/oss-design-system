@@ -9,6 +9,7 @@ import {
 import { StatusIndicator, type StatusDescriptor } from "../status-indicator.js";
 import { actionColumn } from "../settings/table-actions.js";
 import { mcpClientPresentation } from "../../utilities/mcp-client-presentation.js";
+import { TooltipText } from "../../overlays/tooltip.js";
 
 export type ApiKey = {
   id: string;
@@ -33,24 +34,36 @@ function credentialColumns<T extends ApiKey>(
   return [
     {
       key: "permissions",
-      mobileFullWidth: true,
       header: "Permissions",
-      cell: (item) => item.permissions ?? "—",
+      cell: (item) =>
+        item.permissions ? (
+          <TooltipText
+            className="line-clamp-2 max-w-64"
+            tooltip={item.permissions}
+          >
+            {item.permissions}
+          </TooltipText>
+        ) : (
+          "—"
+        ),
     },
     {
       key: "added",
       header: "Added",
+      className: "whitespace-nowrap",
       cell: (item) => (item.createdAt ? formatDate(item.createdAt) : "—"),
     },
     {
       key: "expires",
       header: "Expires",
+      className: "whitespace-nowrap",
       cell: (item) =>
         item.expiresAt ? formatDate(item.expiresAt) : "No expiry",
     },
     {
       key: "last-used",
       header: "Last used",
+      className: "whitespace-nowrap",
       cell: (item) => (item.lastUsedAt ? formatDate(item.lastUsedAt) : "Never"),
     },
     actionColumn(actions),
@@ -66,7 +79,7 @@ export function ApiKeysTable<T extends ApiKey>({
     <ResourceTable
       ariaLabel="API keys"
       mobileLayout="scroll"
-      tableClassName="min-w-4xl"
+      tableClassName="min-w-5xl"
       items={items}
       getRowKey={(item) => item.id}
       emptyTitle="No API keys"
@@ -78,11 +91,14 @@ export function ApiKeysTable<T extends ApiKey>({
           header: "Name",
           className: "min-w-60",
           cell: (item) => (
-            <div className="grid gap-1">
-              <ResourceName name={item.name} description={item.tokenHint} />
-              {item.status ? <StatusIndicator {...item.status} /> : null}
-            </div>
+            <ResourceName name={item.name} description={item.tokenHint} />
           ),
+        },
+        {
+          key: "status",
+          header: "Status",
+          cell: (item) =>
+            item.status ? <StatusIndicator {...item.status} /> : "—",
         },
         ...credentialColumns(formatDate, actions),
       ]}

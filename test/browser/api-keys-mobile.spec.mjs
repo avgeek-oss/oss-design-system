@@ -80,6 +80,7 @@ test("API keys retain every field, native row headers and reachable actions at m
   await expect(table).toBeVisible();
   await expect(table.getByRole("columnheader")).toHaveText([
     "Name",
+    "Status",
     "Permissions",
     "Added",
     "Expires",
@@ -93,7 +94,27 @@ test("API keys retain every field, native row headers and reachable actions at m
   await expect(table.getByRole("rowheader").first()).toContainText(
     "key_••••12ab",
   );
-  await expect(table.getByText("Active", { exact: true })).toBeVisible();
+  await expect(table.getByRole("rowheader").first()).not.toContainText(
+    "Active",
+  );
+  await expect(
+    table.getByRole("gridcell", { name: "Active", exact: true }),
+  ).toBeVisible();
+  const permissions = table
+    .getByRole("gridcell", {
+      name: "Read and write boards, tasks and comments across the current workspace",
+      exact: true,
+    })
+    .locator('[data-slot="tooltip-trigger"]');
+  const permissionHeight = await permissions.evaluate((element) => ({
+    height: element.getBoundingClientRect().height,
+    lineHeight: Number.parseFloat(
+      globalThis.getComputedStyle(element).lineHeight,
+    ),
+  }));
+  expect(permissionHeight.height).toBeLessThanOrEqual(
+    permissionHeight.lineHeight * 2,
+  );
   await expect(
     table.getByRole("gridcell", {
       name: "Read and write boards, tasks and comments across the current workspace",
@@ -102,6 +123,17 @@ test("API keys retain every field, native row headers and reachable actions at m
   ).toBeVisible();
   for (const date of ["2026-10-01", "2026-12-30", "2026-10-06"])
     await expect(table.getByText(date, { exact: true })).toBeVisible();
+  for (const description of await table
+    .locator('[data-slot="table-cell-description"]')
+    .all()) {
+    const dimensions = await description.evaluate((element) => ({
+      height: element.getBoundingClientRect().height,
+      lineHeight: Number.parseFloat(
+        globalThis.getComputedStyle(element).lineHeight,
+      ),
+    }));
+    expect(dimensions.height).toBeLessThanOrEqual(dimensions.lineHeight);
+  }
   await expect(
     table.getByRole("gridcell", { name: "No expiry", exact: true }),
   ).toBeVisible();
@@ -122,7 +154,7 @@ test("API keys retain every field, native row headers and reachable actions at m
   if (touch) expect(bounds.scrollWidth).toBeGreaterThan(bounds.width);
   expect(bounds.pageWidth).toBeLessThanOrEqual(width);
   const cells = table.getByRole("row").nth(1).locator(".table__cell");
-  await expect(cells).toHaveCount(6);
+  await expect(cells).toHaveCount(7);
   const positions = await cells.evaluateAll((elements) =>
     elements.map((element) => element.getBoundingClientRect().top),
   );
