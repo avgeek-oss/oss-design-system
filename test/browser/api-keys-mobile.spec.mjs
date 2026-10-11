@@ -138,7 +138,10 @@ test("API keys retain every field, native row headers and reachable actions at m
     table.getByRole("gridcell", { name: "No expiry", exact: true }),
   ).toBeVisible();
   await expect(
-    table.getByRole("gridcell", { name: "Never", exact: true }),
+    table.getByRole("row", { name: /Reporting/ }).getByRole("gridcell", {
+      name: "Never",
+      exact: true,
+    }),
   ).toBeVisible();
   const bounds = await table.evaluate((element) => {
     const container = element.closest(".table__scroll-container");
