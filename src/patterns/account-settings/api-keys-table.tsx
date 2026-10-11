@@ -65,7 +65,8 @@ export function ApiKeysTable<T extends ApiKey>({
   return (
     <ResourceTable
       ariaLabel="API keys"
-      mobileLayout="stacked"
+      mobileLayout="scroll"
+      tableClassName="min-w-4xl"
       items={items}
       getRowKey={(item) => item.id}
       emptyTitle="No API keys"
@@ -75,6 +76,7 @@ export function ApiKeysTable<T extends ApiKey>({
           key: "name",
           isRowHeader: true,
           header: "Name",
+          className: "min-w-60",
           cell: (item) => (
             <div className="grid gap-1">
               <ResourceName name={item.name} description={item.tokenHint} />
