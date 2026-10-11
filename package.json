@@ -729,6 +729,10 @@
     "./patterns/feedback/backend-unavailable": {
       "types": "./dist/patterns/feedback/backend-unavailable.d.ts",
       "import": "./dist/patterns/feedback/backend-unavailable.js"
+    },
+    "./patterns/file-upload": {
+      "types": "./dist/patterns/file-upload.d.ts",
+      "import": "./dist/patterns/file-upload.js"
     }
   }
 }

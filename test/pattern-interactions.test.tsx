@@ -35,6 +35,7 @@ import { RecoveryCodes } from "../src/patterns/auth/recovery-codes.js";
 import { CodeBlock } from "../src/typography/code-block.js";
 
 import { ResourceTable } from "../src/patterns/resource-table.js";
+import { FileUpload } from "../src/patterns/file-upload.js";
 import { QueryLoading } from "../src/patterns/feedback/query-state.js";
 
 let dangerMessages: ReactNode[] = [];
@@ -1765,4 +1766,97 @@ test("invitation verification shares its resend lock, retains drafts and respect
   } finally {
     await view.unmount();
   }
+});
+
+async function selectUpload(file: File) {
+  const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+  assert.ok(input);
+  Object.defineProperty(input, "files", {
+    configurable: true,
+    value: { length: 1, item: () => file },
+  });
+  await act(async () =>
+    input.dispatchEvent(new Event("change", { bubbles: true })),
+  );
+}
+
+test("file upload locks duplicates, preserves failed files for retry and clears successful selection", async () => {
+  const file = new File(["image"], "diagram.png", { type: "image/png" });
+  const pending = deferred();
+  const received: File[] = [];
+  const view = await mount(
+    <FileUpload
+      onUpload={async (selected) => {
+        received.push(selected);
+        if (received.length === 1) {
+          await pending.promise;
+          throw new Error("Storage could not be reached");
+        }
+      }}
+    />,
+  );
+  await selectUpload(file);
+  assert.equal(button("Uploading…").disabled, true);
+  await selectUpload(file);
+  assert.equal(received.length, 1);
+  await act(async () => pending.resolve());
+  assertFailureToast("Storage could not be reached");
+  assert.match(view.container.textContent ?? "", /diagram.png/);
+  await click(button("Retry upload"));
+  assert.deepEqual(received, [file, file]);
+  assert.doesNotMatch(view.container.textContent ?? "", /diagram.png/);
+  assert.equal(button("Upload attachment").disabled, false);
+  await view.unmount();
+});
+
+test("file upload rejects unsupported and oversized files without mutation, including drops", async () => {
+  let calls = 0;
+  const view = await mount(
+    <FileUpload
+      accept="application/pdf,.png"
+      maxSizeBytes={8}
+      onUpload={async () => {
+        calls++;
+      }}
+    />,
+  );
+  await selectUpload(
+    new File(["content"], "script.js", { type: "text/javascript" }),
+  );
+  await selectUpload(
+    new File(["more than eight bytes"], "report.pdf", {
+      type: "application/pdf",
+    }),
+  );
+  assert.equal(calls, 0);
+  assert.deepEqual(dangerMessages, [
+    "Choose a supported file type.",
+    "This file exceeds the upload size limit.",
+  ]);
+  const event = new Event("drop", { bubbles: true, cancelable: true });
+  Object.defineProperty(event, "dataTransfer", {
+    value: {
+      types: ["Files"],
+      files: {
+        length: 1,
+        item: () => new File(["png"], "picture.PNG", { type: "" }),
+      },
+    },
+  });
+  await act(async () => view.container.firstElementChild?.dispatchEvent(event));
+  assert.equal(event.defaultPrevented, true);
+  assert.equal(calls, 1);
+  await view.render(
+    <FileUpload
+      isDisabled
+      onUpload={async () => {
+        calls++;
+      }}
+    />,
+  );
+  await selectUpload(
+    new File(["content"], "picture.png", { type: "image/png" }),
+  );
+  assert.equal(calls, 1);
+  await view.unmount();
 });

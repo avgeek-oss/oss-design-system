@@ -102,3 +102,11 @@ Auth screens are exported from their own files, rather than implemented inside C
 Use `dateFormatOptions`, `timeFormatOptions` and `defaultDateTimePreferences` from `@avgeek-oss/design-system/utilities/date-time-preferences` in account settings and onboarding. The React-free catalog defines the same five date and four time format IDs for every app. Stored defaults are `day-short-month-year`, `24-hour` and `UTC`. `browserDateTimePreferences` can suggest a supported browser time zone during onboarding; it does not replace stored preferences.
 
 Apps validate and persist these IDs and convert legacy IDs without losing existing choices. Formatting follows the selected display preference. Domain DATE and UTC timestamp serialization remain app-owned wire contracts. Pass the catalog arrays to `DateTimePreferenceFields` along with supported IANA time zones.
+
+## File uploads
+
+Use `FileUpload` from the package root or `patterns/file-upload` for one attachment at a time. It provides a keyboard-accessible file-picker button and a drop area; it uploads immediately after selection. The default `accept` is `image/*,application/pdf` and the default size limit is 10 MiB. Apps should pass their supported MIME types/extensions, `maxSizeBytes`, a descriptive `description`, and `isDisabled` from permissions. The drop area is not a separate keyboard stop because the same action is available through the button.
+
+`onUpload(file)` must resolve only after the upload and metadata save succeed. Rejection shows one danger toast, preserves the selected file and exposes **Retry upload** and **Choose another file**. Pending state appears inside the initiating button and locks picker, drop and retry requests. Success clears the selection. Apps may show contextual success feedback after committing their attachment list; do not duplicate upload failures in the callback. The root forwards div attributes and a ref; use `className` for layout, not to restyle its buttons.
+
+Client file checks are feedback only. Apps own storage, signed URLs, authentication, server validation, request cancellation and persisted attachment lists. Revalidate file type and size on the server; a browser MIME type is not proof of content. Use `ProfileImageSettings` for the account's existing Gravatar preference, rather than introducing an upload it does not support.
