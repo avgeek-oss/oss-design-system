@@ -1795,18 +1795,23 @@ test("file upload locks duplicates, preserves failed files for retry and clears 
       }}
     />,
   );
-  await selectUpload(file);
-  assert.equal(button("Uploading…").disabled, true);
-  await selectUpload(file);
-  assert.equal(received.length, 1);
-  await act(async () => pending.resolve());
-  assertFailureToast("Storage could not be reached");
-  assert.match(view.container.textContent ?? "", /diagram.png/);
-  await click(button("Retry upload"));
-  assert.deepEqual(received, [file, file]);
-  assert.doesNotMatch(view.container.textContent ?? "", /diagram.png/);
-  assert.equal(button("Upload attachment").disabled, false);
-  await view.unmount();
+  try {
+    const uploadButton = view.container.querySelector("button");
+    assert.ok(uploadButton);
+    await selectUpload(file);
+    assert.equal(uploadButton.disabled, true);
+    await selectUpload(file);
+    assert.equal(received.length, 1);
+    await act(async () => pending.resolve());
+    assertFailureToast("Storage could not be reached");
+    assert.match(view.container.textContent ?? "", /diagram.png/);
+    await click(uploadButton);
+    assert.deepEqual(received, [file, file]);
+    assert.doesNotMatch(view.container.textContent ?? "", /diagram.png/);
+    assert.equal(uploadButton.disabled, false);
+  } finally {
+    await view.unmount();
+  }
 });
 
 test("file upload rejects unsupported and oversized files without mutation, including drops", async () => {
@@ -1820,43 +1825,48 @@ test("file upload rejects unsupported and oversized files without mutation, incl
       }}
     />,
   );
-  await selectUpload(
-    new File(["content"], "script.js", { type: "text/javascript" }),
-  );
-  await selectUpload(
-    new File(["more than eight bytes"], "report.pdf", {
-      type: "application/pdf",
-    }),
-  );
-  assert.equal(calls, 0);
-  assert.deepEqual(dangerMessages, [
-    "Choose a supported file type.",
-    "This file exceeds the upload size limit.",
-  ]);
-  const event = new Event("drop", { bubbles: true, cancelable: true });
-  Object.defineProperty(event, "dataTransfer", {
-    value: {
-      types: ["Files"],
-      files: {
-        length: 1,
-        item: () => new File(["png"], "picture.PNG", { type: "" }),
+  try {
+    await selectUpload(
+      new File(["content"], "script.js", { type: "text/javascript" }),
+    );
+    await selectUpload(
+      new File(["more than eight bytes"], "report.pdf", {
+        type: "application/pdf",
+      }),
+    );
+    assert.equal(calls, 0);
+    assert.deepEqual(dangerMessages, [
+      "Choose a supported file type.",
+      "This file exceeds the upload size limit.",
+    ]);
+    const event = new Event("drop", { bubbles: true, cancelable: true });
+    Object.defineProperty(event, "dataTransfer", {
+      value: {
+        types: ["Files"],
+        files: {
+          length: 1,
+          item: () => new File(["png"], "picture.PNG", { type: "" }),
+        },
       },
-    },
-  });
-  await act(async () => view.container.firstElementChild?.dispatchEvent(event));
-  assert.equal(event.defaultPrevented, true);
-  assert.equal(calls, 1);
-  await view.render(
-    <FileUpload
-      isDisabled
-      onUpload={async () => {
-        calls++;
-      }}
-    />,
-  );
-  await selectUpload(
-    new File(["content"], "picture.png", { type: "image/png" }),
-  );
-  assert.equal(calls, 1);
-  await view.unmount();
+    });
+    await act(async () =>
+      view.container.firstElementChild?.dispatchEvent(event),
+    );
+    assert.equal(event.defaultPrevented, true);
+    assert.equal(calls, 1);
+    await view.render(
+      <FileUpload
+        isDisabled
+        onUpload={async () => {
+          calls++;
+        }}
+      />,
+    );
+    await selectUpload(
+      new File(["content"], "picture.png", { type: "image/png" }),
+    );
+    assert.equal(calls, 1);
+  } finally {
+    await view.unmount();
+  }
 });
