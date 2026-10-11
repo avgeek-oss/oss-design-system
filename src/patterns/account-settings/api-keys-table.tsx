@@ -109,6 +109,7 @@ export function AuthorizedClientsTable<T extends AuthorizedClient>({
     <ResourceTable
       ariaLabel="MCP connections"
       mobileLayout="scroll"
+      tableClassName="min-w-4xl"
       items={items}
       getRowKey={(item) => item.id}
       emptyTitle="No MCP connections yet"
@@ -118,6 +119,7 @@ export function AuthorizedClientsTable<T extends AuthorizedClient>({
           key: "client",
           isRowHeader: true,
           header: "App",
+          className: "min-w-60",
           cell: (item) => {
             const client = mcpClientPresentation(item.client);
             return (
