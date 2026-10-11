@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.16 — 2026-10-11
+
+- Use MCP server icons for MCP Connections and MCP Guide headings.
+- Display Codex with the ChatGPT logo in connection tables, consent forms and revocation confirmations, including connections stored with a Codex metadata URL.
+- Keep MCP connections in a horizontally scrolling table on mobile, with readable application names.
+- Return keyboard focus to the initiating action after dismissing MCP connection revocation.
+
 ## 1.2.15
 
 - Standardize MCP consent with an application input, user-selected Read-only, Write and Administrator scope, common role guidance and Deny/Approve actions. Return to the client through the app-owned denial callback.
