@@ -12,12 +12,13 @@ test("API-key confirmation restores its connected row action after Escape and Ca
     ),
   );
   await page.bringToFront();
+  await expect(page.locator("body.sb-show-main")).toBeVisible();
   const opener = page.getByRole("button", { name: "Revoke", exact: true });
   const dialog = page.getByRole("dialog", { name: "Revoke Automation?" });
   for (const dismissal of ["Escape", "Cancel", "Escape"]) {
     await opener.focus();
     if (touch) await opener.tap();
-    else await page.keyboard.press("Enter");
+    else await opener.press("Enter");
     await expect(dialog).toBeVisible();
     await expect
       .poll(() =>
