@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.17 — 2026-10-13
+
+- Keep personal and team API keys in a horizontally scrolling table on mobile.
+- Remove redundant Active status chips and show expired keys in the Expires column.
+- Replace the contributor component catalogue with Storybook, including component documentation, controls and interaction checks.
+
 ## 1.2.16 — 2026-10-11
 
 - Use MCP server icons for MCP Connections and MCP Guide headings.
