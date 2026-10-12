@@ -37,6 +37,17 @@ body {
   min-inline-size: 0;
   max-inline-size: 100%;
 }
+/* Prism's JSX tokens share a class name with the native Tag component. */
+.sbdocs .prismjs .token.tag {
+  display: inline;
+  padding: 0;
+  border-radius: 0;
+  font: inherit;
+  user-select: text;
+  transform: none;
+  transition: none;
+  cursor: inherit;
+}
 @media (max-width: 639px) {
   body .sbdocs-wrapper {
     padding: 24px 16px;

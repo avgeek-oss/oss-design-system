@@ -31,6 +31,9 @@ test("Storybook docs expose working controls, real source and bounded mobile con
   await expect(docs.locator("pre.prismjs").first()).toContainText(
     "export const Example",
   );
+  expect(await docs.locator("pre.prismjs").first().innerText()).toContain(
+    '<div className="p-4">',
+  );
   await expect(docs.locator("html")).toHaveAttribute("data-theme", theme);
   expect(
     await docs
