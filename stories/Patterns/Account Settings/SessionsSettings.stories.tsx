@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { SessionsSettingsPreview as ComponentExample } from "../../../studio/account-settings-previews";
+import { SessionsSettings } from "../../../src/patterns/account-settings/sessions-settings";
 const meta = {
   args: { failRequest: false, slowResponse: false },
   argTypes: {
@@ -13,6 +14,15 @@ const meta = {
     },
   },
   title: "Patterns/Account Settings/SessionsSettings",
+  component: SessionsSettings,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          "Use the published SessionsSettings component from @avgeek-oss/design-system/patterns/account-settings/sessions-settings. Applications supply data and action callbacks.",
+      },
+    },
+  },
 } satisfies Meta;
 export default meta;
 type Story = StoryObj;
