@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { test as base, expect } from "@playwright/test";
 
-const exportDirectory = path.resolve("cosmos-export");
+const exportDirectory = path.resolve("storybook-static");
 const contentTypes = {
   ".html": "text/html",
   ".js": "text/javascript",
@@ -56,10 +56,27 @@ export const test = base.extend({
     },
     { scope: "worker" },
   ],
-  fixtureUrl: async ({ fixtureOrigin }, use) => {
+  fixtureUrl: async ({ fixtureOrigin, theme }, use) => {
+    const { entries: index } = JSON.parse(
+      await readFile(path.join(exportDirectory, "index.json"), "utf8"),
+    );
+    const entries = Object.values(index);
     await use((file, name) => {
-      const fixtureId = { path: file, ...(name ? { name } : {}) };
-      return `${fixtureOrigin}/renderer.html?fixtureId=${encodeURIComponent(JSON.stringify(fixtureId))}&locked=true`;
+      const title = file
+        .replace(/^stories\//, "")
+        .replace(/\.stories\.tsx$/, "");
+      const entry = entries.find(
+        (entry) =>
+          entry.type === "story" &&
+          entry.title === title &&
+          entry.name === (name ?? "Master"),
+      );
+      assert.ok(
+        entry,
+        `Missing Storybook story: ${title} / ${name ?? "Master"}`,
+      );
+      const id = entry.id;
+      return `${fixtureOrigin}/iframe.html?id=${id}&viewMode=story&globals=theme:${theme}`;
     });
   },
   touch: async ({ hasTouch }, use) => use(Boolean(hasTouch)),

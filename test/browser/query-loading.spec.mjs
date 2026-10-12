@@ -8,7 +8,7 @@ test("initial loading remains accessible without shifting content", async ({
   theme,
 }, testInfo) => {
   await page.goto(
-    fixtureUrl("cosmos/Patterns/Feedback/QueryLoading.fixture.tsx", "Initial"),
+    fixtureUrl("stories/Patterns/Feedback/QueryLoading.stories.tsx", "Master"),
   );
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
   const status = page
@@ -51,7 +51,7 @@ test("visible progress can be explicitly requested", async ({
 }, testInfo) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Feedback/QueryLoading.fixture.tsx",
+      "stories/Patterns/Feedback/QueryLoading.stories.tsx",
       "Visible progress",
     ),
   );

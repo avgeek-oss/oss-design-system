@@ -1,7 +1,7 @@
 import { test, expect } from "./fixtures.mjs";
 
 for (const variant of [
-  "Application title",
+  "Master",
   "Custom icon title",
   "Content title",
   "Status title",
@@ -13,7 +13,10 @@ for (const variant of [
     width,
   }, testInfo) => {
     await page.goto(
-      fixtureUrl("cosmos/Layouts/PageHeading.fixture.tsx", variant),
+      fixtureUrl(
+        "stories/Layouts/PageHeading.stories.tsx",
+        variant === "Application title" ? "Master" : variant,
+      ),
     );
     await page.bringToFront();
     const heading = page.getByRole("heading", { level: 1 });
@@ -101,7 +104,7 @@ test("page headings retain their wrapping default", async ({
   width,
 }) => {
   await page.goto(
-    fixtureUrl("cosmos/Layouts/PageHeading.fixture.tsx", "Default wrapping"),
+    fixtureUrl("stories/Layouts/PageHeading.stories.tsx", "Default wrapping"),
   );
   const heading = page.getByRole("heading", { level: 1 });
   await expect(heading).toContainText("all remaining product follow-ups");

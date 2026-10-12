@@ -93,7 +93,8 @@ try {
   }
   for (const forbidden of [
     "studio",
-    "cosmos",
+    "stories",
+    ".storybook",
     "test",
     "scripts",
     "node_modules",

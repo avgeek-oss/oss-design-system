@@ -3,7 +3,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 
 export default tseslint.config(
-  { ignores: ["dist/**", "cosmos-export/**", "cosmos.imports.*"] },
+  { ignores: ["dist/**", "storybook-static/**", "storybook.log"] },
   ...tseslint.configs.recommended,
   {
     files: ["**/*.mjs"],

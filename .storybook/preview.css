@@ -1,0 +1,44 @@
+@source "../stories/**/*.{ts,tsx}";
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+#storybook-root {
+  min-height: 240px;
+}
+.docs-story {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Keep wide demos and API signatures inside their own scroll areas. */
+.catalogue-example {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+.catalogue-example > * {
+  max-inline-size: 100%;
+}
+.catalogue-reference {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+.catalogue-reference table,
+.sbdocs-content table {
+  display: block;
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+.catalogue-reference :is(p, li) {
+  overflow-wrap: anywhere;
+}
+.sbdocs-wrapper .sbdocs-content {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+@media (max-width: 639px) {
+  body .sbdocs-wrapper {
+    padding: 24px 16px;
+  }
+}

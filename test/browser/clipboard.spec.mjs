@@ -4,7 +4,7 @@ import { test, expect } from "./fixtures.mjs";
 const contracts = [
   {
     name: "CodeBlock",
-    fixture: "cosmos/Primitives/Typography/CodeBlock.fixture.tsx",
+    fixture: "stories/Primitives/Typography/CodeBlock.stories.tsx",
     action: "Copy code",
     label: "Copy",
     content: '[data-slot="code-block-code"]',
@@ -15,7 +15,7 @@ const contracts = [
   },
   {
     name: "RecoveryCodes",
-    fixture: "cosmos/Patterns/Auth/RecoveryCodesScreen.fixture.tsx",
+    fixture: "stories/Patterns/Auth/RecoveryCodesScreen.stories.tsx",
     action: "Copy codes",
     label: "Copy codes",
     content: '[aria-label="Recovery codes"]',
@@ -140,8 +140,8 @@ for (const contract of contracts) {
       await holdClipboard(page);
       await page.goto(
         fixtureUrl(
-          "cosmos/Primitives/Overlays/OverlaySuspensionScope.fixture.tsx",
-          contract.name,
+          "stories/Primitives/Overlays/OverlaySuspensionScope.stories.tsx",
+          contract.name === "Passkey" ? "Master" : contract.name,
         ),
       );
       await page.bringToFront();

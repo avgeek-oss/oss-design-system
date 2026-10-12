@@ -1,8 +1,8 @@
 node_modules/
 dist/
 artifacts/
-cosmos-export/
-cosmos.imports.*
+storybook-static/
+storybook.log
 *.tgz
 *.tsbuildinfo
 *.log

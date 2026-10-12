@@ -1,7 +1,7 @@
 import { test, expect } from "./fixtures.mjs";
 
 for (const [name, heading, retry] of [
-  ["404", "Page not found", false],
+  ["Master", "Page not found", false],
   ["500", "We couldn't load this page", true],
   ["Unavailable", "Temporarily unavailable", true],
 ]) {
@@ -10,7 +10,10 @@ for (const [name, heading, retry] of [
     fixtureUrl,
   }) => {
     await page.goto(
-      fixtureUrl("cosmos/Patterns/Feedback/ErrorPage.fixture.tsx", name),
+      fixtureUrl(
+        "stories/Patterns/Feedback/ErrorPage.stories.tsx",
+        name === "404" ? "Master" : name,
+      ),
     );
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
     await expect(
@@ -39,7 +42,7 @@ test("pending recovery cannot be submitted again", async ({
   fixtureUrl,
 }) => {
   await page.goto(
-    fixtureUrl("cosmos/Patterns/Feedback/ErrorPage.fixture.tsx", "Pending"),
+    fixtureUrl("stories/Patterns/Feedback/ErrorPage.stories.tsx", "Pending"),
   );
   await expect(page.getByRole("button", { name: "Try again" })).toBeDisabled();
   await expect(page.getByRole("link", { name: "Go to home" })).toBeVisible();

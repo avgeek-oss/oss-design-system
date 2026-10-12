@@ -12,7 +12,7 @@ test("sidebar links preserve navigation, active sections and mobile dismissal", 
   touch,
   theme,
 }, testInfo) => {
-  await page.goto(fixtureUrl("cosmos/Layouts/SecondarySidebar.fixture.tsx"));
+  await page.goto(fixtureUrl("stories/Layouts/SecondarySidebar.stories.tsx"));
   await page.bringToFront();
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
   const toggle = page.getByRole("button", { name: "Toggle navigation" });
@@ -63,7 +63,7 @@ test("sidebar links preserve navigation, active sections and mobile dismissal", 
   if (touch) await expect(page.getByRole("dialog")).toHaveCount(0);
 
   await page.goto(
-    fixtureUrl("cosmos/Layouts/Shell.fixture.tsx", "Account settings"),
+    fixtureUrl("stories/Layouts/Shell.stories.tsx", "Account settings"),
   );
   if (touch)
     await press(page.getByRole("button", { name: "Toggle navigation" }), touch);
@@ -83,7 +83,7 @@ test("sidebar links preserve navigation, active sections and mobile dismissal", 
   await expect(team).not.toHaveAttribute("aria-current", "page");
   if (touch) await page.keyboard.press("Escape");
   await page.goto(
-    fixtureUrl("cosmos/Layouts/Shell.fixture.tsx", "Team settings"),
+    fixtureUrl("stories/Layouts/Shell.stories.tsx", "Team settings"),
   );
   if (touch)
     await press(page.getByRole("button", { name: "Toggle navigation" }), touch);
@@ -113,7 +113,7 @@ test("notification activation waits, retries and preserves native modified click
   await page.bringToFront();
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/NotificationMenu.fixture.tsx",
+      "stories/Patterns/NotificationMenu.stories.tsx",
       "Activation and recovery",
     ),
   );
@@ -229,7 +229,10 @@ for (const variant of ["Ignored activation", "Ignored async activation"]) {
     touch,
   }) => {
     await page.goto(
-      fixtureUrl("cosmos/Patterns/NotificationMenu.fixture.tsx", variant),
+      fixtureUrl(
+        "stories/Patterns/NotificationMenu.stories.tsx",
+        variant === "Mark all read" ? "Master" : variant,
+      ),
     );
     const trigger = page.getByRole("button", { name: /^Notifications/ });
     await press(trigger, touch);
@@ -269,7 +272,7 @@ for (const variant of ["Ignored activation", "Ignored async activation"]) {
 }
 
 for (const variant of [
-  "Stable navbar",
+  "Master",
   "Replaced navbar",
   "Destination focus",
   "Destination heading",
@@ -285,7 +288,10 @@ for (const variant of [
       "This regression concerns the mobile drawer",
     );
     await page.goto(
-      fixtureUrl("cosmos/Layouts/NavigationFocus.fixture.tsx", variant),
+      fixtureUrl(
+        "stories/Layouts/NavigationFocus.stories.tsx",
+        variant === "Stable navbar" ? "Master" : variant,
+      ),
     );
     await page.bringToFront();
     if (!touch) {
@@ -375,7 +381,7 @@ test("a drawer reopened as the destination mounts keeps focus inside navigation"
   test.skip(!touch, "This regression concerns the mobile drawer");
   await page.goto(
     fixtureUrl(
-      "cosmos/Layouts/NavigationFocus.fixture.tsx",
+      "stories/Layouts/NavigationFocus.stories.tsx",
       "Reopen on arrival",
     ),
   );
@@ -466,11 +472,30 @@ for (const kind of ["dropdown", "select"]) {
     reducedMotion,
   }, testInfo) => {
     await page.goto(
-      fixtureUrl("cosmos/Primitives/Navigation/Breadcrumbs.fixture.tsx"),
+      fixtureUrl(
+        "stories/Primitives/Navigation/Breadcrumbs.stories.tsx",
+        "Sidebar categories omitted",
+      ),
     );
     await page.bringToFront();
     await page.evaluate(() => globalThis.document.fonts.ready);
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    const categoryTrails = page.getByRole("navigation", { name: "Breadcrumb" });
+    await expect(
+      categoryTrails.getByText("Stats", { exact: true }),
+    ).toHaveCount(0);
+    const dailyTrail = categoryTrails.filter({ hasText: "Daily View" });
+    await expect(dailyTrail.locator("li")).toHaveCount(1);
+    await expect(dailyTrail.locator('[aria-current="page"]')).toHaveText(
+      "Daily View",
+    );
+    await expect(dailyTrail.getByText("/", { exact: true })).toHaveCount(0);
+    await page.goto(
+      fixtureUrl(
+        "stories/Primitives/Navigation/Breadcrumbs.stories.tsx",
+        kind === "dropdown" ? "Dropdown" : "Searchable dropdown",
+      ),
+    );
     const trigger = page.getByRole("button", {
       name: kind === "dropdown" ? "Switch section" : /Switch item/,
       exact: kind === "dropdown",
@@ -481,13 +506,6 @@ for (const kind of ["dropdown", "select"]) {
         : '[data-slot="select-popover"]',
     );
     const trails = page.getByRole("navigation", { name: "Breadcrumb" });
-    await expect(trails.getByText("Stats", { exact: true })).toHaveCount(0);
-    const dailyTrail = trails.filter({ hasText: "Daily View" });
-    await expect(dailyTrail.locator("li")).toHaveCount(1);
-    await expect(dailyTrail.locator('[aria-current="page"]')).toHaveText(
-      "Daily View",
-    );
-    await expect(dailyTrail.getByText("/", { exact: true })).toHaveCount(0);
     for (const trail of await trails.all()) {
       const items = trail.locator("li");
       await expect(trail.locator('[aria-current="page"]')).toHaveCount(1);
@@ -694,7 +712,7 @@ test("notification dialog ref preserves focus through disabled refresh and pagin
 }, testInfo) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/NotificationMenu.fixture.tsx",
+      "stories/Patterns/NotificationMenu.stories.tsx",
       "Focus management",
     ),
   );
@@ -765,7 +783,7 @@ test("a notification completed after close and reopen leaves the current menu al
 }) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/NotificationMenu.fixture.tsx",
+      "stories/Patterns/NotificationMenu.stories.tsx",
       "Activation and recovery",
     ),
   );
@@ -802,7 +820,7 @@ test("notification trigger keeps its geometry during held pointer, keyboard and 
   theme,
 }) => {
   await page.goto(
-    fixtureUrl("cosmos/Patterns/NotificationMenu.fixture.tsx", "Mark all read"),
+    fixtureUrl("stories/Patterns/NotificationMenu.stories.tsx", "Master"),
   );
   await page.bringToFront();
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);

@@ -29,7 +29,7 @@ for (const scenario of ["single", "stack", "modal"]) {
     reducedMotion,
   }, testInfo) => {
     await page.goto(
-      fixtureUrl("cosmos/Primitives/Overlays/Toast.fixture.tsx", "Dismissal"),
+      fixtureUrl("stories/Primitives/Overlays/Toast.stories.tsx", "Dismissal"),
     );
     await page.bringToFront();
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -178,7 +178,9 @@ test("semantic status text and chip icons share their chip foreground", async ({
   page,
   fixtureUrl,
 }) => {
-  await page.goto(fixtureUrl("cosmos/Primitives/DataDisplay/Chip.fixture.tsx"));
+  await page.goto(
+    fixtureUrl("stories/Primitives/DataDisplay/Chip.stories.tsx"),
+  );
   for (const tone of ["danger", "warning", "success"]) {
     const example = page.locator(`[data-status-tone="${tone}"]`);
     await expect(example).toBeVisible();
@@ -199,7 +201,7 @@ test("loading skeleton reserves card surfaces with one accessible status", async
   reducedMotion,
 }, testInfo) => {
   await page.goto(
-    fixtureUrl("cosmos/Patterns/Feedback/LoadingSkeleton.fixture.tsx"),
+    fixtureUrl("stories/Patterns/Feedback/LoadingSkeleton.stories.tsx"),
   );
   const status = page.getByRole("status", { name: "Loading overview" });
   await expect(status).toBeVisible();

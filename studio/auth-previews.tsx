@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useFixtureInput } from "react-cosmos/client";
+import { usePreviewOptions } from "./preview-options";
 import { preferenceOptions } from "./preference-options";
 import { BrandLockup } from "../src/media/brand-lockup";
 import { AvgeekLogo } from "./avgeek-brand";
@@ -44,8 +44,8 @@ export type AuthPreviewScreen =
   | "RecoveryCodesScreen";
 
 export function useAuthPreviewSubmit() {
-  const [slow] = useFixtureInput("Slow response", false);
-  const [fail] = useFixtureInput("Fail request", false);
+  const { slowResponse: slow } = usePreviewOptions();
+  const { failRequest: fail } = usePreviewOptions();
   return async () => {
     if (slow) await new Promise((resolve) => setTimeout(resolve, 1200));
     if (fail)
@@ -65,10 +65,7 @@ export function AuthPreview({
   const [screen, setScreen] = useState(initial);
   const [passkeyBusy, setPasskeyBusy] = useState(false);
   const passkeyAttempt = useRef<AbortController | null>(null);
-  const [setupRequests, setSetupRequests] = useFixtureInput(
-    "Setup requests",
-    0,
-  );
+  const [setupRequests, setSetupRequests] = useState(0);
   const submit = useAuthPreviewSubmit();
   const back = () => setScreen("SignIn");
   const cancelPasskey = () => {
@@ -219,9 +216,10 @@ export function ConsentPreview({
   viewerRole?: boolean;
   slowRequest?: boolean;
 }) {
-  const [viewer] = useFixtureInput("Viewer role", viewerRole);
-  const [slow] = useFixtureInput("Slow authorization", slowRequest);
-  const [fail] = useFixtureInput("Authorization failure", false);
+  const options = usePreviewOptions();
+  const viewer = options.viewerRole ?? viewerRole;
+  const slow = options.slowAuthorization ?? slowRequest;
+  const fail = options.authorizationFailure;
   const [accessLevel, setAccessLevel] = useState<"read" | "write" | "admin">(
     "read",
   );
