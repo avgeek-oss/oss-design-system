@@ -1,8 +1,0 @@
-import { ConsentPreview } from "../../../studio/auth-previews";
-
-export default {
-  Administrator: <ConsentPreview />,
-  Viewer: <ConsentPreview viewerRole />,
-  Pending: <ConsentPreview slowRequest />,
-  "Long client name": <ConsentPreview clientName={"M".repeat(100)} />,
-};

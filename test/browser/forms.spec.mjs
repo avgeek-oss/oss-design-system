@@ -62,7 +62,7 @@ test("sign-in clears completed passwords and cached-page credentials while retai
   fixtureUrl,
 }) => {
   await page.goto(
-    fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", "Credential retry"),
+    fixtureUrl("stories/Patterns/Auth/SignIn.stories.tsx", "Credential retry"),
   );
   const email = page.getByRole("textbox", { name: /^Email/ });
   const password = page.getByLabel("Password", { exact: true });
@@ -88,8 +88,8 @@ for (const variant of ["Name validation"]) {
     await page.bringToFront();
     await page.goto(
       fixtureUrl(
-        "cosmos/Patterns/Account Settings/CreateApiKeyDialog.fixture.tsx",
-        variant,
+        "stories/Patterns/Account Settings/CreateApiKeyDialog.stories.tsx",
+        variant === "Name validation" ? "Master" : variant,
       ),
     );
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -168,7 +168,7 @@ test("invitation entry focuses email and moves focus to the returned link action
 }, testInfo) => {
   await page.bringToFront();
   await page.goto(
-    fixtureUrl("cosmos/Patterns/Team Settings/InviteMemberDialog.fixture.tsx"),
+    fixtureUrl("stories/Patterns/Team Settings/InviteMemberDialog.stories.tsx"),
   );
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
   const opener = page.getByRole("button", {
@@ -198,9 +198,12 @@ test("auth page composition retains the same gutters as a standalone auth screen
   width,
 }) => {
   const frames = [];
-  for (const variant of ["Default", "Page layout"]) {
+  for (const variant of ["Master", "Page layout"]) {
     await page.goto(
-      fixtureUrl("cosmos/Patterns/Auth/SignIn.fixture.tsx", variant),
+      fixtureUrl(
+        "stories/Patterns/Auth/SignIn.stories.tsx",
+        variant === "Default" ? "Master" : variant,
+      ),
     );
     await expect(
       page.getByRole("heading", { name: "Sign in", exact: true }),
@@ -237,7 +240,7 @@ test("sign-in verification navigation uses the shared request and private acknow
 }, testInfo) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Auth/SignIn.fixture.tsx",
+      "stories/Patterns/Auth/SignIn.stories.tsx",
       "Email verification recovery",
     ),
   );
@@ -333,8 +336,8 @@ for (const contract of [
   }, testInfo) => {
     await page.goto(
       fixtureUrl(
-        "cosmos/Patterns/Auth/EmailConfirmation.fixture.tsx",
-        contract.variant,
+        "stories/Patterns/Auth/EmailConfirmation.stories.tsx",
+        contract.variant === "Verify email" ? "Master" : contract.variant,
       ),
     );
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -400,7 +403,7 @@ test("email link states do not mutate on mount and omit unsupported retry", asyn
 }) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Auth/EmailConfirmation.fixture.tsx",
+      "stories/Patterns/Auth/EmailConfirmation.stories.tsx",
       "Missing link",
     ),
   );
@@ -413,7 +416,7 @@ test("email link states do not mutate on mount and omit unsupported retry", asyn
   );
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Auth/EmailConfirmation.fixture.tsx",
+      "stories/Patterns/Auth/EmailConfirmation.stories.tsx",
       "Checking",
     ),
   );
@@ -442,7 +445,7 @@ test("invitation resend awaits one request, retains name and code and honors coo
 }, testInfo) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Auth/InvitationVerification.fixture.tsx",
+      "stories/Patterns/Auth/InvitationVerification.stories.tsx",
       "Resend recovery",
     ),
   );
@@ -519,7 +522,7 @@ test("invitation resend awaits one request, retains name and code and honors coo
   await expect(resend).toBeEnabled();
 });
 const suspensionFixture =
-  "cosmos/Primitives/Overlays/OverlaySuspensionScope.fixture.tsx";
+  "stories/Primitives/Overlays/OverlaySuspensionScope.stories.tsx";
 async function previewEvent(page, type) {
   await page.evaluate(
     (name) => globalThis.dispatchEvent(new Event(`preview:${name}`)),
@@ -560,7 +563,12 @@ for (const scenario of [
     fixtureUrl,
     theme,
   }, testInfo) => {
-    await page.goto(fixtureUrl(suspensionFixture, scenario.variant));
+    await page.goto(
+      fixtureUrl(
+        suspensionFixture,
+        scenario.variant === "Passkey" ? "Master" : scenario.variant,
+      ),
+    );
     await page.bringToFront();
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     const originalOverflow = await page.evaluate(
@@ -649,7 +657,7 @@ for (const settlement of ["resolve", "reject"]) {
     page,
     fixtureUrl,
   }) => {
-    await page.goto(fixtureUrl(suspensionFixture, "Passkey"));
+    await page.goto(fixtureUrl(suspensionFixture, "Master"));
     await page
       .getByRole("button", { name: "Add passkey", exact: true })
       .click();
@@ -689,7 +697,12 @@ for (const scenario of [
     page,
     fixtureUrl,
   }) => {
-    await page.goto(fixtureUrl(suspensionFixture, scenario.variant));
+    await page.goto(
+      fixtureUrl(
+        suspensionFixture,
+        scenario.variant === "Passkey" ? "Master" : scenario.variant,
+      ),
+    );
     await page.bringToFront();
     const originalOverflow = await page.evaluate(
       () => globalThis.document.documentElement.style.overflow,
@@ -749,7 +762,9 @@ for (const variant of ["AlertRerender", "AlertDestination"]) {
     page,
     fixtureUrl,
   }) => {
-    await page.goto(fixtureUrl(suspensionFixture, variant));
+    await page.goto(
+      fixtureUrl(suspensionFixture, variant === "Passkey" ? "Master" : variant),
+    );
     await page.bringToFront();
     await page
       .getByRole("button", { name: "Open overlay", exact: true })
@@ -801,7 +816,9 @@ for (const variant of ["PasskeyRename", "PasskeyRecovery"]) {
     page,
     fixtureUrl,
   }) => {
-    await page.goto(fixtureUrl(suspensionFixture, variant));
+    await page.goto(
+      fixtureUrl(suspensionFixture, variant === "Passkey" ? "Master" : variant),
+    );
     await page.bringToFront();
     const opener = page.getByRole("button", {
       name: variant === "PasskeyRename" ? "Rename" : "Add passkey",
@@ -851,7 +868,7 @@ for (const variant of ["PasskeyRename", "PasskeyRecovery"]) {
 }
 
 const heldNameFixture =
-  "cosmos/Patterns/Account Settings/ProfileSettings.fixture.tsx";
+  "stories/Patterns/Account Settings/ProfileSettings.stories.tsx";
 async function settleNameSave(page, request, outcome) {
   await page.evaluate(
     ({ request, outcome }) =>
@@ -986,7 +1003,7 @@ test("time-zone results scroll independently and focus uses a background", async
 }) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Account Settings/PreferencesSettings.fixture.tsx",
+      "stories/Patterns/Account Settings/PreferencesSettings.stories.tsx",
       "All time zones",
     ),
   );
@@ -1041,7 +1058,7 @@ test("installation setup requires a secret and retains account drafts after a fa
 }, testInfo) => {
   await page.bringToFront();
   await page.goto(
-    fixtureUrl("cosmos/Patterns/Auth/TeamSetup.fixture.tsx", "Secret retry"),
+    fixtureUrl("stories/Patterns/Auth/TeamSetup.stories.tsx", "Secret retry"),
   );
   const secret = page.getByLabel("Installation setup secret", { exact: true });
   await page.getByLabel("Team name", { exact: true }).fill("Test team");
@@ -1090,7 +1107,7 @@ test("file upload supports keyboard selection, pending locks and failed-file ret
   theme,
 }, testInfo) => {
   await page.goto(
-    fixtureUrl("cosmos/Patterns/FileUpload.fixture.tsx", "Failure and retry"),
+    fixtureUrl("stories/Patterns/FileUpload.stories.tsx", "Failure and retry"),
   );
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
   const upload = page.getByRole("button", {
@@ -1162,7 +1179,7 @@ test("initial dropped file starts without a picker, retains failed retry and upl
 }) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/FileUpload.fixture.tsx",
+      "stories/Patterns/FileUpload.stories.tsx",
       "Initial dropped file",
     ),
   );

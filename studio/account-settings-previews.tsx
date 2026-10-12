@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useFixtureInput } from "react-cosmos/client";
+import { usePreviewOptions } from "./preview-options";
 import { ProfileSettings } from "../src/patterns/account-settings/profile-settings";
 import { PreferencesSettings } from "../src/patterns/account-settings/preferences-settings";
 import { PasskeySettings } from "../src/patterns/account-settings/passkey-settings";
@@ -15,9 +15,9 @@ const formatDate = (value: string) =>
     timeZone: "UTC",
   }).format(new Date(value));
 function useSettingsRequest() {
-  const [fail] = useFixtureInput("Fail request", false);
+  const { failRequest: fail, slowResponse: slow } = usePreviewOptions();
   return async () => {
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, slow ? 2000 : 800));
     if (fail)
       throw new Error(
         "Could not save changes. Your draft is retained. Try again.",

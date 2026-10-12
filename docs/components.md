@@ -1,12 +1,12 @@
 # Component catalog
 
-Cosmos follows three layers:
+Storybook follows three layers:
 
 - **Primitives:** one fixture per component file, showing its variants, states and compound parts with neutral content. Fixtures import the component directly from `src`; they do not reimplement its styling or contain application workflows.
 - **Patterns:** published authentication, account settings, team settings and data components. Fixtures supply sample data and simulate app callbacks; composed examples without a matching library export are omitted.
 - **Layouts:** shell, sidebars, page headings and navigation.
 
-Cosmos mirrors the component folders: `src/forms/checkbox.tsx` appears at `Primitives / Forms / Checkbox`, and `src/data-display/chip.tsx` at `Primitives / DataDisplay / Chip`. HeroUI-backed primitives follow native styling and variant APIs; composed helpers retain their behavior without restyling the base component. `UserAvatar` belongs to Patterns, where it supplies initials and Gravatar lookup. `ResourceTable` appears under Patterns and composes the Table primitive with record links, actions and an empty state. Its source is [src/patterns/resource-table.tsx](../src/patterns/resource-table.tsx). Source-file mapping is listed below. Applications use that component export directly; fixture wrappers are only for the studio and are not published.
+Storybook mirrors the component folders: `src/forms/checkbox.tsx` appears at `Primitives / Forms / Checkbox`, and `src/data-display/chip.tsx` at `Primitives / DataDisplay / Chip`. HeroUI-backed primitives follow native styling and variant APIs; composed helpers retain their behavior without restyling the base component. `UserAvatar` belongs to Patterns, where it supplies initials and Gravatar lookup. `ResourceTable` appears under Patterns and composes the Table primitive with record links, actions and an empty state. Its source is [src/patterns/resource-table.tsx](../src/patterns/resource-table.tsx). Source-file mapping is listed below. Applications use that component export directly; fixture wrappers are only for the studio and are not published.
 
 `NotificationMenu` is the shared notification trigger and popover in [src/patterns/notifications.tsx](../src/patterns/notifications.tsx), previewed under `Patterns / NotificationMenu`. Import it from the package root or `@avgeek-oss/design-system/patterns/notifications`. Apps supply notification items and mutations; the component owns presentation, navigation dismissal, and controlled or uncontrolled open state.
 
@@ -18,7 +18,7 @@ Use optional `onActivate(item)` when ordinary notification navigation must await
 
 `McpAuthorization` is the shared MCP consent form. Supply `brand`, `productName`, `clientName`, optional `clientLogo`, controlled `accessLevel` (`read`, `write`, or `admin`), role-bounded `availableAccessLevels`, `onAccessLevelChange`, `onApprove` and `onDeny`. Start each request at Read-only, independently of client-requested scopes. The screen owns the Application input, Select Scope picker, role guidance, Deny/Approve actions and Back to client action. Returning invokes `onDeny` so the app can complete a validated OAuth denial. Apps validate the selection, derive grants and revoke connections on role changes. Pending or disabled state blocks decisions and navigation; an unavailable scope blocks approval while permitting denial. Mutation errors use toasts. Keep OAuth metadata, expiry and raw permission lists out of the consent form.
 
-Authentication screens are published components. Cosmos uses a separate fixture file for each under `Patterns / Auth`, matching `src/patterns/auth`. Screens accept a brand and app callbacks; fixtures only simulate requests and navigation. Import a screen from the package root or its `patterns/auth/<file>` subpath.
+Authentication screens are published components. Storybook uses a separate fixture file for each under `Patterns / Auth`, matching `src/patterns/auth`. Screens accept a brand and app callbacks; fixtures only simulate requests and navigation. Import a screen from the package root or its `patterns/auth/<file>` subpath.
 
 | Component                | Source                                                                                            | App callbacks and data                                                                                                                                  |
 | ------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +76,7 @@ The additional shared application patterns follow Towbar's common surfaces. Thei
 | `QueryLoading`, `QueryError`             | `patterns/feedback/query-state`                                      |
 | `ChoiceField`                            | `patterns/choice-field`                                              |
 
-| Cosmos primitive                          | Source file                                                                           |
+| Storybook primitive                       | Source file                                                                           |
 | ----------------------------------------- | ------------------------------------------------------------------------------------- |
 | Accordion                                 | [src/data-display/accordion.tsx](../src/data-display/accordion.tsx)                   |
 | Alert                                     | [src/feedback/alert.tsx](../src/feedback/alert.tsx)                                   |
@@ -167,7 +167,7 @@ The React-free `utilities/date-time-preferences` public subpath and root export 
 
 See [emails and loading](emails-and-loading.md) for usage and ownership rules.
 
-| Export                              | Source                                                                                      | Cosmos                                 |
+| Export                              | Source                                                                                      | Storybook                              |
 | ----------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------- |
 | AuthEmail                           | [src/emails/auth-email.tsx](../src/emails/auth-email.tsx)                                   | Patterns / Emails / AuthEmail          |
 | EmailShell                          | [src/emails/email-shell.tsx](../src/emails/email-shell.tsx)                                 | Patterns / Emails / EmailShell         |
@@ -176,10 +176,10 @@ See [emails and loading](emails-and-loading.md) for usage and ownership rules.
 
 ## Error pages
 
-Use `ErrorPage` ([source](../src/patterns/feedback/error-page.tsx)) for a route that cannot render: `status="not-found"` for 404, `status="server-error"` for 500, `status="unavailable"` for connection or service outages, and `status="forbidden"` for access restrictions. Cosmos previews these under `Patterns / Feedback / ErrorPage`. Import from the package root or `patterns/feedback/error-page`.
+Use `ErrorPage` ([source](../src/patterns/feedback/error-page.tsx)) for a route that cannot render: `status="not-found"` for 404, `status="server-error"` for 500, `status="unavailable"` for connection or service outages, and `status="forbidden"` for access restrictions. Storybook previews these under `Patterns / Feedback / ErrorPage`. Import from the package root or `patterns/feedback/error-page`.
 
 The pattern owns the centered layout, status icon, heading hierarchy, explanation and recovery controls. Apps supply `onRetry`, `isPending`, `returnHref` and `returnLabel`; optional children compose additional recovery actions. Retry is shown only when supplied. Apps retain routing, session policy, error classification and data fetching. Never pass raw exception details into user-facing copy. Keep actionable error-page explanations visible; mutation failures still use toasts. Use `QueryError` for a query failure within an otherwise usable page, and `EmptyState` for successful requests with no records.
 
-`BackendUnavailable` and `useBackendReconnect` ([source](../src/patterns/feedback/backend-unavailable.tsx)) present temporary backend outages with automatic read-only recovery. Cosmos previews the screen under Patterns / Feedback / BackendUnavailable.
+`BackendUnavailable` and `useBackendReconnect` ([source](../src/patterns/feedback/backend-unavailable.tsx)) present temporary backend outages with automatic read-only recovery. Storybook previews the screen under Patterns / Feedback / BackendUnavailable.
 
 `FileUpload` is the attachment upload pattern in [src/patterns/file-upload.tsx](../src/patterns/file-upload.tsx), previewed under `Patterns / FileUpload`. Import it and `FileUploadProps` from the package root or `@avgeek-oss/design-system/patterns/file-upload`. It accepts one image/PDF by default, supports file-picker and drag/drop input plus a mount-only `initialFile` supplied by an app-owned page drop, validates the configured types and size, and awaits an app-owned `onUpload(file)` callback. It owns pending, failure/retry and toast feedback; applications own storage, authorization and server validation. See [file uploads](forms.md#file-uploads).

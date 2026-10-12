@@ -1,12 +1,12 @@
 import { test, expect } from "./fixtures.mjs";
 
-const fixture = "cosmos/Patterns/Auth/McpAuthorization.fixture.tsx";
+const fixture = "stories/Patterns/Auth/McpAuthorization.stories.tsx";
 
 test("MCP consent defaults to read-only and permits an explicit administrator choice", async ({
   page,
   fixtureUrl,
 }) => {
-  await page.goto(fixtureUrl(fixture, "Administrator"));
+  await page.goto(fixtureUrl(fixture, "Master"));
   await expect(
     page.getByRole("heading", { name: "Connect to Towbar" }),
   ).toBeVisible();

@@ -7,7 +7,7 @@ test("Codex metadata connections show a friendly name, logo and revocation title
 }, testInfo) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Account Settings/McpConnectionsSettings.fixture.tsx",
+      "stories/Patterns/Account Settings/McpConnectionsSettings.stories.tsx",
     ),
   );
   await page.bringToFront();
@@ -71,7 +71,7 @@ test("API keys retain every field, native row headers and reachable actions at m
 }, testInfo) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Account Settings/ApiKeysSettings.fixture.tsx",
+      "stories/Patterns/Account Settings/ApiKeysSettings.stories.tsx",
       "Responsive details",
     ),
   );
@@ -223,7 +223,7 @@ test("member identity remains visible beside account status and actions on narro
   fixtureUrl,
 }) => {
   await page.goto(
-    fixtureUrl("cosmos/Patterns/Team Settings/MembersTable.fixture.tsx"),
+    fixtureUrl("stories/Patterns/Team Settings/MembersTable.stories.tsx"),
   );
   const table = page.getByRole("grid", { name: "Members", exact: true });
   await expect(table).toBeVisible();

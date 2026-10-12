@@ -32,21 +32,22 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.cosmos.json --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.stories.json --noEmit",
     "test": "tsx --test test/*.test.tsx && node --test scripts/*.test.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "cosmos": "cosmos",
-    "cosmos:export": "cosmos-export",
     "prepack": "pnpm build",
-    "verify": "pnpm format:check && pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm cosmos:export && pnpm test:browser && pnpm verify:package",
-    "lint": "eslint src cosmos studio test scripts *.mjs vite.config.ts --max-warnings 0 && pnpm lint:styles",
+    "verify": "pnpm format:check && pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build:storybook && pnpm test:stories && pnpm test:browser && pnpm verify:package",
+    "lint": "eslint src stories .storybook studio test scripts *.mjs vitest.config.ts --max-warnings 0 && pnpm lint:styles",
     "lint:styles": "stylelint \"src/**/*.css\"",
     "verify:package": "node scripts/verify-package.mjs",
     "prepublishOnly": "pnpm verify",
     "check:docs": "node scripts/check-docs.mjs",
     "test:published": "node scripts/verify-package.mjs --published",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "storybook": "storybook dev -p 5012 --disable-telemetry",
+    "build:storybook": "storybook build --disable-telemetry",
+    "test:stories": "vitest run"
   },
   "peerDependencies": {
     "next": "^16.0.0",
@@ -73,15 +74,20 @@
     "prism-react-renderer": "^2.4.1",
     "react-aria": "^3.52.1",
     "react-aria-components": "^1.21.1",
+    "react-email": "6.11.0",
     "react-hook-form": "^7.88.0",
     "recharts": "^3.10.1",
     "tailwind-merge": "^3.7.0",
     "tailwindcss": "4.3.3",
-    "zod": "^4.5.4",
-    "react-email": "6.11.0"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
+    "@storybook/addon-a11y": "10.6.1",
+    "@storybook/addon-docs": "10.6.1",
+    "@storybook/addon-themes": "10.6.1",
+    "@storybook/addon-vitest": "10.6.1",
+    "@storybook/react-vite": "10.6.1",
     "@tailwindcss/vite": "4.3.3",
     "@types/css.escape": "^1.5.2",
     "@types/jsdom": "^30.0.0",
@@ -89,6 +95,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "@vitest/browser-playwright": "5.0.4",
     "css.escape": "^1.5.1",
     "eslint": "^10.12.0",
     "eslint-plugin-react-hooks": "^7.0.0",
@@ -97,14 +104,14 @@
     "next": "^16.3.8",
     "prettier": "3.9.9",
     "react": "19.3.0",
-    "react-cosmos": "7.4.1",
-    "react-cosmos-plugin-vite": "7.4.0",
     "react-dom": "19.3.0",
+    "storybook": "10.6.1",
     "stylelint": "^17.16.0",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.0.0",
-    "vite": "8.3.2"
+    "vite": "8.3.2",
+    "vitest": "5.0.4"
   },
   "exports": {
     ".": {

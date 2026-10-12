@@ -7,7 +7,7 @@ test("API-key confirmation restores its connected row action after Escape and Ca
 }) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Account Settings/ApiKeysSettings.fixture.tsx",
+      "stories/Patterns/Account Settings/ApiKeysSettings.stories.tsx",
       "Focus return",
     ),
   );
@@ -46,7 +46,7 @@ test("API-key confirmation recovery preserves deliberate destination focus", asy
 }) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/Account Settings/ApiKeysSettings.fixture.tsx",
+      "stories/Patterns/Account Settings/ApiKeysSettings.stories.tsx",
       "Focus return",
     ),
   );

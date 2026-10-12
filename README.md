@@ -55,16 +55,16 @@ Wrap the shell in `RouteProvider` with the current pathname and navigation callb
 ```sh
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium
-pnpm cosmos
+pnpm storybook
 pnpm verify
 pnpm pack
 ```
 
-React Cosmos runs on port 5012; its Vite renderer uses 5062. Fixtures cover primitives, shell navigation, auth layouts, settings tables, empty states, and charts. Use the shared appearance control to review both themes and Cosmos responsive viewports to review mobile layouts.
+Storybook runs on port 5012 with the React/Vite framework. Fixtures cover primitives, shell navigation, auth layouts, settings tables, empty states, and charts. Use the Theme toolbar for light/dark previews and responsive viewports for mobile layouts. Each component has a Master story, named examples, copyable source and API references. `Show code` includes the composition and local sample callbacks, with imports rewritten to public package subpaths; preview helpers remain unpublished. Native primitives link to HeroUI's API documentation.
 
-Contributor rules are in [AGENTS.md](AGENTS.md). `pnpm verify` includes strict source/studio type checks, code and CSS lint, tests, clean build, Cosmos export, rendered navigation, notification, toast, loading and clipboard interaction tests, and a tarball installation/type/build check outside this checkout. It saves the verified candidate and report in the ignored `artifacts/` folder. Built declarations include maps to the matching packaged source.
+Contributor rules are in [AGENTS.md](AGENTS.md). `pnpm verify` includes strict source/studio type checks, code and CSS lint, tests, clean build, Storybook export, rendered navigation, notification, toast, loading and clipboard interaction tests, and a tarball installation/type/build check outside this checkout. It saves the verified candidate and report in the ignored `artifacts/` folder. Built declarations include maps to the matching packaged source.
 
-Browser cases live in `test/browser/*.spec.mjs` and run together through `pnpm test:browser` after `pnpm cosmos:export`. The shared fixture serves that export and owns theme setup and cleanup. Use the existing command with Playwright filters to investigate a case; do not add a package script for each regression. Reports and failure screenshots stay in `artifacts/browser/`.
+Browser cases live in `test/browser/*.spec.mjs` and run together through `pnpm test:browser` after `pnpm build:storybook`. The shared fixture serves that export and owns theme setup and cleanup. Use the existing command with Playwright filters to investigate a case; do not add a package script for each regression. Reports and failure screenshots stay in `artifacts/browser/`.
 
 Release notes are in [CHANGELOG.md](CHANGELOG.md). Source and third-party attribution are in `NOTICE` and `LICENSE`.
 

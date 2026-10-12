@@ -2,7 +2,7 @@
 
 Towbar is the baseline for common application surfaces. Use these exports directly so applications share their layout, interaction states, and presentation contracts. Components receive typed UI data and callbacks; applications adapt server responses, enforce permissions, perform requests, and update committed data.
 
-Import components and their props from the package root or the subpath shown in the catalog. Every component has a separate interactive Cosmos fixture. Empty states and simulated failures belong to those fixtures, not to production callbacks.
+Import components and their props from the package root or the subpath shown in the catalog. Every component has a separate interactive Storybook fixture. Empty states and simulated failures belong to those fixtures, not to production callbacks.
 
 ## Account settings
 
@@ -116,7 +116,7 @@ Apps supply domain labels, icons, formatted dates/values, pagination and empty/l
 
 ## Error pages
 
-Use `ErrorPage` ([source](../src/patterns/feedback/error-page.tsx)) for a route that cannot render: `status="not-found"` for 404, `status="server-error"` for 500, `status="unavailable"` for connection or service outages, and `status="forbidden"` for access restrictions. Cosmos previews these under `Patterns / Feedback / ErrorPage`. Import from the package root or `patterns/feedback/error-page`.
+Use `ErrorPage` ([source](../src/patterns/feedback/error-page.tsx)) for a route that cannot render: `status="not-found"` for 404, `status="server-error"` for 500, `status="unavailable"` for connection or service outages, and `status="forbidden"` for access restrictions. Storybook previews these under `Patterns / Feedback / ErrorPage`. Import from the package root or `patterns/feedback/error-page`.
 
 The pattern owns the centered layout, status icon, heading hierarchy, explanation and recovery controls. Apps supply `onRetry`, `isPending`, `returnHref` and `returnLabel`; optional children compose additional recovery actions. Retry is shown only when supplied. Apps retain routing, session policy, error classification and data fetching. Never pass raw exception details into user-facing copy. Keep actionable error-page explanations visible; mutation failures still use toasts. Use `QueryError` for a query failure within an otherwise usable page, and `EmptyState` for successful requests with no records.
 

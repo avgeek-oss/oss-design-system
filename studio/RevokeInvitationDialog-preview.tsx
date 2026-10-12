@@ -1,11 +1,11 @@
 import { RevokeInvitationDialog } from "../src/patterns/team-settings/revoke-invitation-dialog";
 import { useState } from "react";
 import { Button } from "../src/buttons/button";
-import { useFixtureInput } from "react-cosmos/client";
+import { usePreviewOptions } from "./preview-options";
 
 export default function RevokeInvitationDialogPreview() {
   const [open, setOpen] = useState(true);
-  const [fail] = useFixtureInput("Fail request", false);
+  const { failRequest: fail } = usePreviewOptions();
   const request = async () => {
     await new Promise((resolve) => setTimeout(resolve, 800));
     if (fail) throw new Error("Could not complete the request. Try again.");

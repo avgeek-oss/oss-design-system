@@ -9,8 +9,8 @@ for (const variant of ["Mixed", "Controlled"]) {
   }, testInfo) => {
     await page.goto(
       fixtureUrl(
-        "cosmos/Patterns/ExpandableAttributeList.fixture.tsx",
-        variant,
+        "stories/Patterns/ExpandableAttributeList.stories.tsx",
+        variant === "Mixed" ? "Master" : variant,
       ),
     );
     const report = page.getByRole("button", { name: /10:49 Report Complete/ });
@@ -81,7 +81,7 @@ test("long attribute labels and values wrap without horizontal overflow", async 
 }, testInfo) => {
   await page.goto(
     fixtureUrl(
-      "cosmos/Patterns/ExpandableAttributeList.fixture.tsx",
+      "stories/Patterns/ExpandableAttributeList.stories.tsx",
       "Long content",
     ),
   );
