@@ -39,7 +39,7 @@ function CatalogueDocs() {
       <Description />
       <Primary />
       {Object.keys(story.initialArgs ?? {}).length > 0 ? (
-        <Controls />
+        <Controls include={Object.keys(story.initialArgs)} />
       ) : properties.length > 0 ? (
         <ArgTypes />
       ) : null}
