@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.18 — 2026-10-13
+
+Publish the shared package publicly on npmjs.org with GitHub Actions trusted publishing. Public installation no longer requires GitHub Packages credentials. Verified tarballs and fresh registry consumer checks remain release gates; retries reject a version whose bytes differ from the verified candidate.
+
 ## 1.2.17 — 2026-10-13
 
 - Keep personal and team API keys in a horizontally scrolling table on mobile.

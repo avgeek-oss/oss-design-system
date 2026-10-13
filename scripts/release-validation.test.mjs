@@ -6,7 +6,7 @@ import { validateCandidate, validateRelease } from "./release-validation.mjs";
 const manifest = {
   name: "@avgeek-oss/design-system",
   version: "1.0.0",
-  publishConfig: { registry: "https://npm.pkg.github.com" },
+  publishConfig: { registry: "https://registry.npmjs.org" },
 };
 
 test("release tags require the exact stable package version and registry", () => {
@@ -18,7 +18,7 @@ test("release tags require the exact stable package version and registry", () =>
     validateRelease(
       {
         ...manifest,
-        publishConfig: { registry: "https://registry.npmjs.org" },
+        publishConfig: { registry: "https://npm.pkg.github.com" },
       },
       "v1.0.0",
     ),

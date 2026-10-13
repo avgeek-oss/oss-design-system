@@ -9,7 +9,7 @@ export function validateRelease(manifest, tag) {
     "Release tag must match package.json",
   );
   assert.equal(manifest.name, "@avgeek-oss/design-system");
-  assert.equal(manifest.publishConfig.registry, "https://npm.pkg.github.com");
+  assert.equal(manifest.publishConfig.registry, "https://registry.npmjs.org");
 }
 
 export function validateCandidate(manifest, report, archive) {
