@@ -8,7 +8,7 @@ validateRelease(manifest, process.env.GITHUB_REF_NAME ?? "");
 const report = JSON.parse(
   await readFile("artifacts/package-report.json", "utf8"),
 );
-const tarball = `artifacts/avgeek-oss-design-system-${manifest.version}.tgz`;
+const tarball = `./artifacts/avgeek-oss-design-system-${manifest.version}.tgz`;
 validateCandidate(manifest, report, await readFile(tarball));
 const result = await publishCandidate(report, () => {
   execFileSync(
