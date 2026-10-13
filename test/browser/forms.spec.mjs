@@ -1130,10 +1130,9 @@ test("file upload supports keyboard selection, pending locks and failed-file ret
     exact: true,
   });
   await expect(pendingUpload).toBeDisabled();
-  expect((await pendingUpload.boundingBox()).width).toBeCloseTo(
-    initialWidth,
-    1,
-  );
+  await expect
+    .poll(async () => (await pendingUpload.boundingBox()).width)
+    .toBeCloseTo(initialWidth, 1);
   await expect(
     page.getByRole("status").filter({ hasText: fileName }),
   ).toBeVisible();

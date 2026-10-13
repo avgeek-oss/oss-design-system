@@ -31,7 +31,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm verify
       - name: Check npm tarball publication without uploading
-        run: npm publish ./artifacts/avgeek-oss-design-system-*.tgz --dry-run --ignore-scripts --registry=https://npm.pkg.github.com
+        run: npm publish ./artifacts/avgeek-oss-design-system-*.tgz --dry-run --ignore-scripts --registry=https://registry.npmjs.org
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version-file: .nvmrc
-          registry-url: https://npm.pkg.github.com
+          registry-url: https://registry.npmjs.org
           scope: "@avgeek-oss"
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
@@ -64,10 +64,6 @@ jobs:
       - name: Check verified package integrity
         run: node scripts/check-release.mjs --candidate
       - name: Publish verified tarball
-        run: npm publish "./artifacts/avgeek-oss-design-system-${GITHUB_REF_NAME#v}.tgz" --ignore-scripts --registry=https://npm.pkg.github.com
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/publish-package.mjs
       - name: Verify registry package and fresh consumers
         run: pnpm test:published
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -36,7 +36,7 @@ try {
     run("npm", [
       "pack",
       `${manifest.name}@${manifest.version}`,
-      "--registry=https://npm.pkg.github.com",
+      "--registry=https://registry.npmjs.org",
       "--ignore-scripts",
       "--pack-destination",
       temporary,

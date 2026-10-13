@@ -4,13 +4,7 @@ Shared React components, application layouts, and UI patterns for Avgeek OSS app
 
 ## Installation
 
-Packages are hosted on GitHub Packages. Add the scope to your application's `.npmrc`:
-
-```ini
-@avgeek-oss:registry=https://npm.pkg.github.com
-```
-
-Authenticate with `npm login --scope=@avgeek-oss --auth-type=legacy --registry=https://npm.pkg.github.com`. Use your GitHub username and a personal access token (classic) with `read:packages` as the password. GitHub requires authentication for public npm packages too; keep credentials in your user configuration or CI secrets, never in Git. See [GitHub's npm registry guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
+The package is public on npmjs.org. Installing it does not require a GitHub token. If an existing `.npmrc` maps `@avgeek-oss` to GitHub Packages, change that scope to `https://registry.npmjs.org` and refresh the dependency lockfile.
 
 ```sh
 pnpm add @avgeek-oss/design-system react react-dom
@@ -70,10 +64,10 @@ Release notes are in [CHANGELOG.md](CHANGELOG.md). Source and third-party attrib
 
 ## Publishing
 
-Pull requests and pushes to `main` run `pnpm verify`. Stable version tags (`v1.0.0`, for example) run the same checks before publishing to GitHub Packages. The tag must match `package.json` and point to a commit on `main`. Update the version and changelog through the normal review process, then tag the intended commit and push the tag to release it.
+Pull requests and pushes to `main` run `pnpm verify`. Stable version tags (`v1.2.18`, for example) run the same checks before publishing publicly to npmjs.org. The tag must match `package.json` and point to a commit on `main`. Update the version and changelog through the normal review process, then tag the intended commit and push the tag to release it.
 
-The publish job uses the repository's `GITHUB_TOKEN` with `packages: write`; no separate publishing secret is needed. It downloads the tarball verified by CI, checks its SHA-512 integrity, and publishes those exact bytes without rerunning package lifecycle scripts. A fresh registry download must match that integrity and pass the isolated Vite and Next.js consumer builds. An existing version cannot be overwritten; publish changes under a new version.
+The publish job uses npm trusted publishing with GitHub Actions OIDC. Configure `avgeek-oss/oss-design-system` and workflow `ci.yml` in the package's npm trusted-publisher settings. The job has `id-token: write`; no publishing token is stored in GitHub secrets.
 
-GitHub initially creates packages with private visibility. After the first publication, set the package's visibility to public in its GitHub package settings. Repository visibility and npm's `access` setting do not replace this step.
+CI downloads the verified tarball, checks its SHA-512 integrity, and publishes those exact bytes without running package lifecycle scripts. A fresh registry download must match that integrity and pass the isolated Vite and Next.js consumer builds. A retry accepts an existing version only if its integrity matches the verified candidate; changed contents require a new version.
 
-Consumer GitHub Actions jobs need `packages: read` and registry authentication through `actions/setup-node` with `registry-url: https://npm.pkg.github.com`, `scope: "@avgeek-oss"`, and `NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` on installation. Grant the consuming repository access in the package's **Manage Actions access** settings if required. Local consumers use the `read:packages` token described above.
+For the initial npm migration, a maintainer publishes the already verified release artifact interactively to create the package, then configures its trusted publisher. Existing GitHub Packages releases remain available for old lockfiles. Public npm installations need no registry credentials or `packages: read` permission.
