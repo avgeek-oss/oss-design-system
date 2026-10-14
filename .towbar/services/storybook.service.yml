@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://towbar.dev/schemas/app.v2.json
 id: oss-design-system-cosmos
-name: OSS Design System
+name: OSS DS
 description: Shared components and patterns in the Storybook catalogue.
 deployment:
   type: dockerfile
