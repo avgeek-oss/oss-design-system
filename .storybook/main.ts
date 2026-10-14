@@ -6,6 +6,7 @@ const config: StorybookConfig = {
   core: { disableTelemetry: true },
   stories: ["../stories/**/*.stories.tsx"],
   staticDirs: [
+    { from: "../public", to: "/" },
     { from: "../node_modules/@fontsource-variable/inter/files", to: "/fonts" },
   ],
   addons: [
