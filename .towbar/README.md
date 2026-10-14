@@ -10,7 +10,7 @@ The Storybook service builds this repository's fixtures with `pnpm build:storybo
 4. Sync the repository and deploy the OSS Design System service manually. Automatic deployment is disabled in the manifest.
 5. Check the HTTPS catalogue, open a story, switch themes, and confirm the story canvas loads. The exported catalogue serves `index.html`, `iframe.html` and `index.json` as static files. Storybook query parameters select documentation and stories.
 
-The build has a 2 GiB memory limit; the static runtime has a 256 MiB limit. Keep room for the build alongside the server's existing workloads. This catalogue is public and contains sample data. Do not put real credentials or production data in stories.
+The build has a 4 GiB memory limit; the static runtime has a 256 MiB limit. Keep room for the build alongside the server's existing workloads. This catalogue is public and contains sample data. Do not put real credentials or production data in stories.
 
 ## Build locally
 

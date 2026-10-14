@@ -10,7 +10,7 @@ deployment:
   architecture: arm64
   resources:
     cpus: 1
-    memory: 2g
+    memory: 4g
 autoDeploy: false
 container:
   port: 8080
