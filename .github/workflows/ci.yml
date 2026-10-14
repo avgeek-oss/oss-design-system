@@ -31,6 +31,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm verify
       - name: Check npm tarball publication without uploading
+        if: startsWith(github.ref, 'refs/tags/v')
         run: npm publish ./artifacts/avgeek-oss-design-system-*.tgz --dry-run --ignore-scripts --registry=https://registry.npmjs.org
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
