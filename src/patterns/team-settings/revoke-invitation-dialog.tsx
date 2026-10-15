@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { ActionConfirmation } from "../actions/action-confirmation.js";
 
 export type RevokeInvitationDialogProps = {
@@ -13,7 +14,7 @@ export function RevokeInvitationDialog({
   email,
   onRevoke,
   ...props
-}: RevokeInvitationDialogProps) {
+}: RevokeInvitationDialogProps): JSX.Element {
   return (
     <ActionConfirmation
       {...props}

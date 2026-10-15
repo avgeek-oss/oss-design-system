@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { Modal } from "../../overlays/modal.js";
 import { AuthForm, type AuthField } from "../auth/auth-form.js";
 import { useFormDraft } from "../use-form-draft.js";
@@ -15,7 +16,7 @@ export type AddNotificationDestinationDialogProps = {
 export function AddNotificationDestinationDialog({
   isOpen,
   ...props
-}: AddNotificationDestinationDialogProps) {
+}: AddNotificationDestinationDialogProps): JSX.Element | null {
   return isOpen ? <DestinationContent {...props} /> : null;
 }
 function DestinationContent({

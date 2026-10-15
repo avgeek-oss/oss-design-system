@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ComputerIcon from "@hugeicons/core-free-icons/ComputerIcon";
 import Key01Icon from "@hugeicons/core-free-icons/Key01Icon";
@@ -37,7 +38,7 @@ export function SettingsPageTitle({
   section,
 }: {
   section: CommonSettingsSection;
-}) {
+}): JSX.Element {
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
       <HugeiconsIcon

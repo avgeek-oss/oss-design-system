@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { MemberFormDialog } from "./member-form-dialog.js";
 import type { ChoiceOption } from "../choice-field.js";
 
@@ -21,7 +22,7 @@ export function AddMemberDialog({
   onAdd,
   minPasswordLength = 15,
   ...props
-}: AddMemberDialogProps) {
+}: AddMemberDialogProps): JSX.Element {
   return (
     <MemberFormDialog
       {...props}

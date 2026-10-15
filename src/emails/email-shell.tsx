@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import {
   Body,
   Button,
@@ -67,7 +68,10 @@ function previewText(content: EmailMessage) {
   if (!opening) return "There is an account update.";
   return /[.!?]$/.test(opening) ? opening : `${opening}.`;
 }
-export function EmailShell({ brand, message: content }: EmailShellProps) {
+export function EmailShell({
+  brand,
+  message: content,
+}: EmailShellProps): JSX.Element {
   const actionUrl = content.actionUrl
     ? validateEmailUrl(content.actionUrl)
     : null;

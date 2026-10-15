@@ -1,6 +1,6 @@
 {
   "name": "@avgeek-oss/design-system",
-  "version": "1.2.18",
+  "version": "1.2.19",
   "description": "Shared React components, application layouts and UI patterns for Avgeek OSS apps.",
   "type": "module",
   "license": "Apache-2.0",
@@ -740,6 +740,22 @@
     "./patterns/file-upload": {
       "types": "./dist/patterns/file-upload.d.ts",
       "import": "./dist/patterns/file-upload.js"
+    },
+    "./pickers/date-range-picker": {
+      "types": "./dist/pickers/date-range-picker.d.ts",
+      "import": "./dist/pickers/date-range-picker.js"
+    },
+    "./pickers/range-calendar": {
+      "types": "./dist/pickers/range-calendar.d.ts",
+      "import": "./dist/pickers/range-calendar.js"
+    },
+    "./forms/time-field": {
+      "types": "./dist/forms/time-field.d.ts",
+      "import": "./dist/forms/time-field.js"
+    },
+    "./patterns/date-time-range-picker": {
+      "types": "./dist/patterns/date-time-range-picker.d.ts",
+      "import": "./dist/patterns/date-time-range-picker.js"
     }
   }
 }

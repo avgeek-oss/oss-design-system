@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { ActionConfirmation } from "../actions/action-confirmation.js";
 
 export type RemoveMemberDialogProps = {
@@ -13,7 +14,7 @@ export function RemoveMemberDialog({
   member,
   onRemove,
   ...props
-}: RemoveMemberDialogProps) {
+}: RemoveMemberDialogProps): JSX.Element {
   return (
     <ActionConfirmation
       {...props}

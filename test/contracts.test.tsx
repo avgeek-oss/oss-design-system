@@ -136,3 +136,27 @@ test("structured data cannot close its script element and preserves its values",
   assert.doesNotMatch(content, /</);
   assert.deepEqual(JSON.parse(content), data);
 });
+
+test("date/time range composition keeps two labeled segmented fields and native disabled state", async () => {
+  const { DateTimeRangePicker } =
+    await import("../src/patterns/date-time-range-picker.js");
+  const { parseDateTime } = await import("@internationalized/date");
+  const markup = renderToStaticMarkup(
+    <DateTimeRangePicker
+      label="Log range"
+      locale="en-GB"
+      isDisabled
+      hourCycle={24}
+      value={{
+        start: parseDateTime("2026-10-14T09:15"),
+        end: parseDateTime("2026-10-14T10:45"),
+      }}
+    />,
+  );
+  assert.match(markup, /Start date and time/);
+  assert.match(markup, /End date and time/);
+  assert.match(markup, /Choose date range/);
+  assert.match(markup, /disabled/);
+  assert.match(markup, /09/);
+  assert.match(markup, /45/);
+});

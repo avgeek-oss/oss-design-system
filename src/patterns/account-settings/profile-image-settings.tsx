@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { UserAvatar } from "../user-avatar.js";
 
 export type ProfileImageSettingsProps = { email: string; name: string };
@@ -7,7 +8,7 @@ export type ProfileImageSettingsProps = { email: string; name: string };
 export function ProfileImageSettings({
   email,
   name,
-}: ProfileImageSettingsProps) {
+}: ProfileImageSettingsProps): JSX.Element {
   return (
     <div className="grid gap-3">
       <span className="text-sm font-medium">Gravatar Image</span>

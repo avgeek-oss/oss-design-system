@@ -6,7 +6,7 @@ import {
   useOverlayState,
 } from "@heroui/react";
 
-const Drawer = HeroDrawer;
+const Drawer: typeof HeroDrawer = HeroDrawer;
 
 export { Drawer, drawerVariants, useOverlayState };
 export type {

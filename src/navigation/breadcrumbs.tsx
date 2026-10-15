@@ -1,5 +1,7 @@
 "use client";
 
+import type { JSX } from "react";
+
 import { TooltipText } from "../overlays/tooltip.js";
 
 import {
@@ -32,7 +34,7 @@ function BreadcrumbDropdownTrigger({
   children,
   className,
   ...props
-}: ComponentProps<typeof Dropdown.Trigger>) {
+}: ComponentProps<typeof Dropdown.Trigger>): JSX.Element {
   const isCurrent = useContext(BreadcrumbItemContext);
   return (
     <Dropdown.Trigger
@@ -60,7 +62,7 @@ function BreadcrumbSelectTrigger({
   children,
   className,
   ...props
-}: ComponentProps<typeof Select.Trigger>) {
+}: ComponentProps<typeof Select.Trigger>): JSX.Element {
   const isCurrent = useContext(BreadcrumbItemContext);
   return (
     <Select.Trigger
@@ -120,7 +122,7 @@ function BreadcrumbDropdownPopover({
   ref,
   children,
   ...props
-}: ComponentProps<typeof Dropdown.Popover>) {
+}: ComponentProps<typeof Dropdown.Popover>): JSX.Element {
   const state = useContext(OverlayTriggerStateContext);
   const popover = useObjectRef<HTMLElement>(ref);
   return (
@@ -145,7 +147,7 @@ function BreadcrumbSelectPopover({
   ref,
   children,
   ...props
-}: ComponentProps<typeof Select.Popover>) {
+}: ComponentProps<typeof Select.Popover>): JSX.Element {
   const state = useContext(OverlayTriggerStateContext);
   const popover = useObjectRef<HTMLElement>(ref);
   return (
@@ -165,12 +167,21 @@ function BreadcrumbSelectPopover({
   );
 }
 
-export const BreadcrumbDropdown = {
+export const BreadcrumbDropdown: Omit<
+  typeof Dropdown,
+  "Trigger" | "Popover"
+> & {
+  Trigger: typeof BreadcrumbDropdownTrigger;
+  Popover: typeof BreadcrumbDropdownPopover;
+} = {
   ...Dropdown,
   Trigger: BreadcrumbDropdownTrigger,
   Popover: BreadcrumbDropdownPopover,
 };
-export const BreadcrumbSelect = {
+export const BreadcrumbSelect: Omit<typeof Select, "Trigger" | "Popover"> & {
+  Trigger: typeof BreadcrumbSelectTrigger;
+  Popover: typeof BreadcrumbSelectPopover;
+} = {
   ...Select,
   Trigger: BreadcrumbSelectTrigger,
   Popover: BreadcrumbSelectPopover,
