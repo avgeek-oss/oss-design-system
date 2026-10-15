@@ -346,3 +346,8 @@ export {
 } from "./patterns/feedback/backend-unavailable.js";
 
 export { FileUpload, type FileUploadProps } from "./patterns/file-upload.js";
+
+export {
+  DateTimeRangePicker,
+  type DateTimeRangePickerProps,
+} from "./patterns/date-time-range-picker.js";

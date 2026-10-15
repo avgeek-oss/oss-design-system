@@ -6,6 +6,8 @@ Use `Input`, `PasswordInput`, `Textarea`, `Select`, and `InputGroup`. Searchable
 
 For dates, compose HeroUI `DatePicker`, `DateField.Group` and `Calendar`. Use `DateField` alone for segmented entry without a popover, or `Calendar` for an inline calendar. Date values use `@internationalized/date`; persist a date-only value as an ISO date string. Apply the input surface variant to `DateField.Group`.
 
+Use `DateTimeRangePicker` from `patterns/date-time-range-picker` for a date and time interval. It combines the exported `DateRangePicker`, `RangeCalendar`, `DateField` and `TimeField` primitives. Pass controlled `CalendarDateTime` values and `onChange`, a `label`, the appropriate surface `variant`, and optional `minValue`/`maxValue`. The calendar popover includes separate start/end time controls. The segmented inputs stack at mobile widths. `hourCycle`, `granularity` (`minute` or `second`), and `locale` control display without changing the stored date values. Apps own the saved time zone, resolving ambiguous daylight-saving times, UTC serialization, retention limits and persistence.
+
 Variants for these examples are `primary` and `secondary`. `primary` is the primitive default.
 
 - Base page or auth page → `primary`.

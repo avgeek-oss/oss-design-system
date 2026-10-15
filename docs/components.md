@@ -91,6 +91,10 @@ The additional shared application patterns follow Towbar's common surfaces. Thei
 | Calendar                                  | [src/pickers/calendar.tsx](../src/pickers/calendar.tsx)                               |
 | DateField                                 | [src/forms/date-field.tsx](../src/forms/date-field.tsx)                               |
 | DatePicker                                | [src/pickers/date-picker.tsx](../src/pickers/date-picker.tsx)                         |
+| DateRangePicker                           | [src/pickers/date-range-picker.tsx](../src/pickers/date-range-picker.tsx)             |
+| RangeCalendar                             | [src/pickers/range-calendar.tsx](../src/pickers/range-calendar.tsx)                   |
+| TimeField                                 | [src/forms/time-field.tsx](../src/forms/time-field.tsx)                               |
+| DateTimeRangePicker                       | [src/patterns/date-time-range-picker.tsx](../src/patterns/date-time-range-picker.tsx) |
 | Checkbox                                  | [src/forms/checkbox.tsx](../src/forms/checkbox.tsx)                                   |
 | Chip                                      | [src/data-display/chip.tsx](../src/data-display/chip.tsx)                             |
 | CodeBlock                                 | [src/typography/code-block.tsx](../src/typography/code-block.tsx)                     |

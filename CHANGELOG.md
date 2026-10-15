@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.19
+
+- Export DateRangePicker, RangeCalendar and TimeField, and add the responsive DateTimeRangePicker composition with a range calendar and start/end time controls.
+
 ## 1.2.18 — 2026-10-13
 
 Publish the shared package publicly on npmjs.org with GitHub Actions trusted publishing. Public installation no longer requires GitHub Packages credentials. Verified tarballs and fresh registry consumer checks remain release gates; retries reject a version whose bytes differ from the verified candidate.
