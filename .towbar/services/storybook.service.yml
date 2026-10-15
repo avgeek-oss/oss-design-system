@@ -7,7 +7,7 @@ deployment:
   context: .
   dockerfile: infra/storybook/Dockerfile
   target: runtime
-  architecture: arm64
+  architecture: amd64
   resources:
     cpus: 1
     memory: 4g
@@ -30,4 +30,4 @@ tls:
   proxied: false
 environments:
   production:
-    server: 13.206.149.158
+    server: 13.202.197.134
