@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { MemberFormDialog } from "./member-form-dialog.js";
 import type { ChoiceOption } from "../choice-field.js";
 import type { Member } from "./members-table.js";
@@ -21,7 +22,7 @@ export type MemberEditDialogProps = {
     }
 );
 
-export function MemberEditDialog(props: MemberEditDialogProps) {
+export function MemberEditDialog(props: MemberEditDialogProps): JSX.Element {
   const { member, mode } = props;
   return (
     <MemberFormDialog

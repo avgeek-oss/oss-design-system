@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import type { CalendarDateTime } from "@internationalized/date";
 import { FieldError as DateRangeError } from "@heroui/react";
 import { I18nProvider } from "react-aria-components";
@@ -28,7 +29,7 @@ export function DateTimeRangePicker({
   variant = "primary",
   granularity = "minute",
   ...props
-}: DateTimeRangePickerProps) {
+}: DateTimeRangePickerProps): JSX.Element {
   return (
     <I18nProvider locale={locale}>
       <DateRangePicker {...props} granularity={granularity} hideTimeZone>

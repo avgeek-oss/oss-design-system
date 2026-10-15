@@ -2,6 +2,8 @@
 
 ## 1.2.19
 
+- Keep public component declarations portable when building from an immutable Git dependency in a nested pnpm store.
+
 - Export DateRangePicker, RangeCalendar and TimeField, and add the responsive DateTimeRangePicker composition with a range calendar and start/end time controls.
 
 ## 1.2.18 — 2026-10-13

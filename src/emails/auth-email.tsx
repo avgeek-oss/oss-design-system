@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import {
   EmailShell,
   type EmailBrand,
@@ -166,7 +167,7 @@ export interface AuthEmailProps {
   template: AuthEmailTemplate;
   data: AuthEmailData;
 }
-export function AuthEmail({ template, data }: AuthEmailProps) {
+export function AuthEmail({ template, data }: AuthEmailProps): JSX.Element {
   return (
     <EmailShell brand={data.brand} message={authEmailMessage(template, data)} />
   );

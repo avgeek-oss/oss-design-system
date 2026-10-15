@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -25,7 +26,7 @@ export function ThemeSwitcher({
   className,
   label = "Appearance",
   ...props
-}: ThemeSwitcherProps) {
+}: ThemeSwitcherProps): JSX.Element {
   const { isHydrated, resolvedTheme, setThemeMode } = useTheme();
   const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
   const icon = resolvedTheme === "dark" ? Moon02Icon : Sun03Icon;
