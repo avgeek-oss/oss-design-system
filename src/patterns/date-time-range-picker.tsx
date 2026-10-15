@@ -38,14 +38,22 @@ export function DateTimeRangePicker({
             <DateField.Group
               variant={variant}
               fullWidth
-              className="h-auto min-h-11 py-2"
+              className="max-sm:h-auto"
             >
-              <DateField.InputContainer className="min-w-0 flex-col items-start gap-y-1 sm:flex-row sm:items-center">
-                <DateField.Input slot="start" aria-label="Start date and time">
+              <DateField.InputContainer className="min-w-0 flex-col items-start sm:flex-row sm:items-center">
+                <DateField.Input
+                  slot="start"
+                  aria-label="Start date and time"
+                  className="max-sm:py-1"
+                >
                   {(segment) => <DateField.Segment segment={segment} />}
                 </DateField.Input>
                 <DateRangePicker.RangeSeparator className="hidden sm:inline-flex" />
-                <DateField.Input slot="end" aria-label="End date and time">
+                <DateField.Input
+                  slot="end"
+                  aria-label="End date and time"
+                  className="max-sm:py-1"
+                >
                   {(segment) => <DateField.Segment segment={segment} />}
                 </DateField.Input>
               </DateField.InputContainer>
@@ -56,11 +64,8 @@ export function DateTimeRangePicker({
               </DateField.Suffix>
             </DateField.Group>
             <DateRangeError />
-            <DateRangePicker.Popover className="flex w-80 min-w-0 max-w-[calc(100vw-2rem)] flex-col gap-3">
-              <RangeCalendar
-                aria-label={`${label} calendar`}
-                className="w-full"
-              >
+            <DateRangePicker.Popover className="flex max-w-[calc(100vw-2rem)] flex-col gap-3">
+              <RangeCalendar aria-label={`${label} calendar`}>
                 <RangeCalendar.Header>
                   <RangeCalendar.YearPickerTrigger>
                     <RangeCalendar.YearPickerTriggerHeading />
